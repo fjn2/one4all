@@ -1,0 +1,22 @@
+{
+  "name": "one4all",
+  "version": "1.0.0",
+  "description": "The idea of this repository is to create a web platform to reproduce the same music in different devices",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fjn2/one4all.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.15.2"
+  },
+  "bugs": {
+    "url": "https://github.com/fjn2/one4all/issues"
+  },
+  "homepage": "https://github.com/fjn2/one4all#readme"
+}
