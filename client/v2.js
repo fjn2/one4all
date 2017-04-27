@@ -31,6 +31,9 @@ var highestServerTime = new Date();
 var lowestServerTime = new Date();
 
 setInterval(function() {
+	if (ac.readyState !== 4) {
+		return
+	}
 	sampleCount++
 	let initialRequestTime = new Date()
 	getCurrentServerData((response) => {
@@ -38,7 +41,7 @@ setInterval(function() {
 
 		let latencyTime = (new Date() - initialRequestTime) / 1000 / 2; // only the time from the server to the client
 
-		resp.time += latencyTime;
+		//resp.time += latencyTime;
 
 		acumServerTime += (new Date() - initialTime) / 1000 + resp.time
 
