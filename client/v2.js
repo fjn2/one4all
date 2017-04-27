@@ -23,6 +23,7 @@ ac.src = "resources/test.mp3";
 ac.play();
 document.body.appendChild(ac)
 
+
 var sampler = []
 var sampleCount = 0;
 var initialTime = new Date();
@@ -81,8 +82,6 @@ setInterval(function() {
 		drawPixel(zeroWidth + sampleCount, zeroHeight - Math.round((ac.currentTime) * 10 ), 100, 100, 100)
 
 		ctx.putImageData(canvasData, 0, 0);
-
-		console.log(ac.currentTime - (avgAcumPower / sampler.length))
 	})
 
 }, 100)
@@ -110,13 +109,11 @@ function drawPixel (x, y, r = 0, g = 0, b = 0) {
 }
 
 
-function getCurrentServerData(handler) {
-    var xmlHttp = new XMLHttpRequest();
-    //var url = 'http://localhost:2000/current';
-    //var url = 'http://10.2.1.107:2000/current?'
-    var url = 'http://192.168.0.101:2000/current?ct='+ac.currentTime;
-    xmlHttp.open( 'GET', url); // false for synchronous request
-    xmlHttp.send( null );
 
-    xmlHttp.addEventListener("load", handler);
-}
+var socket = io('http://192.168.0.101:2002');
+socket.on('serverTime', function (data) {
+	console.log(data);
+});
+
+
+
