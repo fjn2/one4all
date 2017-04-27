@@ -6,7 +6,7 @@ var express = require('express')
 var app = express()
 var path = require('path');
 var port = 2000;
-
+var io = require('socket.io')(port + 2);
 
 ////////////////////////////////////////////////////
 /////////// APPLICATION CONFIGURATION //////////////
@@ -26,6 +26,7 @@ class Reproductor {
 		// duraton mario intro song
 		this.songDuration = 189.779592 * 1000
 		this.initialTime = new Date()
+		io.emit('startSong')
 		// to reproduce the next song
 		setTimeout(() => this.startSong(), this.songDuration)
 	}
@@ -53,6 +54,8 @@ setInterval(function () {
 ////////////////////////////////////////////////////
 
 
+
+
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -62,23 +65,27 @@ app.use(function(req, res, next) {
 app.get('/', function (req, res) {
   res.send('Hello World')
 })
-app.get('/current', function (req, res) {
-	//console.log('current', req.connection.remoteAddress, req.query.ct)
-	if(!clients[req.connection.remoteAddress]) {
-		clients[req.connection.remoteAddress] = {}
-	}
-	clients[req.connection.remoteAddress].currentTime = req.query.ct
-	clients[req.connection.remoteAddress].at = new Date();
 
+setInterval(()=> {
 	//temporal
 	//setTimeout(function() {
 		let time = reproductor.getTime()
 	//	setTimeout(function() {
-			res.send({
-				time: time
-			})
+		io.emit('serverTime',{
+			time: time
+		})
 	//	}, Math.random() * 500)
 	//}, Math.random() * 500)
-})
+}, 100)
+
+
+io.on('connection', function (socket) {
+	console.log('connection')
+});
+
 
 app.listen(port)
+
+
+
+
