@@ -31,6 +31,16 @@ var acumServerTime = 0
 var highestServerTime = new Date();
 var lowestServerTime = new Date();
 
+function getCurrentServerData() {
+    var xmlHttp = new XMLHttpRequest();
+    var url = 'http://localhost:2000/current';
+    var url = 'http://10.2.1.107:2000/current?ct='+ac.currentTime;
+    //var url = 'http://192.168.0.101:2000/current?ct='+ac.currentTime;
+    xmlHttp.open( 'GET', url, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return JSON.parse(xmlHttp.responseText);
+}
+
 setInterval(function() {
 	if (ac.readyState !== 4) {
 		return
@@ -114,6 +124,7 @@ var socket = io('http://192.168.0.101:2002');
 socket.on('serverTime', function (data) {
 	console.log(data);
 });
+
 
 
 
