@@ -26,13 +26,12 @@ class Cronometer {
     }
   }
   get() {
-    Winston.verbose('Cronometer -> get');
+    Winston.silly('Cronometer -> get');
     if (this.startTime) {
       return this.time + (new Date().getTime() - this.startTime);
-    } else {
-      return this.time;
     }
 
+    return this.time;
   }
   reset() {
     Winston.verbose('Cronometer -> reset');

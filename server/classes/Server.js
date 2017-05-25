@@ -24,7 +24,7 @@ class Server {
   nextSong() {
     Winston.info('Server -> nextSong');
     this.currentSong += 1;
-    this.cronometer.reset();
+    this.playList.play();
 
     if (this.currentSong > this.songs.length) {
       this.currentSong = 0;
