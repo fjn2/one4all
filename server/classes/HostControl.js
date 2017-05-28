@@ -29,6 +29,7 @@ class HostControl {
   }
   stop() {
     this.playList.stop();
+    this.clientControl.stopPlay();
   }
   volume(value) {
     this.playList.setVolume(value);

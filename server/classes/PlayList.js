@@ -1,9 +1,12 @@
 const Winston = require('winston');
 
 class PlayList {
-  constructor(songPlayer) {
+  constructor(songPlayer, clientsControl) {
     Winston.info('PlayList -> constructor');
+
     this.songPlayer = songPlayer;
+    this.clientsControl = clientsControl;
+
     // Temporal song
     this.songs = [];
     this.currentSong = 0;
@@ -14,10 +17,16 @@ class PlayList {
       if (this.songPlayer.getCurrentTime() + 1 > this.songPlayer.songDuration) {
         this.nextSong();
         this.songPlayer.reset();
+        this.clientsControl.sendPlayList({
+          songs: this.songs,
+          currentSong: this.getCurrentSong(),
+        });
+        this.clientsControl.startPlay();
+        this.play();
       }
     }, 1000);
 
-    const testSongUrl = 'http://localhost:2000/resources/test.mp3';
+    const testSongUrl = 'http://192.168.1.113:2000/resources/test.mp3';
     this.addSong(testSongUrl);
   }
   addSong(songUrl) {
@@ -46,9 +55,10 @@ class PlayList {
     Winston.info('PlayList -> nextSong');
     this.currentSong += 1;
 
-    if (this.currentSong > this.songs.length) {
+    if (this.currentSong > this.songs.length - 1) {
       this.currentSong = 0;
     }
+    Winston.verbose('PlayList -> nextSong -> now playing #', this.currentSong);
   }
 }
 

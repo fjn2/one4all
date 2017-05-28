@@ -28,6 +28,7 @@ class SongPlayer {
   reset() {
     Winston.verbose('SongPlayer -> reset');
     this.cronometer.reset();
+
     this.readSongDuration().then((duration) => {
       this.songDuration = duration;
     });
@@ -36,18 +37,18 @@ class SongPlayer {
     Winston.verbose('SongPlayer -> getSongDuration');
     // get information about the song
     return new Promise((resolve, reject) => {
-      resolve(100);
+      // resolve(20000);
       // this doesn't work
-      // const stream = request(this.playList.getCurrentSong()).pipe(fs.createWriteStream('./currentSong.mp3'));
-      // console.log(this.playList.getCurrentSong(), 'ZZZ');
-      // stream.on('finish', () => {
-      //   musicMetadata(fs.createReadStream('./currentSong.mp3'), { duration: true }, (err, metadata) => {
-      //     if (err) {
-      //       reject(err);
-      //     }
-      //     resolve(metadata.duration);
-      //   });
-      // });
+      const stream = request(this.playList.getCurrentSong()).pipe(fs.createWriteStream('./currentSong.mp3'));
+      console.log(this.playList.getCurrentSong(), 'ZZZ');
+      stream.on('finish', () => {
+        musicMetadata(fs.createReadStream('./currentSong.mp3'), { duration: true }, (err, metadata) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(metadata.duration * 1000);
+        });
+      });
     });
   }
   getCurrentTime() {

@@ -7,8 +7,6 @@ const SongPlayer = require('./SongPlayer');
 class Server {
   constructor() {
     this.songPlayer = new SongPlayer();
-    this.playList = new PlayList(this.songPlayer);
-    this.songPlayer.setPlayList(this.playList);
 
     this.clientActions = {
       serverTime: () => new Date(),
@@ -33,6 +31,10 @@ class Server {
     };
 
     this.clientsControl = new ClientsControl(this.clientActions, this.welcomeActions);
+
+    this.playList = new PlayList(this.songPlayer, this.clientsControl);
+    this.songPlayer.setPlayList(this.playList);
+
     this.hostControl = new HostControl(this.playList, this.clientsControl);
 
     this.playList.init();

@@ -27,15 +27,18 @@ class Cronometer {
   }
   get() {
     Winston.silly('Cronometer -> get');
+    let time = this.time;
     if (this.startTime) {
-      return this.time + (new Date().getTime() - this.startTime);
+      time = this.time + (new Date().getTime() - this.startTime);
     }
 
-    return this.time;
+    Winston.silly('Cronometer -> get -> time ', time);
+    return time;
   }
   reset() {
     Winston.verbose('Cronometer -> reset');
     this.time = 0;
+    this.startTime = undefined;
     this.status = STATUS.STOP;
   }
 }

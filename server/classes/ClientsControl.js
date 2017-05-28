@@ -7,9 +7,11 @@ const ms = require('mediaserver');
 
 const http = require('http');
 const app = http.createServer(function(req, res) {
-  res.writeHead(200, { 'Content-Type': 'text/html' });
-  //   res.header("Access-Control-Allow-Origin", "*");
-  //   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.writeHead(200, {
+    'Content-Type': 'text/html',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+    'Access-Control-Allow-Origin': '*'
+  });
 
   if (~req.url.indexOf('resources')) {
     const extname = path.extname(req.url);
@@ -49,9 +51,9 @@ const app = http.createServer(function(req, res) {
           res.end();
         }
       } else {
-        // res.writeHead(200, { 'Content-Type': contentType });
-        // res.end(content, 'utf-8');
-        ms.pipe(req, res, `.${req.url}`);
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(content, 'utf-8');
+        // ms.pipe(req, res, `.${req.url}`);
       }
     });
   } else {
@@ -105,11 +107,15 @@ class ClientControls {
     Winston.verbose('ClientControls -> setVolume');
   }
   startPlay() {
-    Winston.info(`ClientControls -> startPlay`);
+    Winston.info('ClientControls -> startPlay');
     io.emit('startPlay');
   }
+  stopPlay() {
+    Winston.info('ClientControls -> stopPlay');
+    io.emit('stopPlay');
+  }
   sendPlayList({ songs, currentSong }) {
-    Winston.info(`ClientControls -> sendPlayList`);
+    Winston.info('ClientControls -> sendPlayList');
     io.emit('playList', {
       data: {
         songs,
