@@ -8,9 +8,24 @@ class Server {
   constructor() {
     this.songPlayer = new SongPlayer();
     this.playList = new PlayList(this.songPlayer);
-    this.clientsControl = new ClientsControl();
+    this.songPlayer.setPlayList(this.playList);
 
-    this.hostControl = new HostControl(this.playList);
+    this.clientActions = {
+      serverTime: () => new Date(),
+      currentTrack: () => this.playList.getCurrentSong(),
+      timeCurrentTrack: () => ({
+        trackTime: this.songPlayer.getCurrentTime(),
+        serverTime: new Date(),
+      }),
+      startPlayS: () => {
+        this.clientsControl.startPlay();
+      },
+    };
+
+    this.clientsControl = new ClientsControl(this.clientActions);
+    this.hostControl = new HostControl(this.playList, this.clientsControl);
+
+    this.playList.init();
   }
   // external methods
   play() {
@@ -29,16 +44,6 @@ class Server {
     if (this.currentSong > this.songs.length) {
       this.currentSong = 0;
     }
-  }
-  // internal methods
-  prepareSong() {
-    this.currentSongDuration = 1234;
-  }
-  getCurrentSong() {
-    return this.songs[this.currentSong];
-  }
-  getSongList() {
-    return this.songs;
   }
   getSongTime() {
     Winston.debug('Server -> getSongTime', this.songPlayer.getCurrentTime());

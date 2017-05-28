@@ -9,13 +9,15 @@ const rl = readline.createInterface({
 
 
 class HostControl {
-  constructor(playList) {
+  constructor(playList, clientControl) {
     this.playList = playList;
+    this.clientControl = clientControl;
 
     rl.on('line', (line) => {
       Winston.verbose('HostControl -> read line from stdin: ', line);
-      if (this[line]) {
-        this[line]();
+      const [command, ...args] = line.split(' ');
+      if (this[command]) {
+        this[command](...args);
       } else {
         Winston.info('HostControl -> command unknown', line);
       }
@@ -23,9 +25,13 @@ class HostControl {
   }
   play() {
     this.playList.play();
+    this.clientControl.startPlay();
   }
   stop() {
     this.playList.stop();
+  }
+  volume(value) {
+    this.playList.setVolume(value);
   }
 }
 

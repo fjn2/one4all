@@ -1,12 +1,21 @@
 const Winston = require('winston');
 const Cronometer = require('./Cronometer');
+const musicMetadata = require('musicmetadata');
+const fs = require('fs');
+const request = require('request');
 
 class SongPlayer {
-  constructor(playList) {
+  constructor() {
     Winston.verbose('SongPlayer -> constructor');
-    this.playList = playList;
+    this.volume = 100;
     this.cronometer = new Cronometer();
+  }
+  init() {
     this.reset();
+  }
+  setPlayList(playList) {
+    Winston.verbose('SongPlayer -> setPlayList');
+    this.playList = playList;
   }
   play() {
     Winston.verbose('SongPlayer -> play');
@@ -18,17 +27,33 @@ class SongPlayer {
   }
   reset() {
     Winston.verbose('SongPlayer -> reset');
-    // get information about the song
-    this.songDuration = 1234; // todo
     this.cronometer.reset();
+    this.readSongDuration().then((duration) => {
+      this.songDuration = duration;
+    });
+  }
+  readSongDuration() {
+    Winston.verbose('SongPlayer -> getSongDuration');
+    // get information about the song
+    return new Promise((resolve, reject) => {
+      const stream = request(this.playList.getCurrentSong()).pipe(fs.createWriteStream('./currentSong.mp3'));
+      stream.on('finish', () => {
+        musicMetadata(fs.createReadStream('./currentSong.mp3'), { duration: true }, (err, metadata) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(metadata.duration);
+        });
+      });
+    });
   }
   getCurrentTime() {
     Winston.verbose('SongPlayer -> getCurrentTime');
     return this.cronometer.get();
   }
-  onEnd() {
-    Winston.verbose('SongPlayer -> onEnd');
-    this.cronometer.reset();
+  setVolume(value) {
+    Winston.verbose('SongPlayer -> setVolume');
+    this.volume = value;
   }
 }
 

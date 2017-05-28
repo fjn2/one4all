@@ -9,6 +9,6 @@ const server = new Server();
 
 Winston.info('Server is running');
 
-setInterval(() => {
-  server.getSongTime();
-}, 1000);
+// setInterval(() => {
+//   server.getSongTime();
+// }, 1000);
