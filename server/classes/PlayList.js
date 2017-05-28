@@ -5,20 +5,23 @@ class PlayList {
     Winston.info('PlayList -> constructor');
     this.songPlayer = songPlayer;
     // Temporal song
-    const testSongUrl = 'http://localhost:2000/resources/test.mp3';
-    this.songs = [testSongUrl];
+    this.songs = [];
     this.currentSong = 0;
 
-    setInterval(() => {
+    setInterval(() => {
       // check the current time, and check if the track is finish
-      if (this.songPlayer.getCurrentTime() + 1 > this.songPlayer.songDuration) { // remove the last second
+      // remove the last second
+      if (this.songPlayer.getCurrentTime() + 1 > this.songPlayer.songDuration) {
         this.nextSong();
         this.songPlayer.reset();
       }
     }, 1000);
+
+    const testSongUrl = 'http://localhost:2000/resources/test.mp3';
+    this.addSong(testSongUrl);
   }
   addSong(songUrl) {
-    Winston.info('PlayList -> addSong');
+    Winston.info('PlayList -> addSong ', songUrl);
     this.songs.push(songUrl);
   }
   play() {

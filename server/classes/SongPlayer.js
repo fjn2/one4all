@@ -36,15 +36,18 @@ class SongPlayer {
     Winston.verbose('SongPlayer -> getSongDuration');
     // get information about the song
     return new Promise((resolve, reject) => {
-      const stream = request(this.playList.getCurrentSong()).pipe(fs.createWriteStream('./currentSong.mp3'));
-      stream.on('finish', () => {
-        musicMetadata(fs.createReadStream('./currentSong.mp3'), { duration: true }, (err, metadata) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(metadata.duration);
-        });
-      });
+      resolve(100);
+      // this doesn't work
+      // const stream = request(this.playList.getCurrentSong()).pipe(fs.createWriteStream('./currentSong.mp3'));
+      // console.log(this.playList.getCurrentSong(), 'ZZZ');
+      // stream.on('finish', () => {
+      //   musicMetadata(fs.createReadStream('./currentSong.mp3'), { duration: true }, (err, metadata) => {
+      //     if (err) {
+      //       reject(err);
+      //     }
+      //     resolve(metadata.duration);
+      //   });
+      // });
     });
   }
   getCurrentTime() {

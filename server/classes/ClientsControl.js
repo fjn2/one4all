@@ -62,13 +62,13 @@ const app = http.createServer(function(req, res) {
 const io = require('socket.io').listen(app);
 
 class ClientControls {
-  constructor(clientActions) {
+  constructor(clientActions, welcomeActions) {
     Winston.verbose('ClientControls -> constructor');
     this.clients = [];
 
     io.on('connection', (socket) => {
       Winston.info('ClientControls -> new connection');
-      this.clients.push(socket);
+      this.addClient(socket);
 
       // load all the events dynamicly
       Object.keys(clientActions).forEach((key) => {
@@ -77,10 +77,19 @@ class ClientControls {
           Winston.info(`ClientControls -> ${key}`);
           io.emit(`${key}-S`, {
             guid: data.guid,
-            data: clientActions[key](),
+            data: clientActions[key](data.data),
           });
         });
       });
+
+      setTimeout(() => {
+        Object.keys(welcomeActions).forEach((key) => {
+          Winston.info(`ClientActions -> sending ${key}`);
+          socket.emit(`${key}`, {
+            data: welcomeActions[key](),
+          });
+        });
+      }, 1000); // wait for one second to stablish the conection
     });
     app.listen(configuration.port);
   }
@@ -96,7 +105,17 @@ class ClientControls {
     Winston.verbose('ClientControls -> setVolume');
   }
   startPlay() {
+    Winston.info(`ClientControls -> startPlay`);
     io.emit('startPlay');
+  }
+  sendPlayList({ songs, currentSong }) {
+    Winston.info(`ClientControls -> sendPlayList`);
+    io.emit('playList', {
+      data: {
+        songs,
+        currentSong,
+      },
+    });
   }
 }
 

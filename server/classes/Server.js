@@ -17,12 +17,22 @@ class Server {
         trackTime: this.songPlayer.getCurrentTime(),
         serverTime: new Date(),
       }),
-      startPlayS: () => {
-        this.clientsControl.startPlay();
+      addSong: (data) => {
+        this.playList.addSong(data.url);
+        this.clientsControl.sendPlayList({
+          songs: this.playList.songs,
+          currentSong: this.playList.getCurrentSong(),
+        });
       },
     };
+    this.welcomeActions = {
+      playList: () => ({
+        songs: this.playList.songs,
+        currentSong: this.playList.getCurrentSong(),
+      }),
+    };
 
-    this.clientsControl = new ClientsControl(this.clientActions);
+    this.clientsControl = new ClientsControl(this.clientActions, this.welcomeActions);
     this.hostControl = new HostControl(this.playList, this.clientsControl);
 
     this.playList.init();
