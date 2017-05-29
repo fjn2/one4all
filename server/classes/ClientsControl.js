@@ -77,7 +77,7 @@ class ClientControls {
         Winston.debug(`ClientControls -> defining ${key} method`);
         socket.on(`${key}`, (data) => {
           Winston.info(`ClientControls -> ${key}`);
-          io.emit(`${key}-S`, {
+          socket.emit(`${key}-S`, {
             guid: data.guid,
             data: clientActions[key](data.data),
           });
@@ -92,6 +92,11 @@ class ClientControls {
           });
         });
       }, 1000); // wait for one second to stablish the conection
+
+      socket.on('disconnect', () => {
+        Winston.info('ClientControls -> disconnect');
+        this.removeClient(socket);
+       });
     });
     app.listen(configuration.port);
   }

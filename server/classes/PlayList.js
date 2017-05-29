@@ -16,18 +16,10 @@ class PlayList {
       // remove the last second
       if (this.songPlayer.getCurrentTime() + 1 > this.songPlayer.songDuration) {
         this.nextSong();
-        this.songPlayer.reset();
-        this.clientsControl.sendPlayList({
-          songs: this.songs,
-          currentSong: this.getCurrentSong(),
-        });
         this.clientsControl.startPlay();
         this.play();
       }
     }, 1000);
-
-    const testSongUrl = 'http://192.168.1.113:2000/resources/test.mp3';
-    this.addSong(testSongUrl);
   }
   addSong(songUrl) {
     Winston.info('PlayList -> addSong ', songUrl);
@@ -58,6 +50,12 @@ class PlayList {
     if (this.currentSong > this.songs.length - 1) {
       this.currentSong = 0;
     }
+
+    this.songPlayer.reset();
+    this.clientsControl.sendPlayList({
+      songs: this.songs,
+      currentSong: this.getCurrentSong(),
+    });
     Winston.verbose('PlayList -> nextSong -> now playing #', this.currentSong);
   }
 }
