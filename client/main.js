@@ -1,202 +1,293 @@
-var ac;
+const configuration = {
+  server: '192.168.0.109:2000',
+  maxDetour: 10,
+};
 
-var canvas;
-var canvasWidth;
-var canvasHeight;
-var ctx;
-var canvasData;
-var zeroHeight = 100
+class ServerTime {
+  constructor(intercommunication) {
+    this.intercommunication = intercommunication;
+    this.detour = undefined; // desvio
+    this.maxSampleritems = 5;
+    this.sampler = [];
+  }
+  getSampler() {
+    const t = new Date();
+    this.intercommunication.get('serverTime', ({ data }) => {
+      const now = new Date();
+      const latency = new Date() - t;
 
-let hiperFoo = []
+      this.sampler.push({
+        serverTime: new Date(new Date(data).getTime() - (latency / 2)),
+        localTime: now,
+        latency,
+      });
 
-setTimeout(() => {
-	// initialize audio control
-	ac = document.createElement("AUDIO");
-	ac.controls = true;
-	ac.src = "resources/test.mp3";
-	document.body.appendChild(ac)
+      if (this.sampler.length > this.maxSampleritems) {
+        const latencyArray = this.sampler.map(item => item.latency);
+        const maxLatency = Math.max(...latencyArray);
+        this.sampler.splice(latencyArray.indexOf(maxLatency), 1);
+      }
+    });
+  }
+  get() {
+    return this.calculateSeverTime(this.sampler, {});
+  }
+  getDetour() {
+    const now = new Date();
+    const values = this.sampler.map(
+      sample => sample.serverTime.getTime() + (now - sample.localTime),
+    );
+    let acum = 0;
 
-	// get elements from DOM
-	var serverTimeEl = document.getElementById('serverTimeEl')
-	var playerTimeEl = document.getElementById('playerTimeEl')
-	var adjustmentFactorEl = document.getElementById('adjustmentFactorEl')
-	var tuneEl = document.getElementById('tuneEl')
-	var differenceEl = document.getElementById('differenceEl')
+    for (let i = 0; i < values.length; i += 1) {
+      acum += values[i];
+    }
 
-	let firstTime = true
+    const media = acum / values.length;
+    acum = 0
+    for (let i = 0; i < values.length; i+= 1) {
+      acum += (values[i] - media) ** 2;
+    }
 
-
-
-	setInterval(() => {
-		let initialRequestTime = new Date()
-		var resp = getCurrentServerData()
-		let latencyTime = (new Date() - initialRequestTime) / 1000 / 2; // only the time from the server to the client
-
-		resp.time += latencyTime;
-
-		hiperFoo.push({
-			serverTime: resp.time,
-			at: new Date()
-		});
-
-		let adjustmentFactor = 0;
-		let adjustmentFactorv2 = 0;
-		if (!firstTime) {
-			adjustmentFactor = getAdjustmentFactor(ac.currentTime - resp.time - (tuneEl.value * 1 / 100))
-			adjustmentFactorv2 = getAdjustmentFactorV2(resp.time)
-			adjustmentFactor = 0
-		}
-
-
-		resp.time = (new Date() - adjustmentFactorv2) / 1000
-
-		//console.log('diff playbackRate', ac.playbackRate, latencyTime, adjustmentFactorv2, resp.time)
-
-		// show debug infromation
-		serverTimeEl.innerHTML = resp.time
-		playerTimeEl.innerHTML = ac.currentTime
-		differenceEl.innerHTML = ac.currentTime - resp.time
-		adjustmentFactorEl.innerHTML = adjustmentFactor
-
-
-		if (ac.currentTime === 0) {
-			ac.currentTime = 0.01
-		}
-
-		if(Math.abs(ac.currentTime - resp.time) > 1) {
-			ac.currentTime = resp.time
-		} else {
-
-
-
-
-
-			//ac.playbackRate = resp.time / ac.currentTime
-			//ac.playbackRate = (resp.time + adjustmentFactor - ac.currentTime) + 1 + (tuneEl.value * 1 / 100)
-			//ac.playbackRate += (resp.time + adjustmentFactor - ac.currentTime)>0?.01:-.01
-			//ac.playbackRate = (resp.time + adjustmentFactor - ac.currentTime)>0?1.01:0.99
-			//ac.playbackRate = (acum / hiperFoo.length) / (ac.currentTime - (tuneEl.value * 1 / 10))
-			// if (ac.playbackRate < 0) {
-	 		// 	ac.currentTime = resp.time
-	 		// 	ac.playbackRate = 1
-	 		// }
-		}
-
-		if(firstTime) {
-			setInterval(()=> {
-				let acum = 0
-				let foo2 = 0
-				hiperFoo.forEach((item)=>{
-					acum += (new Date() - item.at) / 1000 + item.serverTime
-					foo2 += (new Date() - item.at) / 1000 - item.serverTime
-				})
-				ac.playbackRate = ((acum / hiperFoo.length ) - ac.currentTime) + 1 + (tuneEl.value * 1 / 100)
-				console.log(foo2 / hiperFoo.length )
-			},100)
-
-		}
-
-		var acum = 0;
-		hiperFoo.forEach((item)=>{
-			acum += (new Date() - item.at) / 1000 + item.serverTime
-		})
-		var diff2 = ac.currentTime / (acum / hiperFoo.length) / 10
-		var diff3 = ac.currentTime / diff2 / 100
-		drawGraph(ac.currentTime - resp.time , adjustmentFactor, diff2, diff3)
-
-		ac.play();
-		firstTime = false
-	}, 1000)
-
-
-	////////////////////////////////////////////////////
-	///////////////// GRAPH ////////////////////////////
-	////////////////////////////////////////////////////
-
-	canvas = document.getElementById("graphCanvas");
-	canvasWidth = canvas.width;
-	canvasHeight = canvas.height;
-	ctx = canvas.getContext("2d");
-	drawInit();
-	canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
-
-})
-
-
-function getCurrentServerData() {
-    var xmlHttp = new XMLHttpRequest();
-    var url = 'http://localhost:2000/current';
-    var url = 'http://10.2.1.107:2000/current?ct='+ac.currentTime;
-    //var url = 'http://192.168.0.101:2000/current?ct='+ac.currentTime;
-    xmlHttp.open( 'GET', url, false ); // false for synchronous request
-    xmlHttp.send( null );
-    return JSON.parse(xmlHttp.responseText);
+    return Math.sqrt((1 / (values.length - 1)) * acum);
+  }
+  calculateSeverTime([sample, ...tail], { now = new Date(), samplerCount = 0, samplerAcum = 0 }) {
+    if (sample) {
+      const count = samplerCount + 1;
+      const acum = samplerAcum + sample.serverTime.getTime() + (now - sample.localTime);
+      return this.calculateSeverTime(tail, { now, samplerCount: count, samplerAcum: acum });
+    }
+    return samplerAcum / samplerCount;
+  }
+  startSynchronization() {
+    this.synchronizationInterval = setInterval(() => {
+      this.getSampler();
+    }, 1000);
+  }
+  stopSynchronization() {
+    clearInterval(this.synchronizationInterval);
+  }
 }
 
-var samplingCount = 0;
-var samplingAcum = 0;
-var sampling = [];
-function getAdjustmentFactor(diff, adjustmentFactor) {
-	// this is to avoid the problem when the song changes
-	if (Math.abs(diff) < 10) {
-		samplingAcum += diff;
-		samplingCount++
-	}
+class Intercommunication {
+  constructor(url) {
+    this.socket = io(url);
+    // this events requires the petition of the client
+    this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong'];
+    // these events are fired by the server
+    this.eventSubscribe = ['startPlay', 'stopPlay', 'playList'];
 
-	return samplingAcum / samplingCount * -1
+    this.pendingMessages = [];
+    this.subscribers = [];
+
+    this.processCallbacks = (eventName, data) => {
+      this.pendingMessages.forEach((message, index) => {
+        if (message.guid === data.guid) {
+          message.callback(data);
+          this.pendingMessages.splice(index, 1);
+        }
+      });
+    };
+
+    this.eventList.forEach((eventName) => {
+      this.socket.on(`${eventName}-S`, (data) => {
+        this.processCallbacks(eventName, data);
+      });
+    });
+
+    this.processHandlers = (eventName, data) => {
+      this.subscribers.forEach((subscribe) => {
+        if (subscribe.eventName === eventName) {
+          subscribe.handler(data);
+        }
+      });
+    };
+    this.eventSubscribe.forEach((eventName) => {
+      this.socket.on(`${eventName}`, (data) => {
+        this.processHandlers(eventName, data);
+      });
+    });
+  }
+  get(eventName, callback, data) {
+    const guid = Math.floor(Math.random() * 1000000);
+
+    if (~this.eventList.indexOf(eventName)) {
+      this.pendingMessages.push({
+        guid,
+        callback,
+      });
+      this.socket.emit(eventName, {
+        guid,
+        data,
+      });
+    } else {
+      console.warn(`The event '${eventName}' is not defined`);
+    }
+  }
+  subscribe(eventName, handler) {
+    const subs = {
+      eventName,
+      handler,
+    };
+
+    this.subscribers.push(subs);
+
+    return subs;
+  }
+  unsubscribe(reference) {
+    this.subscribers.splice(this.subscribers.indexOf(reference), 1);
+  }
 }
-function getAdjustmentFactorV2(serverTime) {
-	let initialTime = new Date((new Date()).getTime() - serverTime * 1000)
-	// if there is too many difference between one initial time and other, I suppouse, the track has change
 
-	if(sampling.length && Math.abs(sampling[sampling.length -1].initialTime - initialTime) > 1000) {
-		sampling.length = 0
-	}
-	sampling.push({
-		at: new Date(),
-		initialTime
-	})
-	let acum = 0
-	sampling.forEach((item)=>{
-		acum += item.initialTime.getTime()
-	})
-	// returns the start time of the track
-	return acum / sampling.length
+class AudioPlayer {
+  constructor(intercommunication, serverTime) {
+    this.intercommunication = intercommunication;
+    // initialize audio control
+    this.audioElement = window.document.createElement('AUDIO');
+    // this.audioElement.controls = true;
+    window.foo = this.audioElement;
+    this.serverTime = serverTime;
+
+    window.document.body.appendChild(this.audioElement);
+  }
+  loadAudio() {
+    this.intercommunication.get('currentTrack', ({ data }) => {
+      this.setSong(data);
+    });
+  }
+  setSong(songURL) {
+    this.audioElement.src = songURL;
+  }
+  seek(time) {
+    this.audioElement.currentTime = time / 1000;
+  }
+  play() {
+    this.intercommunication.get('timeCurrentTrack', ({ data }) => {
+      const { serverTime, trackTime } = data;
+
+      // server time mas 2 segunds, diff entre eso y mi server time -> despues, play
+      const timeDifference = 1000 - Math.round(new Date(serverTime).getTime() - this.serverTime.get());
+      console.log('playing with ', timeDifference, this.serverTime.getDetour());
+
+      if (timeDifference >= 0 && !Number.isNaN(this.serverTime.getDetour())) {
+        this.seek(0);
+        //setTimeout(() => {
+        // this.seek(trackTime + 5000);
+        const initialTime = new Date();
+        while (new Date() - initialTime < timeDifference) {}
+        this.audioElement.play();
+        //}, timeDifference);
+      } else {
+        console.error('You have too much delay dude :(');
+      }
+    });
+  }
+  waitForPlay() {
+    this.intercommunication.subscribe('startPlay', () => {
+      console.log('PLAY');
+      this.play();
+    });
+    this.intercommunication.subscribe('stopPlay', () => {
+      console.log('STOP');
+      this.stop();
+    });
+  }
+  stop() {
+    this.audioElement.pause();
+  }
 }
 
-function drawInit() {
-	ctx.beginPath();
-	ctx.moveTo(0,zeroHeight + 1);
-	ctx.lineTo(canvasWidth,zeroHeight + 1);
-	ctx.stroke();
+class PlayList {
+  constructor(id, intercommunication, audioPlayer) {
+    this.intercommunication = intercommunication;
+    this.audioPlayer = audioPlayer;
+    this.songs = [];
+    this.currentSong = 0;
+    this.id = id;
+  }
+  get() {
+
+  }
+  addSong(url) {
+    this.intercommunication.get('addSong', () => {
+      console.log('Song added propertly');
+    }, {
+      url,
+    });
+  }
+  waitForPlayList() {
+    this.intercommunication.subscribe('playList', ({ data }) => {
+      const { songs, currentSong } = data;
+      this.songs = songs;
+
+      if (this.currentSong !== currentSong) {
+        this.audioPlayer.loadAudio();
+        this.audioPlayer.stop();
+        this.audioPlayer.play();
+      }
+
+      this.currentSong = currentSong;
+
+      this.render();
+    });
+  }
+  render() {
+    let el = `
+    <span>
+      Playing: <b>${this.currentSong}</b>
+    </span>`;
+
+    for (let i = 0; i < this.songs.length; i += 1) {
+      const song = this.songs[i];
+      el += `
+      <ul>
+        <li>${song}</li>
+      </ul>
+      `;
+    }
+    window.document.getElementById(this.id).innerHTML = el;
+  }
 }
 
-function drawGraph(diff, adjustmentFactor, diff2, diff3) {
-	let diffC = Math.round(diff * 100)
-	var diff2C = Math.round(diff2 * 100)
-	var diff3C = Math.round(diff3 * 100)
-	let adjustmentFactorC = Math.round(adjustmentFactor * 100)
+class App {
+  constructor() {
+    this.intercommunication = new Intercommunication(configuration.server);
+    this.serverTime = new ServerTime(this.intercommunication);
+    this.audioPlayer = new AudioPlayer(this.intercommunication, this.serverTime);
+    this.playList = new PlayList('playList', this.intercommunication, this.audioPlayer);
 
-	drawPixel(samplingCount, diff2C + zeroHeight, 0, 0, 255)
-	drawPixel(samplingCount, diff3C + zeroHeight, 0, 255, 255)
+    this.serverTime.startSynchronization();
 
+    this.audioPlayer.loadAudio();
 
-	if (diffC === adjustmentFactorC) {
-		drawPixel(samplingCount, diffC + zeroHeight, 255, 255, 0)
-	} else {
-		drawPixel(samplingCount, diffC + zeroHeight, 255, 0, 0)
-		drawPixel(samplingCount, adjustmentFactorC + zeroHeight, 0, 255, 0)
-	}
-
-	ctx.putImageData(canvasData, 0, 0);
+    const timer = setInterval(() => {
+      if (this.serverTime.getDetour() < configuration.maxDetour) {
+        console.log('Ready to play');
+        // here I know the server time
+        this.audioPlayer.waitForPlay();
+        this.playList.waitForPlayList();
+        clearInterval(timer);
+      }
+    }, 1000);
+  }
+  addSongToPlayList(songUrl) {
+    this.playList.addSong(songUrl);
+  }
 }
 
-function drawPixel (x, y, r = 0, g = 0, b = 0) {
-    var index = (x + y * canvasWidth) * 4;
 
-    canvasData.data[index + 0] = r;
-    canvasData.data[index + 1] = g;
-    canvasData.data[index + 2] = b;
-    canvasData.data[index + 3] = 255;
+// //////////////////////////////////////////////
+// //////////////////////////////////////////////
+// application starts
+
+const app = new App();
+
+
+function addSongToPlayList() {
+  const songUrl = window.document.getElementById('urlSong').value;
+  if (songUrl) {
+    app.addSongToPlayList(songUrl);
+  } else {
+    window.alert('Why so rude?');
+  }
 }
-

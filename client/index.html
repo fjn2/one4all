@@ -4,28 +4,18 @@
 		<script type="text/javascript" charset="UTF-8" src="scripts/socket.io.js"></script>
 	</header>
 	<body>
+		<h1>
+			Ultimate audio player sync
+		</h1>
+		<img src="http://www.reactiongifs.com/wp-content/uploads/2013/01/gandalf_to_the_music.gif" style="width:100%"/>
 		<div>
-			SERVER TIME
-			<span id="serverTimeEl"></span>
+			<span>User conected: <b id="userConected"></b></span>
 		</div>
 		<div>
-			PLAYER TIME
-			<span id="playerTimeEl"></span>
+			<input type="text" id="urlSong" placeholder="Insert song URL here">
+			<input type="button" value="add song" onclick="addSongToPlayList()"/>
 		</div>
-		<div>
-			DIFFERENCE
-			<b id="differenceEl"></b>
-		</div>
-		<div>
-			ADJUSTEMENT FACTOR
-			<span id="adjustmentFactorEl"></span>
-		</div>
-		<div>
-			TUNE ADJUST
-			<input id="tuneEl" type="number" name="quantity" min="-1000" max="1000" value="0"> (more is faster)
-		</div>
-		<canvas id="graphCanvas" width="500" height="1200" style="width:100%; height:800px"></canvas>
-		<!-- <script type="text/javascript" charset="UTF-8" src="main.js"></script> -->
-		<script type="text/javascript" charset="UTF-8" src="v2.js"></script>
+		<div id="playList"></div>
+		<script type="text/javascript" charset="UTF-8" src="main.js"></script>
 	</body>
 </html>
