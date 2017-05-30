@@ -7,11 +7,8 @@ const ms = require('mediaserver');
 
 const http = require('http');
 const app = http.createServer(function(req, res) {
-  res.writeHead(200, {
-    'Content-Type': 'text/html',
-    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-    'Access-Control-Allow-Origin': '*'
-  });
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
   if (~req.url.indexOf('resources')) {
     const extname = path.extname(req.url);
@@ -43,15 +40,17 @@ const app = http.createServer(function(req, res) {
     fs.readFile(`.${req.url}`, (error, content) => {
       if (error) {
         if (error.code === 'ENOENT') {
-          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.setHeader('Content-Type', contentType);
+          res.statusCode = 200;
           res.end(error.toString(), 'utf-8');
         } else {
-          res.writeHead(500);
+          res.statusCode = 500;
           res.end(`Sorry, check with the site admin for error: ${error.code} ..\n`);
           res.end();
         }
       } else {
-        res.writeHead(200, { 'Content-Type': contentType });
+        res.setHeader('Content-Type', contentType);
+        res.statusCode = 200;
         res.end(content, 'utf-8');
         // ms.pipe(req, res, `.${req.url}`);
       }
