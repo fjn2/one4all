@@ -3,7 +3,6 @@ const configuration = require('../../configuration.json');
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const ms = require('mediaserver');
 
 const http = require('http');
 const app = http.createServer(function(req, res) {
@@ -52,7 +51,6 @@ const app = http.createServer(function(req, res) {
         res.setHeader('Content-Type', contentType);
         res.statusCode = 200;
         res.end(content, 'utf-8');
-        // ms.pipe(req, res, `.${req.url}`);
       }
     });
   } else {
