@@ -64,7 +64,6 @@ class ServerTime {
       this.getSampler();
       this.startSynchronization();
     }, 1000);
-    console.log('Detour', this.getDetour());
   }
 
 }
@@ -73,7 +72,7 @@ class Intercommunication {
   constructor(url) {
     this.socket = io(url);
     // this events requires the petition of the client
-    this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong'];
+    this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'playMusic', 'pauseMusic', 'nextMusic'];
     // these events are fired by the server
     this.eventSubscribe = ['startPlay', 'stopPlay', 'playList'];
 
@@ -83,7 +82,9 @@ class Intercommunication {
     this.processCallbacks = (eventName, data) => {
       this.pendingMessages.forEach((message, index) => {
         if (message.guid === data.guid) {
-          message.callback(data);
+          if (typeof message.callback ===  'function') {
+            message.callback(data);
+          }
           this.pendingMessages.splice(index, 1);
         }
       });
@@ -145,7 +146,7 @@ class AudioPlayer {
     this.percentEl = percentEl;
     // initialize audio control
     this.audioElement = window.document.createElement('AUDIO');
-    this.audioElement.controls = true;
+    // this.audioElement.controls = true;
     window.foo = this.audioElement;
     this.serverTime = serverTime;
 
@@ -249,8 +250,10 @@ class PlayList {
   }
   addSong(url) {
     console.log('Sending song...');
+    window.document.getElementById('loading').style.display = 'block';
     this.intercommunication.get('addSong', () => {
       console.log('Song added propertly');
+      window.document.getElementById('loading').style.display = 'none';
     }, {
       url,
     });
@@ -314,6 +317,15 @@ class App {
   addSongToPlayList(songUrl) {
     this.playList.addSong(songUrl);
   }
+  play() {
+    this.intercommunication.get('playMusic');
+  }
+  pause() {
+    this.intercommunication.get('pauseMusic');
+  }
+  next() {
+    this.intercommunication.get('nextMusic');
+  }
 }
 
 
@@ -331,5 +343,15 @@ function addSongToPlayList() {
   } else {
     window.alert('Why so rude?');
   }
+}
+
+function playMusic() {
+  app.play();
+}
+function pauseMusic() {
+  app.pause();
+}
+function nextMusic() {
+  app.next();
 }
 

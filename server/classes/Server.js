@@ -3,6 +3,9 @@ const HostControl = require('./HostControl');
 const ClientsControl = require('./ClientsControl');
 const PlayList = require('./PlayList');
 const SongPlayer = require('./SongPlayer');
+const yas = require('youtube-audio-server');
+const configuration = require('../../configuration.json');
+const url = require('url');
 
 class Server {
   constructor() {
@@ -15,13 +18,21 @@ class Server {
         trackTime: this.songPlayer.getCurrentTime(),
         serverTime: new Date(),
       }),
-      addSong: (data) => {
-        this.playList.addSong(data.url);
-        this.clientsControl.sendPlayList({
-          songs: this.playList.songs,
-          currentSong: this.playList.getCurrentSong(),
-        });
-      },
+      addSong: data => (
+        Promise.resolve(data.url).then((songUrl) => {
+          if (~songUrl.indexOf('youtube')) {
+            return this.createMp3FromYoutube(songUrl);
+          }
+          return Promise.resolve(data);
+        }).then((songUrl) => {
+          this.playList.addSong(songUrl);
+          this.clientsControl.sendPlayList({
+            songs: this.playList.songs,
+            currentSong: this.playList.getCurrentSong(),
+          });
+          return songUrl;
+        })
+      ),
     };
     this.welcomeActions = {
       playList: () => ({
@@ -60,6 +71,22 @@ class Server {
   getSongTime() {
     Winston.debug('Server -> getSongTime', this.songPlayer.getCurrentTime());
     return this.songPlayer.getCurrentTime();
+  }
+  createMp3FromYoutube(songUrl) {
+    Winston.info('Server -> createMp3FromYoutube');
+    // Download video.
+    const video = url.parse(songUrl, true).query.v;
+    const file = `./resources/${video}`;
+    return new Promise((resolve, reject) => {
+      Winston.verbose(`Server -> createMp3FromYoutube -> Downloading ${video} into ${file}...`);
+      yas.downloader.onSuccess(() => {
+        Winston.info(`Yay! Video (${video}) downloaded successfully into "${file}"!`);
+        resolve(`http://${configuration.host}:${configuration.port}/resources/${video}`);
+      }).onError(({ v, error }) => {
+        Winston.error(`Sorry, an error ocurred when trying to download ${v}`, error);
+        reject(error);
+      }).download({ video, file });
+    });
   }
 }
 

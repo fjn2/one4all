@@ -74,10 +74,23 @@ class ClientControls {
         Winston.debug(`ClientControls -> defining ${key} method`);
         socket.on(`${key}`, (data) => {
           Winston.info(`ClientControls -> ${key}`);
-          socket.emit(`${key}-S`, {
-            guid: data.guid,
-            data: clientActions[key](data.data),
-          });
+          const serverData = clientActions[key](data.data);
+          if (serverData instanceof Promise) {
+            // it is a promise
+            serverData.then((pData) => {
+              console.log('pData',pData)
+              socket.emit(`${key}-S`, {
+                guid: data.guid,
+                data: pData,
+              });
+            });
+          } else {
+            // it is some other value
+            socket.emit(`${key}-S`, {
+              guid: data.guid,
+              data: serverData,
+            });
+          }
         });
       });
 
@@ -93,7 +106,7 @@ class ClientControls {
       socket.on('disconnect', () => {
         Winston.info('ClientControls -> disconnect');
         this.removeClient(socket);
-       });
+      });
     });
     app.listen(configuration.port);
   }

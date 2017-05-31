@@ -20,6 +20,12 @@
 		<div>
 			<input type="text" id="urlSong" placeholder="Insert song URL here">
 			<input type="button" value="add song" onclick="addSongToPlayList()"/>
+			<img id="loading" src="http://www.lolriot.com/wp-content/uploads/2012/12/WTF-Dog-in-space-or-something.gif" style="display:none" />
+		</div>
+		<div>
+			<input type="button" onclick="playMusic()" value="play / sync"/>
+			<input type="button" onclick="pauseMusic()" value="stop"/>
+			<input type="button" onclick="nextMusic()" value="next"/>
 		</div>
 		<div id="playList"></div>
 		<script type="text/javascript" charset="UTF-8" src="main.js"></script>
