@@ -88,7 +88,7 @@ class Server {
     Winston.info('Server -> createMp3FromYoutube');
     // Download video.
     const video = url.parse(songUrl, true).query.v;
-    const file = `${__dirname}/resources/${video}`;
+    const file = `${process.cwd()}/resources/${video}`;
     return new Promise((resolve, reject) => {
       Winston.verbose(`Server -> createMp3FromYoutube -> Downloading ${video} into ${file}...`);
       yas.downloader.onSuccess(() => {
