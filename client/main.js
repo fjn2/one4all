@@ -1,5 +1,5 @@
 const configuration = {
-  server: '192.168.0.110:2000',
+  server: '192.168.43.212:2000',
   maxDetour: 30,
 };
 
@@ -44,7 +44,7 @@ class ServerTime {
     }
 
     const media = acum / values.length;
-    acum = 0
+    acum = 0;
     for (let i = 0; i < values.length; i+= 1) {
       acum += (values[i] - media) ** 2;
     }
@@ -140,8 +140,9 @@ class Intercommunication {
 }
 
 class AudioPlayer {
-  constructor(intercommunication, serverTime) {
+  constructor(intercommunication, serverTime, percentEl) {
     this.intercommunication = intercommunication;
+    this.percentEl = percentEl;
     // initialize audio control
     this.audioElement = window.document.createElement('AUDIO');
     this.audioElement.controls = true;
@@ -151,36 +152,49 @@ class AudioPlayer {
     window.document.body.appendChild(this.audioElement);
     // status = 0 -> no initialized 1 -> requesting current track 2 -> downloading file  4 -> track loaded
     this.status = 0;
+    this.cachedSongs = {};
   }
   loadAudio() {
     this.status = 1;
+    this.setSong(undefined);
     this.intercommunication.get('currentTrack', ({ data }) => {
-      this.status = 2;
       const download = (filename) => {
+        this.status = 2;
         const xhttp = new XMLHttpRequest();
-        xhttp.addEventListener('progress', function(e) {
+        xhttp.addEventListener('progress', (e) => {
           if (e.lengthComputable) {
-            const percentComplete = e.loaded / e.total;
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            this.percentEl.innerHTML = percentComplete;
             console.log(`Downloading: (${filename}) ${percentComplete}%`);
           }
         });
 
-        xhttp.addEventListener('load', (blob) => {
+        xhttp.addEventListener('load', () => {
           if (xhttp.status == 200) {
-            this.setSong(window.URL.createObjectURL(xhttp.response));
+            const tmpUrl = window.URL.createObjectURL(xhttp.response);
+            this.cachedSongs[filename] = tmpUrl;
+            this.setSong(tmpUrl);
             this.status = 4;
           }
         });
 
-        xhttp.open("GET", filename);
+        xhttp.open('GET', filename);
         xhttp.responseType = 'blob';
         xhttp.send();
       };
-
-      download(data);
+      if (data) {
+        if (this.cachedSongs[data]) {
+          this.setSong(this.cachedSongs[data]);
+          this.status = 4;
+        } else {
+          download(data);
+        }
+      } else {
+        console.error('The play list looks like empty dude :(');
+      }
     });
   }
-  setSong(songURL) {
+  setSong(songURL = '') {
     this.audioElement.src = songURL;
   }
   seek(time) {
@@ -189,16 +203,16 @@ class AudioPlayer {
   play() {
     this.intercommunication.get('timeCurrentTrack', ({ data }) => {
       const { serverTime, trackTime } = data;
+
       const delay = 2000;
-      // server time mas 2 segunds, diff entre eso y mi server time -> despues, play
       const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get();
 
       if (timeDifference >= 0 && !Number.isNaN(this.serverTime.getDetour())) {
-        // this.seek(0);
         setTimeout(() => {
-          console.log('DIFF', this.audioElement.currentTime * 1000 - (trackTime + 2000));
+          console.log('DIFF', (trackTime + delay) - this.audioElement.currentTime * 1000);
           this.seek(trackTime + delay);
           const initialTime = new Date();
+          // 100ms looping to have a better performance
           while (new Date() - initialTime < 100) {}
           this.audioElement.play();
         }, timeDifference - 100);
@@ -234,6 +248,7 @@ class PlayList {
 
   }
   addSong(url) {
+    console.log('Sending song...');
     this.intercommunication.get('addSong', () => {
       console.log('Song added propertly');
     }, {
@@ -248,7 +263,6 @@ class PlayList {
       if (this.currentSong !== currentSong) {
         this.audioPlayer.loadAudio();
         this.audioPlayer.stop();
-        this.audioPlayer.play();
       }
 
       this.currentSong = currentSong;
@@ -276,19 +290,21 @@ class PlayList {
 
 class App {
   constructor() {
+    const percentEl = window.document.getElementById('percent');
+
     this.intercommunication = new Intercommunication(configuration.server);
     this.serverTime = new ServerTime(this.intercommunication);
-    this.audioPlayer = new AudioPlayer(this.intercommunication, this.serverTime);
+    this.audioPlayer = new AudioPlayer(this.intercommunication, this.serverTime, percentEl);
     this.playList = new PlayList('playList', this.intercommunication, this.audioPlayer);
 
     this.serverTime.startSynchronization();
 
-    this.audioPlayer.loadAudio();
+    // this.audioPlayer.loadAudio();
     this.playList.waitForPlayList();
 
     const timer = setInterval(() => {
-      if (this.serverTime.getDetour() < configuration.maxDetour && this.audioPlayer.status === 4) {
-        console.log('Ready to play');
+      if (this.serverTime.getDetour() < configuration.maxDetour) {
+        console.log('I know the server time ;) with this detour: ', this.serverTime.getDetour());
         // here I know the server time
         this.audioPlayer.waitForPlay();
         clearInterval(timer);

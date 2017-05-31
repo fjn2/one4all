@@ -2,14 +2,20 @@
 <html>
 	<header>
 		<script type="text/javascript" charset="UTF-8" src="scripts/socket.io.js"></script>
+		<link rel="stylesheet" type="text/css" href="./styles.css">
 	</header>
 	<body>
 		<h1>
 			Ultimate audio player sync
 		</h1>
-		<img src="http://www.reactiongifs.com/wp-content/uploads/2013/01/gandalf_to_the_music.gif" style="width:100%"/>
+		<div class="wrapper">
+			<img src="http://www.reactiongifs.com/wp-content/uploads/2013/01/gandalf_to_the_music.gif" class="gandalf"/>
+		</div>
 		<div>
-			<span>User conected: <b id="userConected"></b></span>
+			Download status: <b id="percent"></b>
+		</div>
+		<div>
+			<span>User conected: <b id="userConected">WIP</b></span>
 		</div>
 		<div>
 			<input type="text" id="urlSong" placeholder="Insert song URL here">
