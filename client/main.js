@@ -1,8 +1,3 @@
-const configuration = {
-  server: '192.168.43.212:2000',
-  maxDetour: 30,
-};
-
 class ServerTime {
   constructor(intercommunication) {
     this.intercommunication = intercommunication;
