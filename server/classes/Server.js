@@ -33,6 +33,18 @@ class Server {
           return songUrl;
         })
       ),
+      playMusic: () => {
+        this.playList.play();
+        this.clientsControl.startPlay();
+      },
+      pauseMusic: () => {
+        this.playList.stop();
+        this.clientsControl.stopPlay();
+      },
+      nextMusic: () => {
+        this.playList.nextSong();
+        this.clientsControl.startPlay();
+      },
     };
     this.welcomeActions = {
       playList: () => ({

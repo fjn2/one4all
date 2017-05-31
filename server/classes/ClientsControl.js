@@ -78,7 +78,6 @@ class ClientControls {
           if (serverData instanceof Promise) {
             // it is a promise
             serverData.then((pData) => {
-              console.log('pData',pData)
               socket.emit(`${key}-S`, {
                 guid: data.guid,
                 data: pData,
