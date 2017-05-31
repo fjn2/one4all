@@ -2,3 +2,4 @@ node_modules
 one4all.pem
 server/resources
 configuration.json
+client/configuration.js
