@@ -1,5 +1,6 @@
 node_modules
+client/configuration.js
 one4all.pem
 server/resources
 configuration.json
-client/configuration.js
+fooFolder
