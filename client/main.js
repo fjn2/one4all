@@ -141,7 +141,7 @@ class AudioPlayer {
     this.percentEl = percentEl;
     // initialize audio control
     this.audioElement = window.document.createElement('AUDIO');
-    // this.audioElement.controls = true;
+    this.audioElement.controls = true;
     window.foo = this.audioElement;
     this.serverTime = serverTime;
 
