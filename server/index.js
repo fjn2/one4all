@@ -12,3 +12,7 @@ Winston.info('Server is running');
 // setInterval(() => {
 //   server.getSongTime();
 // }, 1000);
+
+process.on('uncaughtException', function(err) {
+  console.log('Caught exception: ' + err);
+});
