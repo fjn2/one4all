@@ -69,7 +69,7 @@ class Intercommunication {
     // this events requires the petition of the client
     this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'playMusic', 'pauseMusic', 'nextMusic'];
     // these events are fired by the server
-    this.eventSubscribe = ['startPlay', 'stopPlay', 'playList'];
+    this.eventSubscribe = ['startPlay', 'stopPlay', 'playList', 'numberOfConections'];
 
     this.pendingMessages = [];
     this.subscribers = [];
@@ -271,6 +271,11 @@ class PlayList {
       this.render();
     });
   }
+  waitForNumberOfConections() {
+    this.intercommunication.subscribe('numberOfConections', ({ data }) => {
+      window.document.getElementById('userConected').innerHTML = data.length;
+    });
+  }
   render() {
     let el = `
     <span>
@@ -302,6 +307,7 @@ class App {
 
     // this.audioPlayer.loadAudio();
     this.playList.waitForPlayList();
+    this.playList.waitForNumberOfConections();
 
     const timer = setInterval(() => {
       if (this.serverTime.getDetour() < configuration.maxDetour) {

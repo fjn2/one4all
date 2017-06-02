@@ -112,10 +112,12 @@ class ClientControls {
   addClient(client) {
     Winston.verbose('ClientControls -> addClient');
     this.clients.push(client);
+    this.sendNumberOfConections();
   }
   removeClient(client) {
     Winston.verbose('ClientControls -> removeClient');
     this.clients.splice(this.clients.indexOf(client), 1);
+    this.sendNumberOfConections();
   }
   setVolume(value) {
     Winston.verbose('ClientControls -> setVolume');
@@ -127,6 +129,16 @@ class ClientControls {
   stopPlay() {
     Winston.info('ClientControls -> stopPlay');
     io.emit('stopPlay');
+  }
+  sendNumberOfConections() {
+    Winston.info('ClientControls -> sendNumberOfConections');
+    const clientsData = this.clients.map(socket => ({
+      ip: socket.handshake.address,
+    }));
+
+    io.emit('numberOfConections', {
+      data: clientsData,
+    });
   }
   sendPlayList({ songs, currentSong }) {
     Winston.info('ClientControls -> sendPlayList');
