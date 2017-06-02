@@ -14,5 +14,5 @@ Winston.info('Server is running');
 // }, 1000);
 
 process.on('uncaughtException', function(err) {
-  console.log('Caught exception: ' + err);
+  Winston.error(`Caught exception: ${err}`);
 });

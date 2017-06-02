@@ -41,7 +41,7 @@ class ServerTime {
     const media = acum / values.length;
     acum = 0;
     for (let i = 0; i < values.length; i+= 1) {
-      acum += (values[i] - media) ** 2;
+      acum += Math.pow(values[i] - media, 2);
     }
 
     return Math.sqrt((1 / (values.length - 1)) * acum);
@@ -172,8 +172,8 @@ class AudioPlayer {
           if (xhttp.status == 200) {
             const tmpUrl = window.URL.createObjectURL(xhttp.response);
             this.cachedSongs[filename] = tmpUrl;
-            this.setSong(tmpUrl);
             this.status = 4;
+            this.loadAudio();
           }
         });
 
