@@ -23,7 +23,7 @@ class Server {
           if (~songUrl.indexOf('youtube')) {
             return this.createMp3FromYoutube(songUrl);
           }
-          return Promise.resolve(data);
+          return Promise.resolve(songUrl);
         }).then((songUrl) => {
           this.playList.addSong(songUrl);
           this.clientsControl.sendPlayList({
