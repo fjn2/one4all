@@ -45,6 +45,10 @@ class Server {
         this.playList.nextSong();
         this.clientsControl.startPlay();
       },
+      sendMessage: ({ userName, message }) => {
+        const messageToSend = `${userName}: ${message}`;
+        this.clientsControl.sendActivityStream(messageToSend);
+      },
     };
     this.welcomeActions = {
       playList: () => ({

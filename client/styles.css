@@ -37,3 +37,9 @@
   display:block;
   margin:auto;
 }
+
+#activityStream {
+  border: 2px inset;
+  background: #eee;
+  height: 150px;
+}

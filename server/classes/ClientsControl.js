@@ -149,6 +149,15 @@ class ClientControls {
       },
     });
   }
+  sendActivityStream(message) {
+    Winston.info('ClientControls -> sendActivityStream', message);
+    io.emit('activityStream', {
+      data: {
+        type: 'normal',
+        message,
+      },
+    });
+  }
 }
 
 
