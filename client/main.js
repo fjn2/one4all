@@ -153,44 +153,52 @@ class AudioPlayer {
     this.status = 0;
     this.cachedSongs = {};
   }
-  loadAudio() {
+  loadAudio(playList) {
     this.status = 1;
     this.setSong(undefined);
     this.intercommunication.get('currentTrack', ({ data }) => {
-      const download = (filename) => {
-        this.status = 2;
-        const xhttp = new XMLHttpRequest();
-        xhttp.addEventListener('progress', (e) => {
-          if (e.lengthComputable) {
-            const percentComplete = Math.round((e.loaded / e.total) * 100);
-            this.percentEl.innerHTML = percentComplete;
-            console.log(`Downloading: (${filename}) ${percentComplete}%`);
-          }
-        });
-
-        xhttp.addEventListener('load', () => {
-          if (xhttp.status == 200) {
-            const tmpUrl = window.URL.createObjectURL(xhttp.response);
-            this.cachedSongs[filename] = tmpUrl;
-            this.status = 4;
-            this.loadAudio();
-          }
-        });
-
-        xhttp.open('GET', filename);
-        xhttp.responseType = 'blob';
-        xhttp.send();
-      };
       if (data) {
         if (this.cachedSongs[data]) {
           this.setSong(this.cachedSongs[data]);
           this.status = 4;
         } else {
-          download(data);
+          this.downloadSong(data).then(() => {
+            this.loadAudio(playList);
+          });
+        }
+        const nextTrack = playList[playList.indexOf(data) + 1];
+        if (nextTrack) {
+          this.downloadSong(nextTrack);
         }
       } else {
         console.error('The play list looks like empty dude :(');
       }
+    });
+  }
+  downloadSong(filename) {
+    return new Promise((resolve) => {
+      this.status = 2;
+      const xhttp = new XMLHttpRequest();
+      xhttp.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = Math.round((e.loaded / e.total) * 100);
+          this.percentEl.innerHTML = `${filename} - ${percentComplete}`;
+          console.log(`Downloading: (${filename}) ${percentComplete}%`);
+        }
+      });
+
+      xhttp.addEventListener('load', () => {
+        if (xhttp.status == 200) {
+          const tmpUrl = window.URL.createObjectURL(xhttp.response);
+          this.cachedSongs[filename] = tmpUrl;
+          this.status = 4;
+          resolve();
+        }
+      });
+
+      xhttp.open('GET', filename);
+      xhttp.responseType = 'blob';
+      xhttp.send();
     });
   }
   setSong(songURL = '') {
@@ -262,7 +270,7 @@ class PlayList {
       this.songs = songs;
 
       if (this.currentSong !== currentSong) {
-        this.audioPlayer.loadAudio();
+        this.audioPlayer.loadAudio(this.songs);
         this.audioPlayer.stop();
       }
 
