@@ -58,6 +58,7 @@ class ServerTime {
     setTimeout(() => {
       this.getSampler();
       this.startSynchronization();
+      window.document.getElementById('detour').innerHTML = Math.round(this.getDetour());
     }, 1000);
   }
 
@@ -166,7 +167,7 @@ class AudioPlayer {
             this.loadAudio(playList);
           });
         }
-        const nextTrack = playList[playList.indexOf(data) + 1];
+        const nextTrack = playList[playList.indexOf(data) + 1] || playList[0];
         if (nextTrack) {
           this.downloadSong(nextTrack);
         }
@@ -216,8 +217,8 @@ class AudioPlayer {
 
       if (timeDifference >= 0 && !Number.isNaN(this.serverTime.getDetour())) {
         setTimeout(() => {
-          console.log('DIFF', (trackTime + delay) - this.audioElement.currentTime * 1000);
           this.seek(trackTime + delay);
+          document.getElementById('playDiff').innerHTML = Math.round((trackTime + delay) - this.audioElement.currentTime * 1000) + 'ms';
           const initialTime = new Date();
           // 100ms looping to have a better performance
           while (new Date() - initialTime < 100) {}
@@ -342,7 +343,6 @@ class App {
 
     const timer = setInterval(() => {
       if (this.serverTime.getDetour() < configuration.maxDetour) {
-        console.log('I know the server time ;) with this detour: ', this.serverTime.getDetour());
         // here I know the server time
         this.audioPlayer.waitForPlay();
         clearInterval(timer);
