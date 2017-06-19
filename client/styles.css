@@ -38,6 +38,11 @@
   margin:auto;
 }
 
+.current-song {
+  font-weight: bold;
+  color: blue;
+}
+
 #activityStream {
   border: 2px inset;
   background: #eee;
