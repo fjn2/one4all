@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint ./client/**/*.js; eslint ./server/**/*.js; echo"
+    "lint": "eslint ./client/**/*.js; eslint ./server/**/*.js; echo",
+    "start-client": "node client/serve.js",
+    "start-server": "node server/index.js",
+    "start": "nf start"
   },
   "repository": {
     "type": "git",
@@ -15,6 +18,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.15.2",
+    "foreman": "^2.0.0",
     "guid": "0.0.12",
     "mediaserver": "^0.1.0",
     "mp3-duration": "^1.0.10",
@@ -22,7 +26,7 @@
     "request": "^2.81.0",
     "socket.io": "^1.7.3",
     "winston": "^2.3.1",
-    "youtube-audio-server": "^2.0.1",
+    "youtube-audio-server": "^2.1.2",
     "youtube-audio-stream": "0.0.48"
   },
   "bugs": {

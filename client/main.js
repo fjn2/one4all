@@ -58,7 +58,7 @@ class ServerTime {
     setTimeout(() => {
       this.getSampler();
       this.startSynchronization();
-      window.document.getElementById('detour').innerHTML = Math.round(this.getDetour());
+      // window.document.getElementById('detour').innerHTML = Math.round(this.getDetour());
     }, 1000);
   }
 
@@ -70,7 +70,7 @@ class Intercommunication {
     // this events requires the petition of the client
     this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage'];
     // these events are fired by the server
-    this.eventSubscribe = ['startPlay', 'stopPlay', 'playList', 'numberOfConections', 'activityStream'];
+    this.eventSubscribe = ['startPlay', 'stopPlay', 'playlist', 'numberOfConections', 'activityStream'];
 
     this.pendingMessages = [];
     this.subscribers = [];
@@ -225,16 +225,16 @@ class PlayList {
   }
   addSong(url) {
     console.log('Sending song...');
-    window.document.getElementById('loading').style.display = 'block';
+    $loading.show();
     this.intercommunication.get('addSong', () => {
       console.log('Song added propertly');
-      window.document.getElementById('loading').style.display = 'none';
+      $loading.hide();
     }, {
       url,
     });
   }
   waitForPlayList() {
-    this.intercommunication.subscribe('playList', ({ data }) => {
+    this.intercommunication.subscribe('playlist', ({ data }) => {
       const { songs, currentSong } = data;
       this.songs = songs;
 
@@ -253,6 +253,7 @@ class PlayList {
     });
   }
   render() {
+    console.log('-- RENDER, this.currentSong', this.currentSong)
     let el = `
     <span>
       Playing: <b>${this.currentSong}</b>
@@ -274,7 +275,11 @@ class PlayList {
       </ul>
       `;
     }
-    window.document.getElementById(this.id).innerHTML = el;
+
+    console.log('RENDER', this.id)
+    $playlist
+      .html(el)
+      .show();
   }
 }
 class Chat {
@@ -300,8 +305,8 @@ class Chat {
   }
 }
 class Downloader {
-  constructor(playList) {
-    this.playList = playList.song;
+  constructor(playlist) {
+    this.playlist = playlist.song;
     this.cachedSongs = {};
   }
   // patrol:bool -> will loop over all songs to check for new downloads
@@ -316,7 +321,7 @@ class Downloader {
             const percentComplete = Math.round((e.loaded / e.total) * 100);
             this.cachedSongs[filename].percentComplete = percentComplete;
             console.log(`Downloading: (${filename}) ${percentComplete}%`);
-            playList.render();
+            playlist.render();
           }
         });
 
@@ -346,9 +351,9 @@ class Downloader {
     if (patrol) {
       promise.then(() => {
         // Once this finish, start downloading the next song
-        let nextSong = playList.songs[playList.songs.indexOf(filename) + 1];
+        let nextSong = playlist.songs[playlist.songs.indexOf(filename) + 1];
         if (!nextSong) {
-          nextSong = playList.songs[0];
+          nextSong = playlist.songs[0];
         }
         this.startDownload(nextSong, true);
       });
@@ -365,13 +370,13 @@ class App {
     this.serverTime = new ServerTime(this.intercommunication);
     this.downloader = new Downloader(this.intercommunication);
     this.audioPlayer = new AudioPlayer(this.intercommunication, this.serverTime, percentEl);
-    this.playList = new PlayList('playList', this.intercommunication, this.audioPlayer);
+    this.playlist = new PlayList('playlist', this.intercommunication, this.audioPlayer);
     this.chat = new Chat(this.intercommunication);
 
     this.serverTime.startSynchronization();
 
-    this.playList.waitForPlayList();
-    this.playList.waitForNumberOfConections();
+    this.playlist.waitForPlayList();
+    this.playlist.waitForNumberOfConections();
     this.chat.waitForActivityStream();
 
     const timer = setInterval(() => {
@@ -383,7 +388,7 @@ class App {
     }, 1000);
   }
   addSongToPlayList(songUrl) {
-    this.playList.addSong(songUrl);
+    this.playlist.addSong(songUrl);
   }
   play() {
     this.intercommunication.get('playMusic');
@@ -410,9 +415,12 @@ const intercommunication = app.intercommunication;
 const serverTime = app.serverTime;
 const downloader = app.downloader;
 const audioPlayer = app.audioPlayer;
-const playList = app.playList;
+const playlist = app.playlist;
 const chat = app.chat;
 
+// Set elements.
+const $loading = new El('#loading');
+const $playlist = new El('#playlist');
 
 function addSongToPlayList() {
   const songUrl = window.document.getElementById('urlSong').value;

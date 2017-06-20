@@ -1,7 +1,7 @@
 const Winston = require('winston');
 const HostControl = require('./HostControl');
 const ClientsControl = require('./ClientsControl');
-const PlayList = require('./PlayList');
+const Playlist = require('./Playlist');
 const SongPlayer = require('./SongPlayer');
 const yas = require('youtube-audio-server');
 const configuration = require('../../configuration.json');
@@ -13,7 +13,7 @@ class Server {
 
     this.clientActions = {
       serverTime: () => new Date(),
-      currentTrack: () => this.playList.getCurrentSong(),
+      currentTrack: () => this.playlist.getCurrentSong(),
       timeCurrentTrack: () => ({
         trackTime: this.songPlayer.getCurrentTime(),
         serverTime: new Date(),
@@ -25,24 +25,24 @@ class Server {
           }
           return Promise.resolve(songUrl);
         }).then((songUrl) => {
-          this.playList.addSong(songUrl);
-          this.clientsControl.sendPlayList({
-            songs: this.playList.songs,
-            currentSong: this.playList.getCurrentSong(),
+          this.playlist.addSong(songUrl);
+          this.clientsControl.sendPlaylist({
+            songs: this.playlist.songs,
+            currentSong: this.playlist.getCurrentSong(),
           });
           return songUrl;
         })
       ),
       playMusic: () => {
-        this.playList.play();
+        this.playlist.play();
         this.clientsControl.startPlay();
       },
       pauseMusic: () => {
-        this.playList.stop();
+        this.playlist.stop();
         this.clientsControl.stopPlay();
       },
       nextMusic: () => {
-        this.playList.nextSong();
+        this.playlist.nextSong();
         this.clientsControl.startPlay();
       },
       sendMessage: ({ userName, message }) => {
@@ -51,34 +51,34 @@ class Server {
       },
     };
     this.welcomeActions = {
-      playList: () => ({
-        songs: this.playList.songs,
-        currentSong: this.playList.getCurrentSong(),
+      playlist: () => ({
+        songs: this.playlist.songs,
+        currentSong: this.playlist.getCurrentSong(),
       }),
     };
 
     this.clientsControl = new ClientsControl(this.clientActions, this.welcomeActions);
 
-    this.playList = new PlayList(this.songPlayer, this.clientsControl);
-    this.songPlayer.setPlayList(this.playList);
+    this.playlist = new Playlist(this.songPlayer, this.clientsControl);
+    this.songPlayer.setPlaylist(this.playlist);
 
-    this.hostControl = new HostControl(this.playList, this.clientsControl);
+    this.hostControl = new HostControl(this.playlist, this.clientsControl);
 
-    this.playList.init();
+    this.playlist.init();
   }
   // external methods
   play() {
     Winston.info('Server -> play');
-    this.playList.play();
+    this.playlist.play();
   }
   stop() {
     Winston.info('Server -> stop');
-    this.playList.stop();
+    this.playlist.stop();
   }
   nextSong() {
     Winston.info('Server -> nextSong');
     this.currentSong += 1;
-    this.playList.play();
+    this.playlist.play();
 
     if (this.currentSong > this.songs.length) {
       this.currentSong = 0;
@@ -91,17 +91,17 @@ class Server {
   createMp3FromYoutube(songUrl) {
     Winston.info('Server -> createMp3FromYoutube');
     // Download video.
-    const video = url.parse(songUrl, true).query.v;
-    const file = `${process.cwd()}/resources/${video}`;
+    const id = url.parse(songUrl, true).query.v;
+    const file = `${process.cwd()}/resources/${id}`;
     return new Promise((resolve, reject) => {
-      Winston.verbose(`Server -> createMp3FromYoutube -> Downloading ${video} into ${file}...`);
+      Winston.verbose(`Server -> createMp3FromYoutube -> Downloading ${id} into ${file}...`);
       yas.downloader.onSuccess(() => {
-        Winston.info(`Yay! Video (${video}) downloaded successfully into "${file}"!`);
-        resolve(`http://${configuration.host}:${configuration.port}/resources/${video}`);
+        Winston.info(`Yay! Audio (${id}) downloaded successfully into "${file}"!`);
+        resolve(`http://${configuration.host}:${configuration.port}/resources/${id}`);
       }).onError(({ v, error }) => {
         Winston.error(`Sorry, an error ocurred when trying to download ${v}`, error);
         reject(error);
-      }).download({ video, file });
+      }).download({ id, file });
     });
   }
 }

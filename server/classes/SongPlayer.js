@@ -13,9 +13,9 @@ class SongPlayer {
   init() {
     this.reset();
   }
-  setPlayList(playList) {
-    Winston.verbose('SongPlayer -> setPlayList');
-    this.playList = playList;
+  setPlaylist(playlist) {
+    Winston.verbose('SongPlayer -> setplaylist');
+    this.playlist = playlist;
   }
   play() {
     Winston.verbose('SongPlayer -> play');
@@ -39,8 +39,8 @@ class SongPlayer {
     return new Promise((resolve, reject) => {
       // resolve(20000);
       // this doesn't work
-      const stream = request(this.playList.getCurrentSong()).pipe(fs.createWriteStream('./currentSong.mp3'));
-      console.log(this.playList.getCurrentSong(), 'ZZZ');
+      const stream = request(this.playlist.getCurrentSong()).pipe(fs.createWriteStream('./currentSong.mp3'));
+      console.log(this.playlist.getCurrentSong(), 'ZZZ');
       stream.on('finish', () => {
         musicMetadata(fs.createReadStream('./currentSong.mp3'), { duration: true }, (err, metadata) => {
           if (err) {

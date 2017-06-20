@@ -77,11 +77,15 @@ class ClientControls {
           const serverData = clientActions[key](data.data);
           if (serverData instanceof Promise) {
             // it is a promise
-            serverData.then((pData) => {
+            serverData
+            .then((pData) => {
               socket.emit(`${key}-S`, {
                 guid: data.guid,
                 data: pData,
               });
+            })
+            .catch((err) => {
+              console.error('ERROR:', err)
             });
           } else {
             // it is some other value
@@ -140,8 +144,8 @@ class ClientControls {
       data: clientsData,
     });
   }
-  sendPlayList({ songs, currentSong }) {
-    Winston.info('ClientControls -> sendPlayList');
+  sendPlaylist({ songs, currentSong }) {
+    Winston.info('ClientControls -> sendPlaylist');
     io.emit('playList', {
       data: {
         songs,

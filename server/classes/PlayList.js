@@ -1,6 +1,6 @@
 const Winston = require('winston');
 
-class PlayList {
+class Playlist {
   constructor(songPlayer, clientsControl) {
     Winston.info('PlayList -> constructor');
 
@@ -22,29 +22,29 @@ class PlayList {
     }, 1000);
   }
   addSong(songUrl) {
-    Winston.info('PlayList -> addSong ', songUrl);
+    Winston.info('Playlist -> addSong ', songUrl);
     this.songs.push(songUrl);
   }
   play() {
     this.songPlayer.play();
   }
   stop() {
-    Winston.info('PlayList -> stop');
+    Winston.info('Playlist -> stop');
     this.songPlayer.stop();
   }
   getCurrentSong() {
-    Winston.info('PlayList -> getCurrentSong ', this.songs[this.currentSong]);
+    Winston.info('Playlist -> getCurrentSong ', this.songs[this.currentSong]);
     return this.songs[this.currentSong];
   }
   setVolume(value) {
     this.songPlayer.setVolume(value);
   }
   init() {
-    Winston.info('PlayList -> init');
+    Winston.info('Playlist -> init');
     this.songPlayer.init();
   }
   nextSong() {
-    Winston.info('PlayList -> nextSong');
+    Winston.info('Playlist -> nextSong');
     this.currentSong += 1;
 
     if (this.currentSong > this.songs.length - 1) {
@@ -52,12 +52,12 @@ class PlayList {
     }
 
     this.songPlayer.reset();
-    this.clientsControl.sendPlayList({
+    this.clientsControl.sendPlaylist({
       songs: this.songs,
       currentSong: this.getCurrentSong(),
     });
-    Winston.verbose('PlayList -> nextSong -> now playing #', this.currentSong);
+    Winston.verbose('Playlist -> nextSong -> now playing #', this.currentSong);
   }
 }
 
-module.exports = PlayList;
+module.exports = Playlist;
