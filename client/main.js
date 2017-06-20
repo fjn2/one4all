@@ -431,6 +431,9 @@ const $loading = new El('#loading');
 const $playlist = new El('#playlist');
 const $songUrl = new El('#urlSong');
 
+// Focus on URL input.
+$songUrl.focus();
+
 function addSongToPlayList() {
   const songUrl = $songUrl.val()
   if (songUrl) {

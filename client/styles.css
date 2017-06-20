@@ -78,10 +78,6 @@ input.small {
   display: none;
 }
 
-.status {
-  font-size: 12px;
-}
-
 #playlist {
   display: none;
   background: #eee;
@@ -104,6 +100,13 @@ input.small {
   margin: 20px;
   z-index: 100;
   position: relative;
+}
+
+.status {
+  font-size: 12px;
+  position: absolute;
+  top: 0;
+  right: 10px;
 }
 
 .background {
