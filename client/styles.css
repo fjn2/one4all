@@ -88,6 +88,7 @@ input.small {
   border-bottom: 1px solid #A7A7AA;
   font-size: 12px;
   padding: 5px;
+  font-family: 'Open Sans', sans-serif;
 }
 
 #loading {

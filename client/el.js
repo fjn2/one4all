@@ -21,6 +21,14 @@ class El {
     return this
   }
 
+  disable () {
+    this.$el.disabled = true
+  }
+
+  enable () {
+    this.$el.disabled = false
+  }
+
   style (styleName, value) {
     this.$el.style[styleName] = value
     return this

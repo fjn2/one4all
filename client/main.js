@@ -105,7 +105,9 @@ class Intercommunication {
       });
     });
   }
+
   get(eventName, callback, data) {
+    // TODO: Generate GUIDs on the server.
     const guid = Math.floor(Math.random() * 1000000);
 
     if (~this.eventList.indexOf(eventName)) {
@@ -224,15 +226,18 @@ class PlayList {
 
   }
   addSong(url) {
-    console.log('Sending song...');
+    console.log('Playlist: Adding song...', url);
     $loading.show();
+    $songUrl.disable();
     this.intercommunication.get('addSong', () => {
-      console.log('Song added propertly');
+      console.log('Song added successfully!');
       $loading.hide();
+      $songUrl.enable();
     }, {
-      url,
+      url
     });
   }
+
   waitForPlayList() {
     this.intercommunication.subscribe('playlist', ({ data }) => {
       const { songs, currentSong } = data;
@@ -252,12 +257,16 @@ class PlayList {
       window.document.getElementById('userConected').innerHTML = data.length;
     });
   }
+
   render() {
-    console.log('-- RENDER, this.currentSong', this.currentSong)
+    console.log('RENDER, this.currentSong:', this.currentSong)
+    console.log('RENDER, songs:', this.songs)
+
     let el = `
-    <span>
-      Playing: <b>${this.currentSong}</b>
-    </span>`;
+      <span>
+        Playing: <b>${this.currentSong || '(NOTHING YET)'}</b>
+      </span>
+    `;
 
     for (let i = 0; i < this.songs.length; i += 1) {
       const song = this.songs[i];
@@ -276,7 +285,6 @@ class PlayList {
       `;
     }
 
-    console.log('RENDER', this.id)
     $playlist
       .html(el)
       .show();
@@ -292,9 +300,9 @@ class Chat {
     });
   }
   sendMessage(message, userName) {
-    window.document.getElementById('loading').style.display = 'block';
+    $loading.show();
     this.intercommunication.get('sendMessage', ({ data }) => {
-      window.document.getElementById('loading').style.display = 'none';
+      $loading.hide();
     }, {
       message,
       userName,
@@ -421,9 +429,10 @@ const chat = app.chat;
 // Set elements.
 const $loading = new El('#loading');
 const $playlist = new El('#playlist');
+const $songUrl = new El('#urlSong');
 
 function addSongToPlayList() {
-  const songUrl = window.document.getElementById('urlSong').value;
+  const songUrl = $songUrl.val()
   if (songUrl) {
     app.addSongToPlayList(songUrl);
   } else {

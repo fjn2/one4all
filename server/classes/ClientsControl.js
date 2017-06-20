@@ -146,7 +146,7 @@ class ClientControls {
   }
   sendPlaylist({ songs, currentSong }) {
     Winston.info('ClientControls -> sendPlaylist');
-    io.emit('playList', {
+    io.emit('playlist', {
       data: {
         songs,
         currentSong,
