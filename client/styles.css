@@ -108,10 +108,10 @@ input.small {
 
 .background {
   background: url('metronome.jpg');
-  width: 100%;
+  width: 460px;
   height: 100%;
   position: absolute;
-  right: -300px;
+  right: 0;
   top: 0;
   opacity: 0.5;
   z-index: 0;
