@@ -248,8 +248,7 @@ class PlayList {
     this.intercommunication.subscribe('playlist', ({ data }) => {
       const { songs, currentSong } = data;
       this.songs = songs;
-
-      if (this.currentSong !== currentSong) {
+      if (currentSong && this.currentSong && this.currentSong.url !== currentSong.url) {
         this.audioPlayer.stop();
         this.audioPlayer.loadAudio();
       }
