@@ -97,7 +97,7 @@ input.small {
   right: 0;
   margin: auto;
   width: 50px;
-  top: -60px;
+  top: 53px;
 }
 
 .block {
@@ -171,5 +171,12 @@ input.small {
 
   .status {
     font-size: 10px;
+  }
+
+  #loading {
+    top: 2px;
+    left: auto;
+    right: 3px;
+    width: 35px;
   }
 }
