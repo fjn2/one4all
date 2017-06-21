@@ -1,2 +1,4 @@
 node_modules
 resources
+client/configuration.js
+configuration.json

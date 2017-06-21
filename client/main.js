@@ -58,7 +58,7 @@ class ServerTime {
     setTimeout(() => {
       this.getSampler();
       this.startSynchronization();
-      // window.document.getElementById('detour').innerHTML = Math.round(this.getDetour());
+      window.document.getElementById('detour').innerHTML = Math.round(this.getDetour());
     }, 1000);
   }
 

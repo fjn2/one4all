@@ -40,7 +40,6 @@ class SongPlayer {
       // resolve(20000);
       // this doesn't work
       const stream = request(this.playlist.getCurrentSong()).pipe(fs.createWriteStream('./currentSong.mp3'));
-      console.log(this.playlist.getCurrentSong(), 'ZZZ');
       stream.on('finish', () => {
         musicMetadata(fs.createReadStream('./currentSong.mp3'), { duration: true }, (err, metadata) => {
           if (err) {
