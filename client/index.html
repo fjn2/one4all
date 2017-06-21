@@ -1,86 +1,98 @@
 <!DOCTYPE html>
 <html>
-	<header>
-		<script type="text/javascript" charset="UTF-8" src="configuration.js"></script>
-		<script type="text/javascript" charset="UTF-8" src="scripts/socket.io.js"></script>
-		<link rel="stylesheet" type="text/css" href="./styles.css">
-		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-		<title>Ultimate audio player sync</title>
-	</header>
-	<body>
-		<h1>
-			Ultimate audio player sync
-		</h1>
-		<div class="wrapper">
-			<img src="http://www.reactiongifs.com/wp-content/uploads/2013/01/gandalf_to_the_music.gif" class="gandalf"/>
-		</div>
-		<div>
-			Download status: <b id="percent"></b>
-		</div>
-		<div>
-			Detour: <b id="detour"></b>
-		</div>
-		<div>
-			Play diff: <b id="playDiff"></b>
-		</div>
-		<div>
-			<span>User conected: <b id="userConected">WIP</b></span>
-		</div>
-		<div>
-			<input type="text" id="urlSong" placeholder="Insert song URL here">
-			<input type="button" value="add song" onclick="addSongToPlayList()"/>
-			<img id="loading" src="http://www.lolriot.com/wp-content/uploads/2012/12/WTF-Dog-in-space-or-something.gif" style="display:none" />
-		</div>
-		<div>
-			<input type="button" onclick="playMusic()" value="play / sync"/>
-			<input type="button" onclick="pauseMusic()" value="stop"/>
-			<input type="button" onclick="nextMusic()" value="next"/>
-		</div>
-		<hr/>
-		<div>
-			<h3>Fancy chat</h3>
-			<span>Your name:</span><input type="text" id="userName" placeholder="Your username here!"/>
-			<div id="activityStream"></div>
-			<input id="messageText" type="text" placeholder="Message to send"/>
-			<input type="button" onclick="sendMessage()" value="send"/>
-		</div>
-		<hr/>
-		<div id="playList"></div>
-		<hr/>
-		<h2>What does this psicodelical page is about?</h2>
-		<p>
-			This is an easy and fancy page to reproduce the same song in multiple device (computers, tables, mobiles).<br/>
-			This is your opportunity to convert to you and your friends in the best DJs ever.<br/>
-			All you need is some computers, tablets or cellphones and your imagination<br/>
-		</p>
-		<h2>FAQ</h2>
-		<h3>How to add a new song?</h3>
-		<p>
-			It too easy dude, just look over YouTube or in some MP3 file publics in internet, copy the url and paste it in the input text box.
-		</p>
-		<h3>My computer/device is out of syncrony, what should I do?</h3>
-		<p>
-			Also, this is too easy, just press the play/sync button again, and automagically, all your devices will be on time again.
-		</p>
-		<h3>How do I delete a song?</h3>
-		<p>
-			This feature is not implemented yet, you are  welcome to help me with this in github
-		</p>
-		<h3>The player is not working in my iPhone. What is the problem?</h3>
-		<p>
-			This prototype is not ready to reproduce music in IPhones yet, sorry for that :(
-		</p>
-		<h3>I'm pressing the play button but nothing happen in my Android?</h3>
-		<p>
-			If you are in an Android you must press the play button in the HTML5 player to start reproduce, you should do this at least one time.
-		</p>
-		<h3>I'm pressing the play button but nothing happen in my Computer?</h3>
-		<p>
-			You have to wait until the download has finished
-		<h2>
-			Put in contact with us:
-		</h2>
-		<p>federiconaveira@gmail.com</p>
-		<script type="text/javascript" charset="UTF-8" src="main.js"></script>
-	</body>
+  <header>
+    <script type="text/javascript" charset="UTF-8" src="configuration.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="scripts/socket.io.js"></script>
+    <link rel="stylesheet" type="text/css" href="./styles.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Syncopate" rel="stylesheet">
+
+    <title>Ultimate Audio Player Sync</title>
+  </header>
+  <body>
+    <h1 class="block">
+      Ultimate Audio Player Sync
+    </h1>
+    <!-- <div class="wrapper">
+      <img src="http://www.reactiongifs.com/wp-content/uploads/2013/01/gandalf_to_the_music.gif" class="gandalf"/>
+    </div> -->
+
+    <div class="block status">
+      <div>
+        Download status: <b id="percent"></b>
+      </div>
+      <div>
+        Detour: <b id="detour"></b>
+      </div>
+      <div>
+        Play diff: <b id="playDiff"></b>
+      </div>
+      <div>
+        <span>Users conected: <b id="userConected">WIP</b></span>
+      </div>
+    </div>
+    
+    <div class="block">
+      <input
+        type="text" 
+        id="urlSong"
+        placeholder="Paste YouTube URL and hit Enter."
+        class="large"
+        onkeydown="if (event.keyCode === 13) addSongToPlayList()"
+      >
+      <!-- <input type="button" value="add song" onclick="addSongToPlayList()" /> -->
+      <img id="loading" src="loading.svg" style="display:none" />
+    </div>
+
+    <div class="block controls">
+      <input type="button" onclick="playMusic()" value="play / sync"/>
+      <input type="button" onclick="pauseMusic()" value="stop"/>
+      <input type="button" onclick="nextMusic()" value="next"/>
+    </div>
+
+    <div id="playlist" class="block"></div>
+
+    <div class="about">
+      <h2>What does this psicodelical page is about?</h2>
+      <p>
+        This is an easy and fancy page to reproduce the same song in multiple device (computers, tables, mobiles).<br/>
+        This is your opportunity to convert to you and your friends in the best DJs ever.<br/>
+        All you need is some computers, tablets or cellphones and your imagination<br/>
+      </p>
+      <h2>FAQ</h2>
+      <h3>How to add a new song?</h3>
+      <p>
+        It too easy dude, just look over YouTube or in some MP3 file publics in internet, copy the url and paste it in the input text box.
+      </p>
+      <h3>My computer/device is out of syncrony, what should I do?</h3>
+      <p>
+        Also, this is too easy, just press the play/sync button again, and automagically, all your devices will be on time again.
+      </p>
+      <h3>How do I delete a song?</h3>
+      <p>
+        This feature is not implemented yet, you are  welcome to help me with this in github
+      </p>
+      <h3>The player is not working in my iPhone. What is the problem?</h3>
+      <p>
+        This prototype is not ready to reproduce music in IPhones yet, sorry for that :(
+      </p>
+      <h3>I'm pressing the play button but nothing happen in my Android?</h3>
+      <p>
+        If you are in an Android you must press the play button in the HTML5 player to start reproduce, you should do this at least one time.
+      </p>
+      <h3>I'm pressing the play button but nothing happen in my Computer?</h3>
+      <p>
+        You have to wait until the download has finished
+      </p>
+      <h2>
+        Put in contact with us:
+      </h2>
+      <p>federiconaveira@gmail.com</p>
+    </div>
+
+    <div id="background" class="background-alt"></div>
+
+    <script type="text/javascript" charset="UTF-8" src="el.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="main.js"></script>
+  </body>
 </html>

@@ -9,8 +9,8 @@ const rl = readline.createInterface({
 
 
 class HostControl {
-  constructor(playList, clientControl) {
-    this.playList = playList;
+  constructor(playlist, clientControl) {
+    this.playlist = playlist;
     this.clientControl = clientControl;
 
     rl.on('line', (line) => {
@@ -24,19 +24,19 @@ class HostControl {
     });
   }
   play() {
-    this.playList.play();
+    this.playlist.play();
     this.clientControl.startPlay();
   }
   stop() {
-    this.playList.stop();
+    this.playlist.stop();
     this.clientControl.stopPlay();
   }
   next() {
-    this.playList.nextSong();
+    this.playlist.nextSong();
     this.clientControl.startPlay();
   }
   volume(value) {
-    this.playList.setVolume(value);
+    this.playlist.setVolume(value);
   }
 }
 
