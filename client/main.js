@@ -259,9 +259,6 @@ class PlayList {
   }
 
   render() {
-    console.log('RENDER, this.currentSong:', this.currentSong)
-    console.log('RENDER, songs:', this.songs)
-
     let el = `
       <span>
         Playing: <b>${this.currentSong || '(NOTHING YET)'}</b>
