@@ -64,6 +64,8 @@ input {
   font-size: 12px;
   outline: none;
   font-family: 'Open Sans', sans-serif;
+  opacity: 0.8;
+  border-radius: 20px;
 }
 
 input.large {
@@ -82,9 +84,11 @@ input.small {
   display: none;
   background: #eee;
   border-bottom: 1px solid #A7A7AA;
+  border-radius: 20px;
   font-size: 12px;
-  padding: 5px;
+  padding: 10px;
   font-family: 'Open Sans', sans-serif;
+  opacity: 0.5;
 }
 
 #loading {
@@ -120,7 +124,52 @@ input.small {
   z-index: 0;
 }
 
+.background-alt {
+  background-size: cover;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  filter: blur(5px);
+  padding: 10px;
+  margin: -10px 0 0 -10px;
+}
+
 .controls input {
   cursor: pointer;
-  background: #A7A7AA;
+  background: rgba(167,167,170,0.4);
+}
+
+.controls input:hover {
+  background: rgba(255,255,255,0.4);
+  border: 1px solid #eee;
+}
+
+@media (max-width: 870px) {
+  .status {
+    position: relative;
+    right: 0;
+  }
+}
+
+@media (max-width: 670px) {
+  h1 {
+    font-size: 26px;
+  }
+
+  .status {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 560px) {
+  h1 {
+    font-size: 18px;
+  }
+
+  .status {
+    font-size: 10px;
+  }
 }

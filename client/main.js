@@ -430,6 +430,13 @@ const chat = app.chat;
 const $loading = new El('#loading');
 const $playlist = new El('#playlist');
 const $songUrl = new El('#urlSong');
+const $background = new El('#background');
+
+// Randomize background.
+$background.setRandomBackground({
+  path: 'backgrounds',
+  range: [1, 18]
+})
 
 // Focus on URL input.
 $songUrl.focus();
