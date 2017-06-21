@@ -20,7 +20,9 @@ class ServerTime {
       if (this.sampler.length > this.maxSampleritems) {
         const latencyArray = this.sampler.map(item => item.latency);
         const maxLatency = Math.max(...latencyArray);
+        // remove the one with more latency and also the oldest;
         this.sampler.splice(latencyArray.indexOf(maxLatency), 1);
+        this.sampler.splice(0, 1);
       }
     });
   }
