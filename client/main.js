@@ -266,7 +266,7 @@ class PlayList {
     <span>
       Playing: <b>${currentSongId}</b>
     </span>`;
-    console.log('SONGS', this.songs);
+
     for (let i = 0; i < this.songs.length; i += 1) {
       const song = this.songs[i];
       let percent = 'Download this song now!';
@@ -355,7 +355,9 @@ class Downloader {
     if (patrol) {
       promise.then(() => {
         // Once this finish, start downloading the next song
-        let nextSong = playList.songs[playList.songs.indexOf(filename) + 1];
+        let nextSong = playList.songs[playList.songs.indexOf(playList.songs.find((song) => {
+          return song.url === filename;
+        })) + 1];
         if (!nextSong) {
           nextSong = playList.songs[0];
         }
