@@ -21,16 +21,28 @@ class Server {
       addSong: data => (
         Promise.resolve(data.url).then((songUrl) => {
           if (~songUrl.indexOf('youtube')) {
-            return this.createMp3FromYoutube(songUrl);
+            let newUrl;
+            return this.createMp3FromYoutube(songUrl).then((newSongUrl) => {
+              newUrl = newSongUrl;
+              return this.getYouTubeMetadata(songUrl);
+            }).then(metadata => ({
+              url: newUrl,
+              metadata,
+              kind: 'youtube',
+            }));
           }
-          return Promise.resolve(songUrl);
-        }).then((songUrl) => {
-          this.playList.addSong(songUrl);
+          return Promise.resolve({
+            url: data.url,
+            metadata: data.url,
+            kind: 'unknown',
+          });
+        }).then((song) => {
+          this.playList.addSong(song);
           this.clientsControl.sendPlayList({
             songs: this.playList.songs,
             currentSong: this.playList.getCurrentSong(),
           });
-          return songUrl;
+          return song;
         })
       ),
       playMusic: () => {
@@ -101,7 +113,33 @@ class Server {
       }).onError(({ v, error }) => {
         Winston.error(`Sorry, an error ocurred when trying to download ${v}`, error);
         reject(error);
-      }).download({ video, file });
+      }).download({ id: video, file });
+    });
+  }
+  getYouTubeMetadata(songUrl) {
+    const video = url.parse(songUrl, true).query.v;
+
+    return new Promise((resolve) => {
+      Winston.verbose(`Server -> getYouTubeMetadata`);
+      yas.get(video, (err, metadata) => {
+        let resp;
+        if (err) {
+          Winston.error('getYouTubeMetadata error', err);
+          resp = {
+            id: 0,
+            title: 'Error in metadata',
+            thumbnails: {},
+          };
+        } else {
+          Winston.info(`getYouTubeMetadata finish for "${video}"!`, err, metadata);
+          resp = {
+            id: metadata.items[0].id,
+            title: metadata.items[0].snippet.title,
+            thumbnails: metadata.items[0].snippet.thumbnails,
+          };
+        }
+        resolve(resp);
+      });
     });
   }
 }

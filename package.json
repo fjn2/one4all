@@ -22,7 +22,7 @@
     "request": "^2.81.0",
     "socket.io": "^1.7.3",
     "winston": "^2.3.1",
-    "youtube-audio-server": "^2.0.1",
+    "youtube-audio-server": "^2.1.2",
     "youtube-audio-stream": "0.0.48"
   },
   "bugs": {
