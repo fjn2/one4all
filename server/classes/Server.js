@@ -45,6 +45,13 @@ class Server {
           return song;
         })
       ),
+      removeSong: song => {
+        this.playlist.removeSong(song.url);
+        this.clientsControl.sendPlaylist({
+          songs: this.playlist.songs,
+          currentSong: this.playlist.getCurrentSong(),
+        });
+      },
       playMusic: () => {
         this.playlist.play();
         this.clientsControl.startPlay();

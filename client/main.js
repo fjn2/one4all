@@ -70,7 +70,7 @@ class Intercommunication {
   constructor(url) {
     this.socket = io(url);
     // this events requires the petition of the client
-    this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage'];
+    this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'removeSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage'];
     // these events are fired by the server
     this.eventSubscribe = ['startPlay', 'stopPlay', 'playlist', 'numberOfConections', 'activityStream'];
 
@@ -243,15 +243,22 @@ class PlayList {
         .val('')
         .focus();
     }, {
-      url
+      url,
     });
   }
-
+  removeSong(url) {
+    $loading.show();
+    this.intercommunication.get('removeSong', () => {
+      $loading.hide();
+    }, {
+      url,
+    });
+  }
   waitForPlayList() {
     this.intercommunication.subscribe('playlist', ({ data }) => {
       const { songs, currentSong } = data;
       this.songs = songs;
-      if (currentSong && this.currentSong && this.currentSong.url !== currentSong.url) {
+      if (!currentSong || !this.currentSong || this.currentSong.url !== currentSong.url) {
         this.audioPlayer.stop();
         this.audioPlayer.loadAudio();
       }
@@ -275,6 +282,7 @@ class PlayList {
           <i class="material-icons">file_download</i>
         </a>
         <img class="playing" src="playing.gif" />
+        <a onclick="removeSongToPlayList('${song.url}')"><i class="material-icons">file_delete</i></a>
       `;
       return actions;
     }
@@ -337,7 +345,7 @@ class PlayList {
       el += `
       <ul>
         <li class="${currentSongClass}">
-          ${song.metadata.title} - 
+          ${song.metadata.title} -
           ${actions}
           ${playingIcon}
         </li>
@@ -426,6 +434,10 @@ class Downloader {
         if (!nextSong) {
           nextSong = playlist.songs[0];
         }
+        if (!nextSong) {
+          // probably the playlist is empty
+          nextSong = {};
+        }
         this.startDownload(nextSong.url, true);
       });
     }
@@ -460,6 +472,9 @@ class App {
   }
   addSongToPlayList(songUrl) {
     this.playlist.addSong(songUrl);
+  }
+  removeSongToPlaylist(songUrl) {
+    this.playlist.removeSong(songUrl);
   }
   play() {
     this.intercommunication.get('playMusic');
@@ -513,7 +528,9 @@ function addSongToPlayList() {
     window.alert('Why so rude?');
   }
 }
-
+function removeSongToPlayList(songUrl) {
+  app.removeSongToPlaylist(songUrl);
+}
 function playMusic() {
   app.play();
   isPlaying = true;
@@ -547,10 +564,11 @@ function downloadSong(songUrl) {
   downloader.startDownload(songUrl);
 }
 
-function downloadFile(sognUrl) {
+function downloadFile(songUrl) {
   console.log('TODO!')
 }
 
-function cancelDownload(sognUrl) {
+function cancelDownload(songUrl) {
   console.log('TODO!')
 }
+

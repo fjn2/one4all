@@ -25,6 +25,16 @@ class Playlist {
     Winston.info('Playlist -> addSong ', songUrl);
     this.songs.push(songUrl);
   }
+  removeSong(songUrl) {
+    Winston.info('Playlist -> removeSong ', songUrl, this.songs);
+
+    const songToRemove = this.songs.find(song => song.url === songUrl);
+    if (songToRemove) {
+      this.songs.splice(this.songs.indexOf(songToRemove), 1);
+    } else {
+      Winston.warn('Playlist -> removeSong -> The song doesn\'t exit in the list');
+    }
+  }
   play() {
     this.songPlayer.play();
   }
