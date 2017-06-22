@@ -5,6 +5,20 @@ html, body {
   cursor: default;
 }
 
+ul {
+  margin: 0;
+  padding: 5px;
+}
+
+li {
+  list-style: none;
+  position: relative;
+}
+
+a {
+  cursor: pointer;
+}
+
 .wrapper {
   height: 100%;
   width: 100%;
@@ -91,6 +105,34 @@ input.small {
   opacity: 0.5;
 }
 
+#playlist ul:nth-child(2n) {
+  /*background: #bbb;*/
+}
+
+#playlist ul {
+  border-top: 1px solid white;
+}
+
+#playlist ul:first-child {
+  border-top: none;
+}
+
+#playlist ul:last-child {
+  border-bottom: 1px solid white;
+}
+
+#playlist label {
+  text-align: right;
+  display: block;
+}
+
+#playlist .playing {
+  width: 15px;
+  margin-left: 30px;
+  position: absolute;
+  border-radius: 8px;
+}
+
 #loading {
   position: absolute;
   left: 0;
@@ -145,6 +187,12 @@ input.small {
 .controls input:hover {
   background: rgba(255,255,255,0.4);
   border: 1px solid #eee;
+}
+
+.material-icons {
+  position: absolute;
+  top: -3px;
+  margin-left: 5px;
 }
 
 @media (max-width: 870px) {
