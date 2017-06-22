@@ -269,7 +269,7 @@ class PlayList {
 
   getSongActions(song) {
     // Playing.
-    if (isPlaying) {
+    if (isPlaying && this.currentSong.url === song.url) {
       const actions = `
         <a onclick="downloadFile('${song.url}')">
           <i class="material-icons">file_download</i>
