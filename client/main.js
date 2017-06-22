@@ -239,6 +239,9 @@ class PlayList {
       console.log('Song added successfully!');
       $loading.hide();
       $songUrl.enable();
+      $songUrl
+        .val('')
+        .focus();
     }, {
       url
     });
@@ -257,36 +260,87 @@ class PlayList {
       this.render();
     });
   }
+
   waitForNumberOfConections() {
     this.intercommunication.subscribe('numberOfConections', ({ data }) => {
       window.document.getElementById('userConected').innerHTML = data.length;
     });
   }
 
+  getSongActions(song) {
+    // Playing.
+    if (isPlaying) {
+      const actions = `
+        <a onclick="downloadFile('${song.url}')">
+          <i class="material-icons">file_download</i>
+        </a>
+        <img class="playing" src="playing.gif" />
+      `;
+      return actions;
+    }
+
+    // Get percentage downloaded.
+    let percent = 0;
+    if (downloader.cachedSongs[song.url]) {
+      percent = downloader.cachedSongs[song.url].percentComplete;
+    }
+
+    // Paused, fully downloaded.
+    if (percent === 100) {
+      const actions = `
+        <a onclick="downloadFile('${song.url}')">
+          <i class="material-icons">file_download</i>
+        </a>
+      `;
+      return actions;
+    }
+
+    // Downloading.
+    if (percent > 0 && percent < 100) {
+      const actions = `
+        <a onclick="cancelDownload('${song.url}')">
+          <span class="downloaded">${percent}</span>
+        </a>
+      `;
+      return actions;
+    }
+
+    // Default actions.
+    const actions = `
+      <a onclick="downloadSong('${song.url}')">
+        <i class="material-icons">cloud_download</i>
+      </a>
+    `;
+    return actions;
+  }
+
   render() {
     let el = '';
     let currentSongId = 'No song';
+    let playingIcon = '';
+    const songsLabel = (this.songs.length === 1)? 'song' : 'songs';
+
+    el = `
+    <label>
+      ${this.songs.length} ${songsLabel} added
+    </label>`;
+
     if (this.currentSong && this.currentSong.metadata) {
       currentSongId = this.currentSong.metadata.id;
     }
-    el = `
-    <span>
-      Playing: <b>${currentSongId}</b>
-    </span>`;
 
     for (let i = 0; i < this.songs.length; i += 1) {
       const song = this.songs[i];
-      let percent = 'Download this song now!';
       let currentSongClass = this.currentSong.url === song.url ? 'current-song' : '';
-      if (downloader.cachedSongs[song.url]) {
-        percent = downloader.cachedSongs[song.url].percentComplete;
-      }
-      if (percent === 100) {
-        percent = 'Ready to play! :)';
-      }
+
+      const actions = this.getSongActions(song);
       el += `
       <ul>
-        <li class="${currentSongClass}">${song.metadata.title} - <b onclick="downloadSong('${song}')">${percent}</b></li>
+        <li class="${currentSongClass}">
+          ${song.metadata.title} - 
+          ${actions}
+          ${playingIcon}
+        </li>
       </ul>
       `;
     }
@@ -434,6 +488,7 @@ const downloader = app.downloader;
 const audioPlayer = app.audioPlayer;
 const playlist = app.playlist;
 const chat = app.chat;
+let isPlaying = false;
 
 // Set elements.
 const $loading = new El('#loading');
@@ -461,9 +516,11 @@ function addSongToPlayList() {
 
 function playMusic() {
   app.play();
+  isPlaying = true;
 }
 function pauseMusic() {
   app.pause();
+  isPlaying = false;
 }
 function nextMusic() {
   app.next();
@@ -485,6 +542,15 @@ function isMobile() {
   return check;
 }
 
-function downloadSong(song) {
-  downloader.startDownload(song.url);
+function downloadSong(songUrl) {
+  console.log('DOWNLOAD:', songUrl)
+  downloader.startDownload(songUrl);
+}
+
+function downloadFile(sognUrl) {
+  console.log('TODO!')
+}
+
+function cancelDownload(sognUrl) {
+  console.log('TODO!')
 }

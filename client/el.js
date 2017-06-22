@@ -37,7 +37,6 @@ class El {
   setRandomBackground ({path = '', range = [0, 5], length = 3, ext = 'jpg'}) {
     const [min, max] = range
     const num = Math.round(Math.random() * (max - min) + min)
-    console.log(`MIN=${min} / MAX=${max}`, num)
     const name = ('0'.repeat(length) + num).substr(-length)
     this.$el.style.backgroundImage = `url(${path}/${name}.${ext})`
   }
