@@ -23,10 +23,12 @@ class El {
 
   disable () {
     this.$el.disabled = true
+    return this
   }
 
   enable () {
     this.$el.disabled = false
+    return this
   }
 
   style (styleName, value) {

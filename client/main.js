@@ -424,9 +424,14 @@ class Chat {
   }
 
   sendMessage(message) {
-    $loading.show();
+    $message.disable();
+    $messageSending.show();
     this.intercommunication.get('sendMessage', ({ data }) => {
-      $loading.hide();
+      $messageSending.hide();
+      $message
+        .val('')
+        .enable()
+        .focus();
     }, {
       message,
       userName: this.username || 'Anonymous',
@@ -571,12 +576,13 @@ const $songUrl = new El('#urlSong');
 const $background = new El('#background');
 const $username = new El('#userName');
 const $message = new El('#messageText');
+const $messageSending = new El('#message-sending');
 
 // Randomize background.
 $background.setRandomBackground({
   path: 'backgrounds',
   range: [1, 18]
-})
+});
 
 // Focus on URL input.
 $songUrl.focus();
