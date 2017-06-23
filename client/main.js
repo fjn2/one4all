@@ -215,6 +215,7 @@ class AudioPlayer {
           while (new Date() - initialTime < 100) {}
           isPlaying = true;
           this.audioElement.play();
+          playlist.render();
         }, timeDifference - 100);
       } else {
         console.error('You have too much delay dude :(');
@@ -255,6 +256,7 @@ class AudioPlayer {
   stop() {
     isPlaying = false;
     this.audioElement.pause();
+    playlist.render();
   }
 }
 
@@ -302,7 +304,7 @@ class PlayList {
           this.audioPlayer.play();
         });
       }
-      this.currentSong = currentSong;
+      this.currentSong = currentSong || {};
 
       this.render();
     });
@@ -355,11 +357,12 @@ class PlayList {
     // Not started.
     if (percent === 0) actions = downloadSong;
 
+    // Delete action
     actions += deleteAction;
 
     // Playing.
     if (isPlayingCurrentSong && percent === 100) {
-      actions = downloadFile + playingStatus;
+      actions += playingStatus;
     }
 
     return actions;
@@ -426,8 +429,9 @@ class Chat {
       $loading.hide();
     }, {
       message,
-      userName: this.userName || 'Anonymous',
+      userName: this.username || 'Anonymous',
     });
+    $message.val('');
   }
 
   addActivity(message) {

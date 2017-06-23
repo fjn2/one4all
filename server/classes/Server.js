@@ -58,6 +58,7 @@ class Server {
       },
       pauseMusic: () => {
         this.playlist.stop();
+        this.clientsControl.stopPlay();
       },
       nextMusic: () => {
         this.playlist.nextSong();

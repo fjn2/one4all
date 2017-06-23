@@ -2,3 +2,4 @@ node_modules
 resources
 client/configuration.js
 configuration.json
+server/currentSong.mp3
