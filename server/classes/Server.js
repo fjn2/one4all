@@ -62,8 +62,7 @@ class Server {
       },
       nextMusic: () => {
         this.playlist.nextSong();
-        this.playlist.play();
-        this.clientsControl.startPlay();
+        this.playMusic();
       },
       sendMessage: ({ userName, message }) => {
         const messageToSend = `${userName}: ${message}`;

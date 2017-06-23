@@ -234,7 +234,7 @@ class AudioPlayer {
           window.document.getElementById('playDiff').innerHTML = diff + 'ms';
           if (Math.abs(diff) > this.maxDiferenceTolerance) {
             console.log('Re-play');
-            //this.play();
+            this.play();
           }
         } else {
           window.document.getElementById('playDiff').innerHTML = '-';

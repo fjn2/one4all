@@ -66,6 +66,7 @@ class Playlist {
       songs: this.songs,
       currentSong: this.getCurrentSong(),
     });
+    this.songPlayer.play();
     Winston.verbose('Playlist -> nextSong -> now playing #', this.currentSong);
   }
 }
