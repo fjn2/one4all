@@ -58,11 +58,12 @@ class Server {
       },
       pauseMusic: () => {
         this.playlist.stop();
-        this.clientsControl.stopPlay();
+        this.playlist.play();
+        this.clientsControl.startPlay();
       },
       nextMusic: () => {
         this.playlist.nextSong();
-        this.clientsControl.startPlay();
+        this.playMusic();
       },
       sendMessage: ({ userName, message }) => {
         const messageToSend = `${userName}: ${message}`;
