@@ -67,7 +67,10 @@ class ServerTime {
       this.getSampler().then(() => {
         this.startSynchronization(nextInterval);
       });
-      window.document.getElementById('detour').innerHTML = Math.round(detour);
+
+      audioPlayer.getPlayListDiff();
+
+      window.document.getElementById('detour').innerHTML = Math.round(detour) + ' &#177; ms';
     }, interval);
   }
 
@@ -76,7 +79,7 @@ class ServerTime {
 class Intercommunication {
   constructor(url) {
     this.socket = io(url);
-    // this events requires the petition of the client
+    // these events require the petition of the client
     this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'removeSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage'];
     // these events are fired by the server
     this.eventSubscribe = ['startPlay', 'stopPlay', 'playlist', 'numberOfConections', 'activityStream'];
@@ -200,7 +203,6 @@ class AudioPlayer {
 
       if (timeDifference >= 0 && !Number.isNaN(this.serverTime.getDetour())) {
         setTimeout(() => {
-          document.getElementById('playDiff').innerHTML = Math.round((trackTime + delay - 100) - this.audioElement.currentTime * 1000) + 'ms';
           this.seek(trackTime + delay);
           const initialTime = new Date();
           // 100ms looping to have a better performance
@@ -210,6 +212,27 @@ class AudioPlayer {
       } else {
         console.error('You have too much delay dude :(');
       }
+    });
+  }
+  getPlayListDiff() {
+    this.intercommunication.get('timeCurrentTrack', ({ data }) => {
+      const { serverTime, trackTime } = data;
+
+      const delay = 2000;
+      const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get();
+
+      setTimeout(() => {
+        const diff = Math.round((trackTime + delay) - this.audioElement.currentTime * 1000);
+        if (isPlaying) {
+          window.document.getElementById('playDiff').innerHTML = diff + 'ms';
+          if (Math.abs(diff) > 100) {
+            console.log('Re-play');
+            this.play();
+          }
+        } else {
+          window.document.getElementById('playDiff').innerHTML = '-';
+        }
+      }, timeDifference);
     });
   }
   waitForPlay() {
