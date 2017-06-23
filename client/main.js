@@ -355,6 +355,8 @@ class PlayList {
     // Not started.
     if (percent === 0) actions = downloadSong;
 
+    actions += deleteAction;
+
     // Playing.
     if (isPlayingCurrentSong && percent === 100) {
       actions = downloadFile + playingStatus;
@@ -411,7 +413,6 @@ class Chat {
   }
 
   setUsername(username) {
-    console.log('USERNAME', username)
     this.username = username;
     $username.hide();
     $message
