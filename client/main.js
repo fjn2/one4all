@@ -363,20 +363,32 @@ class Chat {
   constructor(intercommunication) {
     this.intercommunication = intercommunication;
   }
+
   waitForActivityStream() {
     this.intercommunication.subscribe('activityStream', ({ data }) => {
       this.addActivity(data.message);
     });
   }
-  sendMessage(message, userName) {
+
+  setUsername(username) {
+    console.log('USERNAME', username)
+    this.username = username;
+    $username.hide();
+    $message
+      .show()
+      .focus();
+  }
+
+  sendMessage(message) {
     $loading.show();
     this.intercommunication.get('sendMessage', ({ data }) => {
       $loading.hide();
     }, {
       message,
-      userName,
+      userName: this.userName || 'Anonymous',
     });
   }
+
   addActivity(message) {
     window.document.getElementById('activityStream').innerHTML += `${message} <br/>`;
   }
@@ -511,6 +523,8 @@ const $loading = new El('#loading');
 const $playlist = new El('#playlist');
 const $songUrl = new El('#urlSong');
 const $background = new El('#background');
+const $username = new El('#userName');
+const $message = new El('#messageText');
 
 // Randomize background.
 $background.setRandomBackground({

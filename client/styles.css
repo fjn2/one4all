@@ -19,6 +19,10 @@ a {
   cursor: pointer;
 }
 
+h1 {
+  font-size: 26px;
+}
+
 .wrapper {
   height: 100%;
   width: 100%;
@@ -65,10 +69,27 @@ a {
 }
 
 #activityStream {
-  border: 2px inset;
-  background: #eee;
-  height: 150px;
   overflow: scroll;
+  position: absolute;
+  width: calc(100% - 40px);
+  height: calc(100% - 135px);
+  background: rgba(255,255,255,0.5);
+  margin-top: 0;
+  top: 50px;
+}
+
+.chat-controls {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+}
+
+.chat-controls input {
+  width: calc(100% - 40px);
+}
+
+#messageText {
+  display: none;
 }
 
 input {
@@ -143,13 +164,13 @@ input.small {
 }
 
 .block {
-  margin: 20px;
+  margin: 20px 0;
   z-index: 100;
   position: relative;
 }
 
 .status {
-  font-size: 12px;
+  font-size: 11px;
   position: absolute;
   top: 0;
   right: 10px;
@@ -179,14 +200,33 @@ input.small {
   margin: -10px 0 0 -10px;
 }
 
-.controls input {
+.controls .button {
   cursor: pointer;
   background: rgba(167,167,170,0.4);
+  width: 40px;
+  height: 40px;
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 50%;
+  border: 1px solid #eee;
+  position: relative;
 }
 
-.controls input:hover {
+.controls .button i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  left: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  font-size: 30px;
+}
+
+.controls .button:hover {
   background: rgba(255,255,255,0.4);
-  border: 1px solid #eee;
+  border: 1px solid white;
 }
 
 .material-icons {
@@ -195,30 +235,47 @@ input.small {
   margin-left: 5px;
 }
 
-@media (max-width: 870px) {
+.main-container {
+  
+}
+
+.container {
+  position: absolute;
+  padding: 0 20px;
+  width: calc(50% - 40px);
+}
+
+.left-container {
+  left: 0;
+}
+
+.right-container {
+  height: 100%;
+  right: 0;
+  background: rgba(255,255,255,0.5);
+  z-index: 10;
+}
+
+.right-container .title {
+  position: absolute;
+  right: 20px;
+}
+
+@media (max-width: 1390px) {
+  h1 {
+    font-size: 24px;
+  }
+
   .status {
-    position: relative;
-    right: 0;
+    font-size: 9px;
   }
 }
 
-@media (max-width: 670px) {
-  h1 {
-    font-size: 26px;
-  }
-
-  .status {
-    font-size: 11px;
-  }
-}
-
-@media (max-width: 560px) {
-  h1 {
-    font-size: 18px;
-  }
-
+@media (max-width: 1250px) {
   .status {
     font-size: 10px;
+    position: relative;
+    right: 0;
   }
 
   #loading {
@@ -226,5 +283,21 @@ input.small {
     left: auto;
     right: 3px;
     width: 35px;
+  }
+}
+
+@media (max-width: 1030px) {
+  h1 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 870px) {
+  h1 {
+    font-size: 18px;
+  }
+
+  .status {
+    font-size: 8px;
   }
 }
