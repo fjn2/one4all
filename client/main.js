@@ -6,24 +6,27 @@ class ServerTime {
     this.sampler = [];
   }
   getSampler() {
-    const t = new Date();
-    this.intercommunication.get('serverTime', ({ data }) => {
-      const now = new Date();
-      const latency = new Date() - t;
+    return new Promise((resolve) => {
+      const t = new Date();
+      this.intercommunication.get('serverTime', ({ data }) => {
+        const now = new Date();
+        const latency = new Date() - t;
 
-      this.sampler.push({
-        serverTime: new Date(new Date(data).getTime() + (latency / 2)),
-        localTime: now,
-        latency,
+        this.sampler.push({
+          serverTime: new Date(new Date(data).getTime() + (latency / 2)),
+          localTime: now,
+          latency,
+        });
+
+        if (this.sampler.length > this.maxSampleritems) {
+          const latencyArray = this.sampler.map(item => item.latency);
+          const maxLatency = Math.max(...latencyArray);
+          // remove the one with more latency and also the oldest;
+          this.sampler.splice(latencyArray.indexOf(maxLatency), 1);
+          this.sampler.splice(0, 1);
+        }
+        resolve();
       });
-
-      if (this.sampler.length > this.maxSampleritems) {
-        const latencyArray = this.sampler.map(item => item.latency);
-        const maxLatency = Math.max(...latencyArray);
-        // remove the one with more latency and also the oldest;
-        this.sampler.splice(latencyArray.indexOf(maxLatency), 1);
-        this.sampler.splice(0, 1);
-      }
     });
   }
   get() {
@@ -56,12 +59,16 @@ class ServerTime {
     }
     return samplerAcum / samplerCount;
   }
-  startSynchronization() {
+  startSynchronization(interval = 1000) {
     setTimeout(() => {
-      this.getSampler();
-      this.startSynchronization();
-      window.document.getElementById('detour').innerHTML = Math.round(this.getDetour());
-    }, 1000);
+      const detour = this.getDetour();
+      let nextInterval = - 20 * detour + 2100;
+      nextInterval = nextInterval > 100 ? nextInterval : 100;
+      this.getSampler().then(() => {
+        this.startSynchronization(nextInterval);
+      });
+      window.document.getElementById('detour').innerHTML = Math.round(detour);
+    }, interval);
   }
 
 }
