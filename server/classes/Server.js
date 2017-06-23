@@ -62,6 +62,7 @@ class Server {
       },
       nextMusic: () => {
         this.playlist.nextSong();
+        this.playlist.play();
         this.clientsControl.startPlay();
       },
       sendMessage: ({ userName, message }) => {
