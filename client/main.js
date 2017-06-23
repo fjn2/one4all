@@ -6,24 +6,27 @@ class ServerTime {
     this.sampler = [];
   }
   getSampler() {
-    const t = new Date();
-    this.intercommunication.get('serverTime', ({ data }) => {
-      const now = new Date();
-      const latency = new Date() - t;
+    return new Promise((resolve) => {
+      const t = new Date();
+      this.intercommunication.get('serverTime', ({ data }) => {
+        const now = new Date();
+        const latency = new Date() - t;
 
-      this.sampler.push({
-        serverTime: new Date(new Date(data).getTime() + (latency / 2)),
-        localTime: now,
-        latency,
+        this.sampler.push({
+          serverTime: new Date(new Date(data).getTime() + (latency / 2)),
+          localTime: now,
+          latency,
+        });
+
+        if (this.sampler.length > this.maxSampleritems) {
+          const latencyArray = this.sampler.map(item => item.latency);
+          const maxLatency = Math.max(...latencyArray);
+          // remove the one with more latency and also the oldest;
+          this.sampler.splice(latencyArray.indexOf(maxLatency), 1);
+          this.sampler.splice(0, 1);
+        }
+        resolve();
       });
-
-      if (this.sampler.length > this.maxSampleritems) {
-        const latencyArray = this.sampler.map(item => item.latency);
-        const maxLatency = Math.max(...latencyArray);
-        // remove the one with more latency and also the oldest;
-        this.sampler.splice(latencyArray.indexOf(maxLatency), 1);
-        this.sampler.splice(0, 1);
-      }
     });
   }
   get() {
@@ -56,20 +59,29 @@ class ServerTime {
     }
     return samplerAcum / samplerCount;
   }
-  startSynchronization() {
+  startSynchronization(interval = 1000) {
     setTimeout(() => {
-      this.getSampler();
-      this.startSynchronization();
-      window.document.getElementById('detour').innerHTML = Math.round(this.getDetour());
-    }, 1000);
-  }
+      const detour = this.getDetour();
+      let nextInterval = - 20 * detour + 2100;
+      nextInterval = nextInterval > 100 ? nextInterval : 100;
+      this.getSampler().then(() => {
+        this.startSynchronization(nextInterval);
+      });
 
+      window.document.getElementById('detour').innerHTML = Math.round(detour) + ' &#177; ms';
+    }, interval);
+  }
+  startPlayDiffSynchronization() {
+    setInterval(() => {
+      audioPlayer.getPlayListDiff();
+    }, 5000);
+  }
 }
 
 class Intercommunication {
   constructor(url) {
     this.socket = io(url);
-    // this events requires the petition of the client
+    // these events require the petition of the client
     this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'removeSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage'];
     // these events are fired by the server
     this.eventSubscribe = ['startPlay', 'stopPlay', 'playlist', 'numberOfConections', 'activityStream'];
@@ -153,29 +165,33 @@ class AudioPlayer {
       this.audioElement.controls = true;
     }
     this.src = './beep.mp3';
+    this.maxDiferenceTolerance = 100;
 
     this.serverTime = serverTime;
 
     window.document.body.appendChild(this.audioElement);
   }
   loadAudio() {
-    this.intercommunication.get('currentTrack', ({ data }) => {
-      if (data) {
-        if (downloader.cachedSongs[data.url] && downloader.cachedSongs[data.url].tmpUrl) {
-          if (this.audioElement.src !== downloader.cachedSongs[data.url].tmpUrl) {
-            this.setSong(downloader.cachedSongs[data.url].tmpUrl);
+    return new Promise ((resolve) => {
+      this.intercommunication.get('currentTrack', ({ data }) => {
+        if (data) {
+          if (downloader.cachedSongs[data.url] && downloader.cachedSongs[data.url].tmpUrl) {
+            if (this.audioElement.src !== downloader.cachedSongs[data.url].tmpUrl) {
+              this.setSong(downloader.cachedSongs[data.url].tmpUrl);
+            }
+          } else {
+            console.log('The song is not ready');
+            downloader.startDownload(data.url, firstPatrol).then(() => {
+              console.log('Trying loading again!');
+              this.loadAudio();
+            });
+            firstPatrol = false;
           }
         } else {
-          console.log('The song is not ready');
-          downloader.startDownload(data.url, firstPatrol).then(() => {
-            console.log('Trying loading again!');
-            this.loadAudio();
-          });
-          firstPatrol = false;
+          console.error('The play list looks like empty dude :(');
         }
-      } else {
-        console.error('The play list looks like empty dude :(');
-      }
+        resolve();
+      });
     });
   }
   setSong(songURL = '') {
@@ -193,16 +209,37 @@ class AudioPlayer {
 
       if (timeDifference >= 0 && !Number.isNaN(this.serverTime.getDetour())) {
         setTimeout(() => {
-          document.getElementById('playDiff').innerHTML = Math.round((trackTime + delay - 100) - this.audioElement.currentTime * 1000) + 'ms';
           this.seek(trackTime + delay);
           const initialTime = new Date();
           // 100ms looping to have a better performance
           while (new Date() - initialTime < 100) {}
+          isPlaying = true;
           this.audioElement.play();
         }, timeDifference - 100);
       } else {
         console.error('You have too much delay dude :(');
       }
+    });
+  }
+  getPlayListDiff() {
+    this.intercommunication.get('timeCurrentTrack', ({ data }) => {
+      const { serverTime, trackTime } = data;
+
+      const delay = 2000;
+      const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get();
+
+      setTimeout(() => {
+        const diff = Math.round((trackTime + delay) - this.audioElement.currentTime * 1000);
+        if (isPlaying) {
+          window.document.getElementById('playDiff').innerHTML = diff + 'ms';
+          if (Math.abs(diff) > this.maxDiferenceTolerance) {
+            console.log('Re-play');
+            this.play();
+          }
+        } else {
+          window.document.getElementById('playDiff').innerHTML = '-';
+        }
+      }, timeDifference);
     });
   }
   waitForPlay() {
@@ -216,6 +253,7 @@ class AudioPlayer {
     });
   }
   stop() {
+    isPlaying = false;
     this.audioElement.pause();
   }
 }
@@ -260,7 +298,9 @@ class PlayList {
       this.songs = songs;
       if (!currentSong || !this.currentSong || this.currentSong.url !== currentSong.url) {
         this.audioPlayer.stop();
-        this.audioPlayer.loadAudio();
+        this.audioPlayer.loadAudio().then(() => {
+          this.audioPlayer.play();
+        });
       }
       this.currentSong = currentSong;
 
@@ -314,6 +354,8 @@ class PlayList {
 
     // Not started.
     if (percent === 0) actions = downloadSong;
+
+    actions += deleteAction;
 
     // Playing.
     if (isPlayingCurrentSong && percent === 100) {
@@ -371,7 +413,6 @@ class Chat {
   }
 
   setUsername(username) {
-    console.log('USERNAME', username)
     this.username = username;
     $username.hide();
     $message
@@ -470,6 +511,7 @@ class App {
     this.chat = new Chat(this.intercommunication);
 
     this.serverTime.startSynchronization();
+    this.serverTime.startPlayDiffSynchronization();
 
     this.playlist.waitForPlayList();
     this.playlist.waitForNumberOfConections();
@@ -548,11 +590,9 @@ function removeSongToPlayList(songUrl) {
 }
 function playMusic() {
   app.play();
-  isPlaying = true;
 }
 function pauseMusic() {
   app.pause();
-  isPlaying = false;
 }
 function nextMusic() {
   app.next();
