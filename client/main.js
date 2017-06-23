@@ -275,17 +275,8 @@ class PlayList {
   }
 
   getSongActions(song) {
-    // Playing.
-    if (isPlaying && this.currentSong.url === song.url) {
-      const actions = `
-        <a onclick="downloadFile('${song.url}')">
-          <i class="material-icons">file_download</i>
-        </a>
-        <img class="playing" src="playing.gif" />
-        <a onclick="removeSongToPlayList('${song.url}')"><i class="material-icons">file_delete</i></a>
-      `;
-      return actions;
-    }
+    let actions = '';
+    const isPlayingCurrentSong = (isPlaying && this.currentSong.url === song.url);
 
     // Get percentage downloaded.
     let percent = 0;
@@ -293,32 +284,42 @@ class PlayList {
       percent = downloader.cachedSongs[song.url].percentComplete;
     }
 
-    // Paused, fully downloaded.
-    if (percent === 100) {
-      const actions = `
-        <a onclick="downloadFile('${song.url}')">
-          <i class="material-icons">file_download</i>
-        </a>
-      `;
-      return actions;
-    }
-
-    // Downloading.
-    if (percent > 0 && percent < 100) {
-      const actions = `
-        <a onclick="cancelDownload('${song.url}')">
-          <span class="downloaded">${percent}</span>
-        </a>
-      `;
-      return actions;
-    }
-
-    // Default actions.
-    const actions = `
+    const deleteAction = `
+      <a onclick="removeSongToPlayList('${song.url}')">
+        <i class="material-icons">file_delete</i>
+      </a>
+    `;
+    const playingStatus = '<img class="playing" src="playing.gif" />';
+    const downloadSong = `
       <a onclick="downloadSong('${song.url}')">
         <i class="material-icons">cloud_download</i>
       </a>
     `;
+    const downloadFile = `
+      <a onclick="downloadFile('${song.url}')">
+        <i class="material-icons">file_download</i>
+      </a>
+    `;
+    const downloadingStatus = `
+      <a onclick="cancelDownload('${song.url}')">
+        <span class="downloaded">${percent}</span>
+      </a>
+    `;
+
+    // Paused, fully downloaded.
+    if (percent === 100) actions = downloadFile;
+
+    // Downloading.
+    if (percent > 0 && percent < 100) actions = downloadingStatus;
+
+    // Not started.
+    if (percent === 0) actions = downloadSong;
+
+    // Playing.
+    if (isPlayingCurrentSong && percent === 100) {
+      actions = downloadFile + playingStatus;
+    }
+
     return actions;
   }
 
