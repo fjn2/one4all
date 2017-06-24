@@ -68,7 +68,36 @@ h1 {
   color: blue;
 }
 
+.song-row {
+  position: relative;
+  display: block;
+}
+
+.song-title {
+  text-overflow: ellipsis;
+  display: block;
+  width: calc(100% - 54px);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.song-actions {
+  position: absolute;
+  display: block;
+  top: 0;
+  right: 18px;
+  width: 64px;
+  height: 100%;
+  text-align: right;
+}
+
+.song-actions a {
+  display: inline-block;
+  width: 30px;
+}
+
 #activityStream {
+  font: 12px 'Open Sans';
   overflow: scroll;
   position: absolute;
   width: calc(100% - 60px);
@@ -77,6 +106,32 @@ h1 {
   margin-top: 0;
   top: 50px;
   padding: 10px;
+}
+
+#activityStream .message:nth-child(2n) {
+  /*background: rgba(255,255,255,0.3);*/
+}
+
+.message:first-child {
+  border-top: none;
+}
+
+.message {
+  padding: 3px;
+  border-top: 1px solid rgba(50,50,50,0.1);
+}
+
+.message p {
+  display: inline-block;
+  margin: 0;
+}
+
+.username {
+  font-weight: bold;
+}
+
+.text {
+  color: #555;
 }
 
 .chat-controls {
@@ -157,9 +212,8 @@ input.small {
 
 #playlist .playing {
   width: 15px;
-  margin-left: 30px;
-  position: absolute;
   border-radius: 8px;
+  vertical-align: middle;
 }
 
 #loading {
@@ -240,7 +294,6 @@ input.small {
 .material-icons {
   position: absolute;
   top: -3px;
-  margin-left: 5px;
 }
 
 .main-container {

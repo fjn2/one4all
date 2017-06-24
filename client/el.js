@@ -54,7 +54,14 @@ class El {
   }
 
   html (value) {
+    if (!value) return this.$el.innerHTML;
+    
     this.$el.innerHTML = value
+    return this
+  }
+
+  prependHtml (value) {
+    this.$el.innerHTML = value + this.html()
     return this
   }
 
