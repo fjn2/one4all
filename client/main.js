@@ -318,14 +318,6 @@ class PlayList {
     return (isPlaying && this.currentSong.url === song.url);
   }
 
-  setPlayingStatus(song) {
-    const id = this.getSongId(song);
-    const playingStatus = '<img class="playing" src="playing.gif" />';
-    
-    const songTitle = new El(`#song-${id}`);
-    songTitle.prependHtml(playingStatus);
-  }
-
   getPlayingStatus(song) {
     let playingStatus = '<img class="playing" src="playing.gif" />';
     if (!this.isPlayingSong(song)) playingStatus = '';
