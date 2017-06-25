@@ -23,10 +23,12 @@ class El {
 
   disable () {
     this.$el.disabled = true
+    return this
   }
 
   enable () {
     this.$el.disabled = false
+    return this
   }
 
   style (styleName, value) {
@@ -52,7 +54,14 @@ class El {
   }
 
   html (value) {
+    if (!value) return this.$el.innerHTML;
+    
     this.$el.innerHTML = value
+    return this
+  }
+
+  prependHtml (value) {
+    this.$el.innerHTML = value + this.html()
     return this
   }
 

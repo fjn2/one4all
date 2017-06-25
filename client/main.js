@@ -316,9 +316,18 @@ class PlayList {
     });
   }
 
+  isPlayingSong(song) {
+    return (isPlaying && this.currentSong.url === song.url);
+  }
+
+  getPlayingStatus(song) {
+    let playingStatus = '<img class="playing" src="playing.gif" />';
+    if (!this.isPlayingSong(song)) playingStatus = '';
+    return playingStatus;
+  }
+
   getSongActions(song) {
     let actions = '';
-    const isPlayingCurrentSong = (isPlaying && this.currentSong.url === song.url);
 
     // Get percentage downloaded.
     let percent = 0;
@@ -328,10 +337,10 @@ class PlayList {
 
     const deleteAction = `
       <a onclick="removeSongToPlayList('${song.url}')">
-        <i class="material-icons">file_delete</i>
+        <i class="material-icons">cancel</i>
       </a>
     `;
-    const playingStatus = '<img class="playing" src="playing.gif" />';
+    // const playingStatus = '<img class="playing" src="playing.gif" />';
     const downloadSong = `
       <a onclick="downloadSong('${song.url}')">
         <i class="material-icons">cloud_download</i>
@@ -361,17 +370,20 @@ class PlayList {
     actions += deleteAction;
 
     // Playing.
-    if (isPlayingCurrentSong && percent === 100) {
-      actions += playingStatus;
-    }
+    // if (isPlayingCurrentSong && percent === 100) {
+    //   actions = downloadFile + playingStatus;
+    // }
 
     return actions;
   }
 
+  getSongId(song) {
+    return this.currentSong.metadata.id; // YouTube
+  }
+
   render() {
     let el = '';
-    let currentSongId = 'No song';
-    let playingIcon = '';
+    let currentSongId = 'No song.';
     const songsLabel = (this.songs.length === 1)? 'song' : 'songs';
 
     el = `
@@ -380,20 +392,23 @@ class PlayList {
     </label>`;
 
     if (this.currentSong && this.currentSong.metadata) {
-      currentSongId = this.currentSong.metadata.id;
+      currentSongId = this.getSongId(this.currentSong);
     }
 
     for (let i = 0; i < this.songs.length; i += 1) {
       const song = this.songs[i];
-      let currentSongClass = this.currentSong.url === song.url ? 'current-song' : '';
+      let currentSongClass = this.currentSong.url === song.url ? ' current-song' : '';
 
+      const playingStatus = this.getPlayingStatus(song);
       const actions = this.getSongActions(song);
       el += `
       <ul>
-        <li class="${currentSongClass}">
-          ${song.metadata.title} -
-          ${actions}
-          ${playingIcon}
+        <li class="song-row${currentSongClass}">
+          <span id="song-${currentSongId}" class="song-title" title="${song.metadata.title}">
+            ${playingStatus}
+            ${song.metadata.title}
+          </span>
+          <span class="song-actions">${actions}</span>
         </li>
       </ul>
       `;
@@ -424,9 +439,14 @@ class Chat {
   }
 
   sendMessage(message) {
-    $loading.show();
+    $message.disable();
+    $messageSending.show();
     this.intercommunication.get('sendMessage', ({ data }) => {
-      $loading.hide();
+      $messageSending.hide();
+      $message
+        .val('')
+        .enable()
+        .focus();
     }, {
       message,
       userName: this.username || 'Anonymous',
@@ -435,7 +455,7 @@ class Chat {
   }
 
   addActivity(message) {
-    window.document.getElementById('activityStream').innerHTML += `${message} <br/>`;
+    window.document.getElementById('activityStream').innerHTML += message;
   }
 }
 class Downloader {
@@ -571,12 +591,13 @@ const $songUrl = new El('#urlSong');
 const $background = new El('#background');
 const $username = new El('#userName');
 const $message = new El('#messageText');
+const $messageSending = new El('#message-sending');
 
 // Randomize background.
 $background.setRandomBackground({
   path: 'backgrounds',
   range: [1, 18]
-})
+});
 
 // Focus on URL input.
 $songUrl.focus();
@@ -625,9 +646,10 @@ function downloadSong(songUrl) {
 
 function downloadFile(songUrl) {
   console.log('TODO!')
+  alert('Comming soon!')
 }
 
 function cancelDownload(songUrl) {
-  console.log('TODO!')
+  alert('Comming soon!')
 }
 
