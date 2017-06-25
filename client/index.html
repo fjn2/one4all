@@ -42,12 +42,10 @@
             class="large"
             onkeydown="if (event.keyCode === 13) addSongToPlayList()"
           >
-          <!-- <input type="button" value="add song" onclick="addSongToPlayList()" /> -->
           <img id="loading" src="loading.svg" style="display:none" />
         </div>
 
         <div class="block controls">
-          <!-- <input type="button" onclick="playMusic()" value="play / sync"/> -->
           <div class="button" onclick="playMusic()">
             <i class="material-icons">play_arrow</i>
           </div>
@@ -58,6 +56,10 @@
 
           <div class="button" onclick="nextMusic()">
             <i class="material-icons">skip_next</i>
+          </div>
+          <div class="range">
+            <input id="rangeAdjustment" type="range" min="-1000" max="1000" value="0" step="10" onchange="manualAdjustment(this.value)" />
+            <span id="rangeAdjustmentValue"></span>
           </div>
         </div>
 

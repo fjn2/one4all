@@ -203,13 +203,12 @@ class AudioPlayer {
   play() {
     this.intercommunication.get('timeCurrentTrack', ({ data }) => {
       const { serverTime, trackTime } = data;
-
       const delay = 2000;
       const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get();
 
       if (timeDifference >= 0 && !Number.isNaN(this.serverTime.getDetour())) {
         setTimeout(() => {
-          this.seek(trackTime + delay);
+          this.seek(trackTime + delay + ($rangeAdjustment.val() * 1));
           const initialTime = new Date();
           // 100ms looping to have a better performance
           while (new Date() - initialTime < 100) {}
@@ -227,12 +226,16 @@ class AudioPlayer {
       const { serverTime, trackTime } = data;
 
       const delay = 2000;
-      const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get();
+      const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get() + ($rangeAdjustment.val() * -1);
 
       setTimeout(() => {
         const diff = Math.round((trackTime + delay) - this.audioElement.currentTime * 1000);
         if (isPlaying) {
-          window.document.getElementById('playDiff').innerHTML = diff + 'ms';
+          let diffToShow = diff;
+          if ($rangeAdjustment.val() !== '0') {
+            diffToShow = '(' + diff + ' + ' + ($rangeAdjustment.val() * 1) + ')';
+          }
+          window.document.getElementById('playDiff').innerHTML = diffToShow + ' ms';
           if (Math.abs(diff) > this.maxDiferenceTolerance) {
             console.log('Re-play');
             this.play();
@@ -592,6 +595,7 @@ const $background = new El('#background');
 const $username = new El('#userName');
 const $message = new El('#messageText');
 const $messageSending = new El('#message-sending');
+const $rangeAdjustment = new El('#rangeAdjustment');
 
 // Randomize background.
 $background.setRandomBackground({
@@ -646,10 +650,13 @@ function downloadSong(songUrl) {
 
 function downloadFile(songUrl) {
   console.log('TODO!')
-  alert('Comming soon!')
+  alert('Comming soon!');
 }
 
 function cancelDownload(songUrl) {
-  alert('Comming soon!')
+  alert('Comming soon!');
 }
 
+function manualAdjustment(val) {
+  window.document.getElementById('rangeAdjustmentValue').innerHTML = val + ' ms';
+}

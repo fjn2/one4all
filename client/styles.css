@@ -297,7 +297,7 @@ input.small {
 }
 
 .main-container {
-  
+
 }
 
 .container {
@@ -321,6 +321,19 @@ input.small {
 .right-container .title {
   position: absolute;
   right: 20px;
+}
+
+.range {
+  display:inline-block;
+  background: rgba(167,167,170,0.4);
+  vertical-align: middle;
+  border-radius: 5px;
+  border: 1px solid #eee;
+  position: relative;
+}
+.range span {
+  vertical-align: top;
+  line-height: 2.5rem;
 }
 
 @media (max-width: 1390px) {
