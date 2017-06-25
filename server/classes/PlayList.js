@@ -43,7 +43,7 @@ class Playlist {
     this.songPlayer.stop();
   }
   getCurrentSong() {
-    Winston.info('Playlist -> getCurrentSong ', this.songs[this.currentSong]);
+    Winston.info('Playlist -> getCurrentSong  ', this.songs[this.currentSong]);
     return this.songs[this.currentSong];
   }
   setVolume(value) {

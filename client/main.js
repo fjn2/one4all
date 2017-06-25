@@ -304,7 +304,7 @@ class PlayList {
           this.audioPlayer.play();
         });
       }
-      this.currentSong = currentSong || {};
+      this.currentSong = currentSong || {};
 
       this.render();
     });
@@ -552,7 +552,7 @@ class App {
   addSongToPlayList(songUrl) {
     this.playlist.addSong(songUrl);
   }
-  removeSongToPlaylist(songUrl) {
+  removeSongToPlaylist(songUrl) {
     this.playlist.removeSong(songUrl);
   }
   play() {
