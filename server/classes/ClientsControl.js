@@ -1,64 +1,23 @@
 const Winston = require('winston');
 const configuration = require('../../configuration.json');
-const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const express = require('express');
+const cors = require('cors');
+const args = require('minimist')(process.argv.slice(2));
+const app = express();
+const resourcesPath = path.join(__dirname, '../../resources');
 
-const http = require('http');
-const app = http.createServer(function(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+app.use(cors());
+app.use('/resources', express.static(resourcesPath));
 
-  if (~req.url.indexOf('resources')) {
-    const extname = path.extname(req.url);
-    let contentType = 'text/html';
-    switch (extname) {
-      case '.js':
-        contentType = 'text/javascript';
-        break;
-      case '.css':
-        contentType = 'text/css';
-        break;
-      case '.json':
-        contentType = 'application/json';
-        break;
-      case '.png':
-        contentType = 'image/png';
-        break;
-      case '.jpg':
-        contentType = 'image/jpg';
-        break;
-      case '.wav':
-        contentType = 'audio/wav';
-        break;
-      case '.mp3':
-        contentType = 'audio/mpeg';
-        break;
+// TODO: update this later.
+// Override port to support multiple channels / processes.
+configuration.port = args.port || configuration.port;
 
-    }
-    fs.readFile(`.${req.url}`, (error, content) => {
-      if (error) {
-        if (error.code === 'ENOENT') {
-          res.setHeader('Content-Type', contentType);
-          res.statusCode = 200;
-          res.end(error.toString(), 'utf-8');
-        } else {
-          res.statusCode = 500;
-          res.end(`Sorry, check with the site admin for error: ${error.code} ..\n`);
-          res.end();
-        }
-      } else {
-        res.setHeader('Content-Type', contentType);
-        res.statusCode = 200;
-        res.end(content, 'utf-8');
-      }
-    });
-  } else {
-    res.end('Hello World');
-  }
-});
-
-const io = require('socket.io').listen(app);
+const server = require('http').createServer(app);
+const io = require('socket.io').listen(server);
+server.listen(configuration.port);
 
 class ClientControls {
   constructor(clientActions, welcomeActions) {
@@ -111,7 +70,6 @@ class ClientControls {
         this.removeClient(socket);
       });
     });
-    app.listen(configuration.port);
   }
   addClient(client) {
     Winston.verbose('ClientControls -> addClient');

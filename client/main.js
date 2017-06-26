@@ -80,7 +80,7 @@ class ServerTime {
 
 class Intercommunication {
   constructor(url) {
-    this.socket = io(url);
+    this.socket = io(url, {transports: ['websocket', 'polling', 'flashsocket']});
     // these events require the petition of the client
     this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'removeSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage'];
     // these events are fired by the server
@@ -527,10 +527,10 @@ class Downloader {
 }
 
 class App {
-  constructor() {
+  constructor(url) {
     const percentEl = window.document.getElementById('percent');
 
-    this.intercommunication = new Intercommunication(configuration.server);
+    this.intercommunication = new Intercommunication(url); //configuration.server
     this.serverTime = new ServerTime(this.intercommunication);
     this.downloader = new Downloader(this.intercommunication);
     this.audioPlayer = new AudioPlayer(this.intercommunication, this.serverTime, percentEl);
@@ -572,20 +572,72 @@ class App {
   }
 }
 
+class Connection {
+  constructor() {
+    this.url = 'http://localhost:3000';
+    this.onRoomCallback;
+  }
+
+  start(callback) {
+    console.log('Start websocket');
+    this.onRoomCallback = callback;
+    this.socket = io(this.url, {transports: ['websocket', 'polling', 'flashsocket']});
+    this.socket.on('connect', () => {
+      this.events();
+      this.connectRoom();
+    });
+  }
+
+  events() {
+    this.socket.on('room', (data) => {
+      console.log('GOT ROOM:', data)
+      this.onRoomCallback(data);
+    });
+  }
+
+  connectRoom() {
+    this.roomId = this.getRoomId();
+    this.socket.emit('room', {id: this.roomId});
+  }
+
+  getRoomId() {
+    if (!location.pathname.match(/room/)) return null;
+
+    const roomId = location.pathname
+      .replace('/room/', '')
+      .replace('/', '');
+    
+    return roomId;
+  }
+}
+
 
 // //////////////////////////////////////////////
 // //////////////////////////////////////////////
 // application starts
 
-const app = new App();
 // expose the object to the entry world
-const intercommunication = app.intercommunication;
-const serverTime = app.serverTime;
-const downloader = app.downloader;
-const audioPlayer = app.audioPlayer;
-const playlist = app.playlist;
-const chat = app.chat;
+let app;
+let intercommunication;
+let serverTime;
+let downloader;
+let audioPlayer;
+let playlist;
+let chat;
 let isPlaying = false;
+
+const connection = new Connection();
+connection.start(({url}) => {
+  console.log('CONNECTED to SPINNER!');
+
+  app = new App(url);
+  intercommunication = app.intercommunication;
+  serverTime = app.serverTime;
+  downloader = app.downloader;
+  audioPlayer = app.audioPlayer;
+  playlist = app.playlist;
+  chat = app.chat;
+});
 
 // Set elements.
 const $loading = new El('#loading');

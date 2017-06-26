@@ -1,3 +1,4 @@
+console.log('Child process started');
 require('./configuration/Winston');
 const Server = require('./classes/Server');
 const Winston = require('winston'); //  error: 0, warn: 1, info: 2, verbose: 3, debug: 4, silly: 5
