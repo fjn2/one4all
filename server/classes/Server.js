@@ -116,12 +116,12 @@ class Server {
     Winston.info('Server -> createMp3FromYoutube');
     // Download video.
     const id = url.parse(songUrl, true).query.v;
-    const file = `${process.cwd()}/resources/${id}`;
+    const file = `${process.cwd()}/resources/${id}.mp3`;
     return new Promise((resolve, reject) => {
       Winston.verbose(`Server -> createMp3FromYoutube -> Downloading ${id} into ${file}...`);
       yas.downloader.onSuccess(() => {
         Winston.info(`Yay! Audio (${id}) downloaded successfully into "${file}"!`);
-        resolve(`http://${configuration.host}:${configuration.port}/resources/${id}`);
+        resolve(`http://${configuration.host}:${configuration.port}/resources/${id}.mp3`);
       }).onError(({ v, error }) => {
         Winston.error(`Sorry, an error ocurred when trying to download ${v}`, error);
         reject(error);

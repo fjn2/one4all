@@ -161,6 +161,7 @@ class AudioPlayer {
     this.percentEl = percentEl;
     // initialize audio control
     this.audioElement = window.document.createElement('AUDIO');
+
     if (isMobile()) {
       this.audioElement.controls = true;
     }
@@ -583,7 +584,8 @@ const intercommunication = app.intercommunication;
 const serverTime = app.serverTime;
 const downloader = app.downloader;
 const audioPlayer = app.audioPlayer;
-const playlist = app.playlist;
+// the 'var' is needed for safari compatibility, otherwise, a global variable definition conflict error will be triggered
+var playlist = app.playlist;
 const chat = app.chat;
 let isPlaying = false;
 
