@@ -73,6 +73,9 @@ class Server {
         `;
         this.clientsControl.sendActivityStream(messageToSend);
       },
+      sendUserStatus: (data) => {
+        this.clientsControl.setUserSatus(data);
+      }
     };
     this.welcomeActions = {
       playlist: () => ({

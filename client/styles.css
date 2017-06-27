@@ -178,7 +178,7 @@ input.small {
   display: none;
 }
 
-#playlist {
+#playlist, #userlist {
   display: none;
   background: #eee;
   border-bottom: 1px solid #A7A7AA;
@@ -205,12 +205,12 @@ input.small {
   border-bottom: 1px solid white;
 }
 
-#playlist label {
+#playlist label, #userlist label {
   text-align: right;
   display: block;
 }
 
-#playlist .playing {
+.playing {
   width: 15px;
   border-radius: 8px;
   vertical-align: middle;
