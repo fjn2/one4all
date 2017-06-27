@@ -1,3 +1,5 @@
+require('./configuration/Winston');
+
 const Winston = require('winston');
 const cp = require('child_process');
 const path = require('path');
@@ -28,7 +30,7 @@ function getPort() {
 function createRoom(id, callback) {
   const port = getPort();
   const proc = cp.spawn('node', [serverFile, `--port=${port}`]);
-  const url = `http://localhost:${port}`;
+  const url = `http://${configuration.host}:${port}`;
   Winston.info('Created child process on port', port);
 
   rooms[id] = {
