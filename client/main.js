@@ -69,6 +69,9 @@ class ServerTime {
       });
 
       window.document.getElementById('detour').innerHTML = Math.round(detour) + ' &#177; ms';
+
+      user.render();
+      user.sendStatus();
     }, interval);
   }
   startPlayDiffSynchronization() {
@@ -82,7 +85,7 @@ class Intercommunication {
   constructor(url) {
     this.socket = io(url, {transports: ['websocket', 'polling', 'flashsocket']});
     // these events require the petition of the client
-    this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'removeSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage'];
+    this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'removeSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage', 'sendUserStatus'];
     // these events are fired by the server
     this.eventSubscribe = ['startPlay', 'stopPlay', 'playlist', 'numberOfConections', 'activityStream'];
 
@@ -161,6 +164,7 @@ class AudioPlayer {
     this.percentEl = percentEl;
     // initialize audio control
     this.audioElement = window.document.createElement('AUDIO');
+
     if (isMobile()) {
       this.audioElement.controls = true;
     }
@@ -230,6 +234,7 @@ class AudioPlayer {
 
       setTimeout(() => {
         const diff = Math.round((trackTime + delay) - this.audioElement.currentTime * 1000);
+        this.diff = diff;
         if (isPlaying) {
           let diffToShow = diff;
           if ($rangeAdjustment.val() !== '0') {
@@ -315,7 +320,8 @@ class PlayList {
 
   waitForNumberOfConections() {
     this.intercommunication.subscribe('numberOfConections', ({ data }) => {
-      window.document.getElementById('userConected').innerHTML = data.length;
+      this.users = data;
+      window.document.getElementById('userConected').innerHTML = this.users.length;
     });
   }
 
@@ -418,6 +424,71 @@ class PlayList {
     }
 
     $playlist
+      .html(el)
+      .show();
+  }
+}
+class User {
+  constructor() {
+    this.temporalName = ('Guest' + Math.round(Math.random() * 1000 + 1000));
+  }
+  getName() {
+    let username = window.document.getElementById('userName').value;
+    if (username === '') {
+      username = this.temporalName;
+    }
+    return username;
+  }
+  sendStatus() {
+    intercommunication.get('sendUserStatus', () => {}, {
+      id: intercommunication.socket.id,
+      username: this.getName(),
+      detour: serverTime.getDetour(),
+      playDiff: audioPlayer.diff,
+      playOffset: window.document.getElementById('rangeAdjustment').value,
+      isPlaying: isPlaying && downloader.cachedSongs[playlist.currentSong.url].percentComplete === 100,
+    });
+  }
+  render() {
+    let el = `
+    <label>
+      ${playlist.users.length} users
+    </label>
+    <ul>
+    `;
+
+    for (let i = 0; i < playlist.users.length; i += 1) {
+      let diffToShow = Math.round(playlist.users[i].playDiff) + ' ms';
+      if (playlist.users[i].playOffset !== '0') {
+        diffToShow = '(' + playlist.users[i].playDiff + ' + ' + (playlist.users[i].playOffset * 1) + ') ms';
+      }
+      let detour = Math.round(playlist.users[i].detour);
+      let playing =  '';
+      if (playlist.users[i].isPlaying) {
+        playing = '<img class="playing" src="playing.gif" />';
+      } else {
+        diffToShow = '-';
+      }
+      el += `
+      <li>
+        <b>
+          ${playlist.users[i].username} -
+        </b>
+        <span>
+          <b>Detour:</b> ${detour} &#177; ms /
+        </span>
+        <span>
+          <b>Play diff:</b> ${diffToShow}
+        </span>
+        <span>
+          ${playing}
+        </span>
+
+      </li>`;
+    }
+    el += '</ul>';
+
+    $userlist
       .html(el)
       .show();
   }
@@ -535,6 +606,7 @@ class App {
     this.downloader = new Downloader(this.intercommunication);
     this.audioPlayer = new AudioPlayer(this.intercommunication, this.serverTime, percentEl);
     this.playlist = new PlayList('playlist', this.intercommunication, this.audioPlayer);
+    this.user = new User();
     this.chat = new Chat(this.intercommunication);
 
     this.serverTime.startSynchronization();
@@ -606,7 +678,7 @@ class Connection {
     const roomId = location.pathname
       .replace('/room/', '')
       .replace('/', '');
-    
+
     return roomId;
   }
 }
@@ -617,13 +689,17 @@ class Connection {
 // application starts
 
 // expose the object to the entry world
+
 let app;
 let intercommunication;
 let serverTime;
 let downloader;
 let audioPlayer;
-let playlist;
+// the 'var' is needed for safari compatibility, otherwise, a global variable definition conflict error will be triggered
+var playlist;
 let chat;
+let user;
+
 let isPlaying = false;
 
 const connection = new Connection();
@@ -637,11 +713,13 @@ connection.start(({url}) => {
   audioPlayer = app.audioPlayer;
   playlist = app.playlist;
   chat = app.chat;
+  user = app.user;
 });
 
 // Set elements.
 const $loading = new El('#loading');
 const $playlist = new El('#playlist');
+const $userlist = new El('#userlist');
 const $songUrl = new El('#urlSong');
 const $background = new El('#background');
 const $username = new El('#userName');

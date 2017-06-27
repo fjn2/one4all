@@ -71,14 +71,23 @@ class ClientControls {
       });
     });
   }
-  addClient(client) {
+  addClient(socket) {
     Winston.verbose('ClientControls -> addClient');
-    this.clients.push(client);
+    this.clients.push({
+      id: socket.id,
+      socket,
+    });
     this.sendNumberOfConections();
   }
-  removeClient(client) {
+  removeClient(socket) {
     Winston.verbose('ClientControls -> removeClient');
-    this.clients.splice(this.clients.indexOf(client), 1);
+    for (var i = 0; i < this.clients.length; i++) {
+      if (this.clients[i].socket === socket) {
+        this.clients.splice(i, 1);
+        break;
+      }
+    }
+
     this.sendNumberOfConections();
   }
   setVolume(value) {
@@ -94,9 +103,17 @@ class ClientControls {
   }
   sendNumberOfConections() {
     Winston.info('ClientControls -> sendNumberOfConections');
-    const clientsData = this.clients.map(socket => ({
-      ip: socket.handshake.address,
-    }));
+    const clientsData = this.clients.map(client => {
+      return {
+        id: client.socket.id,
+        ip: client.socket.handshake.address,
+        username: client.username,
+        detour: client.detour,
+        playOffset: client.playOffset,
+        playDiff: client.playDiff,
+        isPlaying: client.isPlaying,
+      };
+    });
 
     io.emit('numberOfConections', {
       data: clientsData,
@@ -119,6 +136,20 @@ class ClientControls {
         message,
       },
     });
+  }
+  setUserSatus({ id, username, detour, playOffset, playDiff, isPlaying }) {
+    Winston.info('ClientControls -> setUserSatus', id);
+    for (let i = 0; i < this.clients.length; i += 1) {
+      if (this.clients[i].id === id) {
+        this.clients[i].username = username;
+        this.clients[i].detour = detour;
+        this.clients[i].playOffset = playOffset;
+        this.clients[i].playDiff = playDiff;
+        this.clients[i].isPlaying = isPlaying;
+        break;
+      }
+    }
+    this.sendNumberOfConections();
   }
 }
 
