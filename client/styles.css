@@ -336,6 +336,11 @@ input.small {
   line-height: 2.5rem;
 }
 
+
+.home-page {
+  text-align: center;
+}
+
 @media (max-width: 1390px) {
   h1 {
     font-size: 24px;
