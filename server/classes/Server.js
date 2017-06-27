@@ -11,7 +11,7 @@ const args = require('minimist')(process.argv.slice(2));
 // TODO: update this later.
 // Override port to support multiple channels / processes.
 configuration.port = args.port || configuration.port;
-console.log('Starting SERVER on PORT', configuration.port);
+Winston.info('Starting SERVER on PORT', configuration.port);
 
 class Server {
   constructor() {

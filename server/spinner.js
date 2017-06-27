@@ -1,19 +1,18 @@
+const Winston = require('winston');
 const cp = require('child_process');
 const path = require('path');
 const app = require('http').createServer(onListen);
 const io = require('socket.io')(app);
-const fs = require('fs');
-
+const configuration = require('../configuration.json');
 const serverFile = path.join(__dirname, './index.js');
-const ytKey = 'KEY=AIzaSyDt2mEYU5lp2l-6oaWXSg1VwMyxWMRghc8';
 const rooms = {};
 const usedPorts = {};
-const firstPort = 1025;
+const firstPort = 55535;
 const lastPort = 65535;
-app.listen(3000);
+app.listen(configuration.spinnerPort);
 
 function onListen(req, res) {
-  console.log('SERVER LISTENING');
+  Winston.info('SERVER LISTENING');
 }
 
 function getPort() {
@@ -28,15 +27,14 @@ function getPort() {
 
 function createRoom(id, callback) {
   const port = getPort();
-  // const proc = cp.spawn('node', [ytKey, `PORT=${port}`, serverFile]);
   const proc = cp.spawn('node', [serverFile, `--port=${port}`]);
   const url = `http://localhost:${port}`;
-  console.log('Created child process on port', port);
+  Winston.info('Created child process on port', port);
 
   rooms[id] = {
     url,
     port,
-    proc
+    proc,
   };
 
   // Free port when process closes.
@@ -48,7 +46,7 @@ function createRoom(id, callback) {
 
   usedPorts[port] = true;
 
-  // TODO: Get notified when process finishes starting! 
+  // TODO: Get notified when process finishes starting!
   // Wait for process to finish starting.
   setTimeout(() => {
     callback(rooms[id]);
@@ -56,20 +54,25 @@ function createRoom(id, callback) {
 }
 
 io.on('connection', function (socket) {
-  // console.log('Client connected!')
-  socket.on('room', function ({id}) {
+  socket.on('room', function ({ id }) {
     // Connect to existing room.
     const room = rooms[id];
     if (room) {
-      console.log('CONNECT to existing room:', id);
-      socket.emit('room', {url: room.url});
+      Winston.info('CONNECT to existing room:', id);
+      socket.emit('room', { url: room.url });
       return;
     }
 
     // Create new room.
-    console.log('CREATE room:', id);
+    Winston.info('CREATE room:', id);
     createRoom(id, (room) => {
-      socket.emit('room', {url: room.url});
+      socket.emit('room', { url: room.url });
     });
   });
 });
+
+
+process.on('uncaughtException', function(err) {
+  Winston.error(`Caught exception: ${err}`);
+});
+

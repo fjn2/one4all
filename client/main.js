@@ -646,14 +646,14 @@ class App {
 
 class Connection {
   constructor() {
-    this.url = 'http://localhost:3000';
+    this.url = `http://${configuration.spinner}`;
     this.onRoomCallback;
   }
 
   start(callback) {
     console.log('Start websocket');
     this.onRoomCallback = callback;
-    this.socket = io(this.url, {transports: ['websocket', 'polling', 'flashsocket']});
+    this.socket = io(this.url, { transports: ['websocket', 'polling', 'flashsocket'] });
     this.socket.on('connect', () => {
       this.events();
       this.connectRoom();
@@ -662,7 +662,7 @@ class Connection {
 
   events() {
     this.socket.on('room', (data) => {
-      console.log('GOT ROOM:', data)
+      console.log('GOT ROOM:', data);
       this.onRoomCallback(data);
     });
   }
