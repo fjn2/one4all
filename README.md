@@ -11,6 +11,10 @@ We know that there is a lot to work to do but we are putting our best. (Especial
 
 You can choose as input for the music mp3 audios (online)  or links from YouTube
 
+You can also create rooms for you `/room/ROOM_NAME` to have more privacity with your friends
+
+
+
 ## Server
 
 #### Configuration
@@ -27,7 +31,8 @@ With this content as an example:
 {
 	"host": "localhost",
 	"port": "2000",
-	"debug": "silly"
+	"debug": "silly",
+    "spinnerPort": "2003"
 }
 ```
 
@@ -35,7 +40,7 @@ To run the server
 
 ```shell
 cd server/
-node index.js
+node spinner.js
 ```
 
 
@@ -53,6 +58,7 @@ With this content:
 ```javascript
 const configuration = {
   server: 'localhost:2000',
+  spinner: 'localhost:2003',
   maxDetour: 30,
 };
 ```
@@ -75,5 +81,5 @@ If you have problems, suggestions or whatever that you want to say, just send me
 ### TODO
 
 - Integrate music with spotify / etc
-- Make a nice UI design
-- Create channels of audios
+- Kill rooms when there is no people inside
+- Select an administrator of the room

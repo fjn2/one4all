@@ -83,7 +83,7 @@ class ServerTime {
 
 class Intercommunication {
   constructor(url) {
-    this.socket = io(url);
+    this.socket = io(url, {transports: ['websocket', 'polling', 'flashsocket']});
     // these events require the petition of the client
     this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'removeSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage', 'sendUserStatus'];
     // these events are fired by the server
@@ -598,10 +598,10 @@ class Downloader {
 }
 
 class App {
-  constructor() {
+  constructor(url) {
     const percentEl = window.document.getElementById('percent');
 
-    this.intercommunication = new Intercommunication(configuration.server);
+    this.intercommunication = new Intercommunication(url); //configuration.server
     this.serverTime = new ServerTime(this.intercommunication);
     this.downloader = new Downloader(this.intercommunication);
     this.audioPlayer = new AudioPlayer(this.intercommunication, this.serverTime, percentEl);
@@ -644,22 +644,80 @@ class App {
   }
 }
 
+class Connection {
+  constructor() {
+    this.url = `http://${configuration.spinner}`;
+    this.onRoomCallback;
+  }
+
+  start(callback) {
+    console.log('Start websocket');
+    this.onRoomCallback = callback;
+    this.socket = io(this.url, { transports: ['websocket', 'polling', 'flashsocket'] });
+    this.socket.on('connect', () => {
+      this.events();
+      this.connectRoom();
+    });
+  }
+
+  events() {
+    this.socket.on('room', (data) => {
+      console.log('GOT ROOM:', data);
+      this.onRoomCallback(data);
+    });
+  }
+
+  connectRoom() {
+    this.roomId = this.getRoomId();
+    this.socket.emit('room', {id: this.roomId});
+  }
+
+  getRoomId() {
+    function getParameterByName(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+          results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+    return getParameterByName('id');
+  }
+}
+
 
 // //////////////////////////////////////////////
 // //////////////////////////////////////////////
 // application starts
 
-const app = new App();
 // expose the object to the entry world
-const intercommunication = app.intercommunication;
-const serverTime = app.serverTime;
-const downloader = app.downloader;
-const audioPlayer = app.audioPlayer;
+
+let app;
+let intercommunication;
+let serverTime;
+let downloader;
+let audioPlayer;
 // the 'var' is needed for safari compatibility, otherwise, a global variable definition conflict error will be triggered
-var playlist = app.playlist;
-const chat = app.chat;
-const user = app.user;
+var playlist;
+let chat;
+let user;
+
 let isPlaying = false;
+
+const connection = new Connection();
+connection.start(({url}) => {
+  console.log('CONNECTED to SPINNER!');
+
+  app = new App(url);
+  intercommunication = app.intercommunication;
+  serverTime = app.serverTime;
+  downloader = app.downloader;
+  audioPlayer = app.audioPlayer;
+  playlist = app.playlist;
+  chat = app.chat;
+  user = app.user;
+});
 
 // Set elements.
 const $loading = new El('#loading');
