@@ -6,17 +6,18 @@ const express = require('express');
 const cors = require('cors');
 const args = require('minimist')(process.argv.slice(2));
 const app = express();
+const pm2 = require('pm2');
 const resourcesPath = path.join(__dirname, '../../resources');
 
 app.use(cors());
 app.use('/resources', express.static(resourcesPath));
 
-// TODO: update this later.
-// Override port to support multiple channels / processes.
-configuration.port = args.port || configuration.port;
+configuration.port = process.env.PORT || configuration.port;
 
 const server = require('http').createServer(app);
 const io = require('socket.io').listen(server);
+
+Winston.info('Running socket at port:', configuration.port);
 server.listen(configuration.port);
 
 class ClientControls {
@@ -70,6 +71,16 @@ class ClientControls {
         this.removeClient(socket);
       });
     });
+
+    this.isTheRoomEmpty = false;
+    setInterval(() => {
+      if (this.isTheRoomEmpty && this.clients.length === 0) {
+        this.killMyself();
+      }
+      if (this.clients.length === 0) {
+        this.isTheRoomEmpty = true;
+      }
+    }, 60000);
   }
   addClient(socket) {
     Winston.verbose('ClientControls -> addClient');
@@ -150,6 +161,13 @@ class ClientControls {
       }
     }
     this.sendNumberOfConections();
+  }
+  killMyself() {
+    Winston.info('ClientControls -> killMyself');
+    pm2.connect(function(err) {
+      pm2.stop(`room${process.env.PORT}`);
+      // pm2.disconnect();
+    });
   }
 }
 

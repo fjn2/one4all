@@ -3,19 +3,24 @@ require('./configuration/Winston');
 const Winston = require('winston');
 const cp = require('child_process');
 const path = require('path');
-const app = require('http').createServer(onListen);
-const io = require('socket.io')(app);
+const http = require('http');
+
 const configuration = require('../configuration.json');
 const serverFile = path.join(__dirname, './index.js');
 const rooms = {};
 const usedPorts = {};
 const firstPort = 55535;
 const lastPort = 65535;
-app.listen(configuration.spinnerPort);
+const pm2 = require('pm2');
 
-function onListen(req, res) {
-  Winston.info('SERVER LISTENING');
-}
+
+const app = http.createServer(function (req, res) {
+  res.end('Running');
+});
+const io = require('socket.io')(app);
+
+app.listen(configuration.spinnerPort);
+Winston.info('SERVER LISTENING AT PORT ', configuration.spinnerPort);
 
 function getPort() {
   if (!Object.keys(usedPorts).length) return firstPort;
@@ -29,30 +34,41 @@ function getPort() {
 
 function createRoom(id, callback) {
   const port = getPort();
-  const proc = cp.spawn('node', [serverFile, `--port=${port}`]);
   const url = `http://${configuration.host}:${port}`;
   Winston.info('Created child process on port', port);
 
-  rooms[id] = {
-    url,
-    port,
-    proc,
-  };
-
-  // Free port when process closes.
-  proc.on('close', () => {
-    usedPorts[port] = false;
-  });
-
-  proc.stdout.pipe(process.stdout);
-
   usedPorts[port] = true;
 
-  // TODO: Get notified when process finishes starting!
-  // Wait for process to finish starting.
-  setTimeout(() => {
-    callback(rooms[id]);
-  }, 4000);
+  pm2.connect(function(err) {
+    if (err) {
+      console.error(err);
+      process.exit(2);
+    }
+
+    pm2.start({
+      script: 'server/index.js',
+      name: `room${port}`,
+      exec_mode: 'cluster',
+      instances: 1,
+      max_memory_restart: '100M',
+      env: {
+        "PORT": port,
+      }
+    }, function(err, apps) {
+      pm2.disconnect();
+      if (apps) {
+        if (err) throw err;
+        rooms[id] = {
+          url,
+          port,
+          proc: apps,
+        };
+        Winston.info('Added new room', port);
+      } else {
+        Winston.error('The room was not created propperly', port);
+      }
+    });
+  });
 }
 
 io.on('connection', function (socket) {

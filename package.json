@@ -24,6 +24,7 @@
     "mediaserver": "^0.1.0",
     "mp3-duration": "^1.0.10",
     "musicmetadata": "^2.0.5",
+    "pm2": "^2.5.0",
     "request": "^2.81.0",
     "socket.io": "^2.0.3",
     "winston": "^2.3.1",
