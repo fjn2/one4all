@@ -38,9 +38,9 @@ class SongPlayer {
     // get information about the song
     return new Promise((resolve, reject) => {
       if (this.playlist.getCurrentSong()) {
-        const stream = request(this.playlist.getCurrentSong()).pipe(fs.createWriteStream('./currentSong.mp3'));
+        const stream = request(this.playlist.getCurrentSong()).pipe(fs.createWriteStream(`./currentSong${process.env.PORT}.mp3`));
         stream.on('finish', () => {
-          musicMetadata(fs.createReadStream('./currentSong.mp3'), { duration: true }, (err, metadata) => {
+          musicMetadata(fs.createReadStream(`./currentSong${process.env.PORT}.mp3`), { duration: true }, (err, metadata) => {
             if (err) {
               reject(err);
             }

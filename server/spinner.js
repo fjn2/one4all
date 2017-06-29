@@ -8,9 +8,9 @@ const http = require('http');
 const configuration = require('../configuration.json');
 const serverFile = path.join(__dirname, './index.js');
 const rooms = {};
-const usedPorts = {};
 const firstPort = 55535;
 const lastPort = 65535;
+let actualPort = firstPort;
 const pm2 = require('pm2');
 
 
@@ -23,21 +23,17 @@ app.listen(configuration.spinnerPort);
 Winston.info('SERVER LISTENING AT PORT ', configuration.spinnerPort);
 
 function getPort() {
-  if (!Object.keys(usedPorts).length) return firstPort;
-
-  for (let port = firstPort; port <= lastPort; ++port) {
-    if (!usedPorts[port]) return port;
+  actualPort += 2;
+  if (actualPort > lastPort - 2) {
+    actualPort = firstPort;
   }
-
-  return false;
+  return actualPort;
 }
 
 function createRoom(id, callback) {
   const port = getPort();
   const url = `http://${configuration.host}:${port}`;
-  Winston.info('Created child process on port', port);
-
-  usedPorts[port] = true;
+  Winston.info('createRoom -> PORT', port);
 
   pm2.connect(function(err) {
     if (err) {
@@ -50,10 +46,9 @@ function createRoom(id, callback) {
       name: `room${port}`,
       exec_mode: 'cluster',
       instances: 1,
-      max_memory_restart: '100M',
       env: {
-        "PORT": port,
-      }
+        PORT: port,
+      },
     }, function(err, apps) {
       pm2.disconnect();
       if (apps) {
@@ -64,6 +59,7 @@ function createRoom(id, callback) {
           proc: apps,
         };
         Winston.info('Added new room', port);
+        callback(rooms[id]);
       } else {
         Winston.error('The room was not created propperly', port);
       }
