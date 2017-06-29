@@ -708,15 +708,17 @@ let isPlaying = false;
 const connection = new Connection();
 connection.start(({url}) => {
   console.log('CONNECTED to SPINNER!');
-
-  app = new App(url);
-  intercommunication = app.intercommunication;
-  serverTime = app.serverTime;
-  downloader = app.downloader;
-  audioPlayer = app.audioPlayer;
-  playlist = app.playlist;
-  chat = app.chat;
-  user = app.user;
+  // TODO: check why this is treggered multiple times
+  if (!app) {
+    app = new App(url);
+    intercommunication = app.intercommunication;
+    serverTime = app.serverTime;
+    downloader = app.downloader;
+    audioPlayer = app.audioPlayer;
+    playlist = app.playlist;
+    chat = app.chat;
+    user = app.user;
+  }
 });
 
 // Set elements.
