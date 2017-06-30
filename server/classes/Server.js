@@ -22,6 +22,7 @@ class Server {
       currentTrack: () => this.playlist.getCurrentSong(),
       timeCurrentTrack: () => ({
         trackTime: this.songPlayer.getCurrentTime(),
+        playing: this.songPlayer.playing,
         serverTime: new Date(),
       }),
       addSong: data => (

@@ -206,7 +206,7 @@ class AudioPlayer {
   }
   play() {
     this.intercommunication.get('timeCurrentTrack', ({ data }) => {
-      const { serverTime, trackTime } = data;
+      const { serverTime, trackTime, playing } = data;
       const delay = 2000;
       const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get();
 
@@ -216,8 +216,13 @@ class AudioPlayer {
           const initialTime = new Date();
           // 100ms looping to have a better performance
           while (new Date() - initialTime < 100) {}
-          isPlaying = true;
-          this.audioElement.play();
+          if (playing) {
+            isPlaying = true;
+            this.audioElement.play();
+          } else {
+            isPlaying = false;
+            this.audioElement.stop();
+          }
           playlist.render();
         }, timeDifference - 100);
       } else {
@@ -241,7 +246,7 @@ class AudioPlayer {
             diffToShow = '(' + diff + ' + ' + ($rangeAdjustment.val() * 1) + ')';
           }
           window.document.getElementById('playDiff').innerHTML = diffToShow + ' ms';
-          if (Math.abs(diff) > this.maxDiferenceTolerance) {
+          if (Math.abs(diff) > this.maxDiferenceTolerance || diff < 0) {
             console.log('Re-play');
             this.play();
           }

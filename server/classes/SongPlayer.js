@@ -9,6 +9,7 @@ class SongPlayer {
     Winston.verbose('SongPlayer -> constructor');
     this.volume = 100;
     this.cronometer = new Cronometer();
+    this.playing = false;
   }
   init() {
     this.reset();
@@ -20,15 +21,17 @@ class SongPlayer {
   play() {
     Winston.verbose('SongPlayer -> play');
     this.cronometer.start();
+    this.playing = true;
   }
   stop() {
     Winston.verbose('SongPlayer -> stop');
     this.cronometer.stop();
+    this.playing = false;
   }
   reset() {
     Winston.verbose('SongPlayer -> reset');
     this.cronometer.reset();
-
+    this.playing = false;
     this.readSongDuration().then((duration) => {
       this.songDuration = duration;
     });
