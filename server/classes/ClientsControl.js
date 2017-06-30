@@ -65,7 +65,9 @@ class ClientControls {
           });
         });
       }, 1000); // wait for one second to stablish the conection
-
+      setInterval( () => {
+        this.sendNumberOfConections();
+      }, 3000);
       socket.on('disconnect', () => {
         Winston.info('ClientControls -> disconnect');
         this.removeClient(socket);
@@ -88,7 +90,6 @@ class ClientControls {
       id: socket.id,
       socket,
     });
-    this.sendNumberOfConections();
   }
   removeClient(socket) {
     Winston.verbose('ClientControls -> removeClient');
@@ -98,8 +99,6 @@ class ClientControls {
         break;
       }
     }
-
-    this.sendNumberOfConections();
   }
   setVolume(value) {
     Winston.verbose('ClientControls -> setVolume');
@@ -160,7 +159,6 @@ class ClientControls {
         break;
       }
     }
-    this.sendNumberOfConections();
   }
   killMyself() {
     Winston.info('ClientControls -> killMyself');

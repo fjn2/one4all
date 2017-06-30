@@ -19,6 +19,7 @@ class Playlist {
         this.clientsControl.startPlay();
         this.play();
       }
+
     }, 1000);
   }
   addSong(songUrl) {
@@ -30,7 +31,11 @@ class Playlist {
 
     const songToRemove = this.songs.find(song => song.url === songUrl);
     if (songToRemove) {
-      this.songs.splice(this.songs.indexOf(songToRemove), 1);
+      const index = this.songs.indexOf(songToRemove);
+      if (index < this.currentSong) {
+        this.currentSong -= 1;
+      }
+      this.songs.splice(index, 1);
     } else {
       Winston.warn('Playlist -> removeSong -> The song doesn\'t exit in the list');
     }
