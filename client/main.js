@@ -71,12 +71,12 @@ class ServerTime {
       window.document.getElementById('detour').innerHTML = Math.round(detour) + ' &#177; ms';
 
       user.render();
-      user.sendStatus();
     }, interval);
   }
   startPlayDiffSynchronization() {
     setInterval(() => {
       audioPlayer.getPlayListDiff();
+      user.sendStatus();
     }, 5000);
   }
 }
