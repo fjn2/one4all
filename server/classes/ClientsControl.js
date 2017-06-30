@@ -65,9 +65,6 @@ class ClientControls {
           });
         });
       }, 1000); // wait for one second to stablish the conection
-      setInterval( () => {
-        this.sendNumberOfConections();
-      }, 3000);
       socket.on('disconnect', () => {
         Winston.info('ClientControls -> disconnect');
         this.removeClient(socket);
@@ -80,9 +77,15 @@ class ClientControls {
         this.killMyself();
       }
       if (this.clients.length === 0) {
+        Winston.warn('I am going to die...');
         this.isTheRoomEmpty = true;
+      } else {
+        this.isTheRoomEmpty = false;
       }
     }, 60000);
+    setInterval( () => {
+      this.sendNumberOfConections();
+    }, 3000);
   }
   addClient(socket) {
     Winston.verbose('ClientControls -> addClient');
