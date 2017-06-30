@@ -185,6 +185,7 @@ class AudioPlayer {
             }
           } else {
             console.log('The song is not ready');
+            this.setSong(undefined);
             downloader.startDownload(data.url, firstPatrol).then(() => {
               console.log('Trying loading again!');
               this.loadAudio();
@@ -221,7 +222,7 @@ class AudioPlayer {
             this.audioElement.play();
           } else {
             isPlaying = false;
-            this.audioElement.stop();
+            this.audioElement.pause();
           }
           playlist.render();
         }, timeDifference - 100);
