@@ -354,6 +354,10 @@ input.small {
   right: auto;
 }
 
+#rooms {
+  display: none;
+}
+
 .block {
   margin: 20px;
   z-index: 100;

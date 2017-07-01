@@ -741,7 +741,8 @@ class Menu {
     this.content = {
       playlist: new El('#playlist'),
       chat: new El('#chat'),
-      users: new El('#users')
+      users: new El('#users'),
+      rooms: new El('#rooms')
     }
   }
 
