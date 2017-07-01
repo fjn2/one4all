@@ -21,6 +21,7 @@
     "express": "^4.15.2",
     "foreman": "^2.0.0",
     "guid": "0.0.12",
+    "material-components-web": "^0.14.0",
     "mediaserver": "^0.1.0",
     "mp3-duration": "^1.0.10",
     "musicmetadata": "^2.0.5",

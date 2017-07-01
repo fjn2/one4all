@@ -74,7 +74,7 @@ class Server {
       sendMessage: ({ userName, message }) => {
         const messageToSend = `
           <div class="message">
-            <p class="username">${userName}:</p>
+            <p class="username">${userName}</p>
             <p class="text">${message}</p>
           </div>
         `;

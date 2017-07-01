@@ -16,6 +16,11 @@ class El {
     return this
   }
 
+  showInline () {
+    this.$el.style.display = 'inline'
+    return this
+  }
+
   hide () {
     this.$el.style.display = 'none'
     return this
@@ -33,6 +38,19 @@ class El {
 
   style (styleName, value) {
     this.$el.style[styleName] = value
+    return this
+  }
+
+  addClass (className) {
+    this.$el.className += ` ${className}`
+    return this
+  }
+
+  removeClass (className) {
+    this.$el.className = this.$el.className
+      .replace(className, '')
+      .replace('  ', ' ')
+
     return this
   }
 

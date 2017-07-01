@@ -1,13 +1,16 @@
 html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Roboto', sans-serif;
   cursor: default;
+  color: #eee;
+  overflow: hidden;
 }
 
 ul {
   margin: 0;
-  padding: 5px;
+  padding: 0;
+  border-radius: 20px;
 }
 
 li {
@@ -21,6 +24,17 @@ a {
 
 h1 {
   font-size: 26px;
+}
+
+.home {
+  padding: 20px;
+  background: black;
+  margin: 0;
+}
+
+.home:hover {
+  cursor: pointer;
+  color: #6ab4d1;
 }
 
 .wrapper {
@@ -57,6 +71,15 @@ h1 {
   100%{background-position:0% 82%}
 }
 
+.fadein {
+  animation: fadein-frames 3s ease;
+}
+
+@keyframes fadein-frames {
+  0% {opacity:0}
+  100% {opacity:1}
+}
+
 .gandalf {
   height:25vh;
   display:block;
@@ -65,7 +88,13 @@ h1 {
 
 .current-song {
   font-weight: bold;
-  color: blue;
+  background: #6ab4d1;
+  color: black;
+}
+
+.current-song .is-playing {
+  padding-left: 18px;
+  width: calc(100% - 60px);
 }
 
 .song-row {
@@ -74,9 +103,17 @@ h1 {
 }
 
 .song-title {
-  text-overflow: ellipsis;
   display: block;
   width: calc(100% - 54px);
+
+  /*TODO */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.ellipsis {
+  text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -84,8 +121,8 @@ h1 {
 .song-actions {
   position: absolute;
   display: block;
-  top: 0;
-  right: 18px;
+  top: 4px;
+  right: 22px;
   width: 64px;
   height: 100%;
   text-align: right;
@@ -93,19 +130,18 @@ h1 {
 
 .song-actions a {
   display: inline-block;
-  width: 30px;
+  width: 20px;
+}
+
+.song-actions i {
+  font-size: 21px;
 }
 
 #activityStream {
   font: 12px 'Open Sans';
   overflow: scroll;
-  position: absolute;
-  width: calc(100% - 60px);
-  height: calc(100% - 155px);
-  background: rgba(255,255,255,0.5);
-  margin-top: 0;
-  top: 50px;
-  padding: 10px;
+  height: calc(100% - 80px);
+  text-align: left;
 }
 
 #activityStream .message:nth-child(2n) {
@@ -128,24 +164,88 @@ h1 {
 
 .username {
   font-weight: bold;
+  padding: 3px 5px;
+  border-radius: 20px;
+  background: #6ab4d1;
 }
 
 .text {
   color: #555;
 }
 
+#chat {
+  display: none;
+}
+
 .chat-controls {
   position: absolute;
-  bottom: 20px;
+  bottom: 0;
   width: 100%;
+  background: rgba(255,255,255,0.5);
+  padding: 10px 0;
 }
 
 .chat-controls input {
   width: calc(100% - 40px);
+  display: inline-block;
+}
+
+.material-icons.emoticon-selector {
+  left: 10px;
+  top: 10px;
+  font-size: 40px;
+  cursor: pointer;
+  z-index: 1;
+  display: none;
+}
+
+.menu {
+  position: relative;
+}
+
+.menu-item {
+  position: relative; 
+  padding: 10px;
+  background: black;
+}
+
+.menu-item.active {
+  background: rgba(255,255,255,0.5);
+  font-weight: bold;
+  color: black;
+}
+
+.menu-item.active i {
+  
+}
+
+.menu-item:hover {
+  background: #6ab4d1;
+  cursor: pointer;
+  color: black;
+}
+
+.menu-item i {
+  position: absolute;
+  top: 23px;
+  right: 20px;
+}
+
+.menu-item p {
+  
+}
+
+.menu-fill {
+  height: 100vh;
+  background: black;
+  position: absolute;
+  width: 100%;
 }
 
 #messageText {
   display: none;
+  width: calc(100% - 75px);
+  margin-right: -35px;
 }
 
 #message-sending {
@@ -178,7 +278,24 @@ input.small {
   display: none;
 }
 
-#playlist, #userlist {
+#users {
+  border-radius: 20px;
+  background: #eee;
+  border-bottom: 1px solid #A7A7AA;
+  color: black;
+  padding: 10px;
+  display: none;
+}
+
+#users label {
+  font-size: 12px;
+}
+
+#users ul {
+  font-size: 10px;
+}
+
+#playlist {
   display: none;
   background: #eee;
   border-bottom: 1px solid #A7A7AA;
@@ -186,26 +303,28 @@ input.small {
   font-size: 12px;
   padding: 10px;
   font-family: 'Open Sans', sans-serif;
-  opacity: 0.5;
+  opacity: 0.9;
 }
 
 #playlist ul:nth-child(2n) {
-  /*background: #bbb;*/
+  background: rgba(200,200,200,0.3);
 }
 
-#playlist ul {
-  border-top: 1px solid white;
+#playlist li {
+  /*border-top: 1px solid white;*/
+  border-radius: 20px;
+  padding: 3px;
 }
 
-#playlist ul:first-child {
+#playlist li:first-child {
   border-top: none;
 }
 
-#playlist ul:last-child {
-  border-bottom: 1px solid white;
+#playlist li:last-child {
+  /*border-bottom: 1px solid white;*/
 }
 
-#playlist label, #userlist label {
+#playlist label, #users label {
   text-align: right;
   display: block;
 }
@@ -214,19 +333,23 @@ input.small {
   width: 15px;
   border-radius: 8px;
   vertical-align: middle;
+  position: absolute;
+  left: 4px;
+  top: 4px;
 }
 
 #loading {
   position: absolute;
-  left: 0;
-  right: 0;
   margin: auto;
-  width: 50px;
-  top: 53px;
+  width: 40px;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  right: auto;
 }
 
 .block {
-  margin: 20px 0;
+  margin: 20px;
   z-index: 100;
   position: relative;
 }
@@ -236,6 +359,7 @@ input.small {
   position: absolute;
   top: 0;
   right: 10px;
+  display: none;
 }
 
 .background {
@@ -260,6 +384,19 @@ input.small {
   filter: blur(5px);
   padding: 10px;
   margin: -10px 0 0 -10px;
+}
+
+.controls {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 135px;
+}
+
+.controls .range {
+  display: none;
 }
 
 .controls .button {
@@ -302,20 +439,39 @@ input.small {
 
 .container {
   position: absolute;
-  padding: 0 20px;
-  width: calc(50% - 40px);
+  height: 100%;
+  text-align: center;
+  z-index: 1;
 }
 
 .left-container {
   left: 0;
+  width: 200px;
+  /*background: black;*/
+}
+
+.top-container {
+  background: #888;
+  height: 50%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+}
+
+.bottom-container {
+  height: 50%;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
 }
 
 .right-container {
-  height: 100%;
   top: 0;
   right: 0;
   background: rgba(255,255,255,0.5);
   z-index: 10;
+  width: calc(100% - 200px);
+  color: black;
 }
 
 .right-container .title {
@@ -341,43 +497,6 @@ input.small {
   text-align: center;
 }
 
-@media (max-width: 1390px) {
-  h1 {
-    font-size: 24px;
-  }
-
-  .status {
-    font-size: 9px;
-  }
-}
-
-@media (max-width: 1250px) {
-  .status {
-    font-size: 10px;
-    position: relative;
-    right: 0;
-  }
-
-  #loading {
-    top: 2px;
-    left: auto;
-    right: 3px;
-    width: 35px;
-  }
-}
-
-@media (max-width: 1030px) {
-  h1 {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 870px) {
-  h1 {
-    font-size: 18px;
-  }
-
-  .status {
-    font-size: 8px;
-  }
+@media (max-width: 640px) {
+  
 }
