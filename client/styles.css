@@ -1,7 +1,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Roboto', serif;
   cursor: default;
 }
 
@@ -20,7 +20,7 @@ a {
 }
 
 h1 {
-  font-size: 26px;
+  font-size: 35px;
 }
 
 .wrapper {
@@ -231,6 +231,10 @@ input.small {
   position: relative;
 }
 
+.block-md {
+  margin: 10px 0;
+}
+
 .status {
   font-size: 11px;
   position: absolute;
@@ -341,16 +345,6 @@ input.small {
   text-align: center;
 }
 
-@media (max-width: 1390px) {
-  h1 {
-    font-size: 24px;
-  }
-
-  .status {
-    font-size: 9px;
-  }
-}
-
 @media (max-width: 1250px) {
   .status {
     font-size: 10px;
@@ -366,18 +360,8 @@ input.small {
   }
 }
 
-@media (max-width: 1030px) {
+@media (max-width: 950px) {
   h1 {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 870px) {
-  h1 {
-    font-size: 18px;
-  }
-
-  .status {
-    font-size: 8px;
+    font-size: 30px;
   }
 }
