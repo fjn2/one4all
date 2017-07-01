@@ -20,6 +20,7 @@ li {
 
 a {
   cursor: pointer;
+  text-decoration: none;
 }
 
 h1 {
@@ -30,6 +31,10 @@ h1 {
   padding: 20px;
   background: black;
   margin: 0;
+}
+
+.home a {
+  color: inherit;
 }
 
 .home:hover {
@@ -327,6 +332,7 @@ input.small {
 #playlist label, #users label {
   text-align: right;
   display: block;
+  padding: 0 0 5px 0;
 }
 
 .playing {
@@ -363,14 +369,17 @@ input.small {
 }
 
 .background {
-  background: url('metronome.jpg');
-  width: 460px;
+  background: url('backgrounds/001.jpg') no-repeat;
+  background-size: cover;
+  width: 100%;
   height: 100%;
   position: absolute;
-  right: 0;
   top: 0;
-  opacity: 0.5;
-  z-index: 0;
+  left: 0;
+  z-index: -1;
+  filter: blur(5px);
+  padding: 10px;
+  margin: -10px 0 0 -10px;
 }
 
 .background-alt {
@@ -384,6 +393,10 @@ input.small {
   filter: blur(5px);
   padding: 10px;
   margin: -10px 0 0 -10px;
+}
+
+.button {
+  cursor: pointer;
 }
 
 .controls {
@@ -400,7 +413,6 @@ input.small {
 }
 
 .controls .button {
-  cursor: pointer;
   background: rgba(167,167,170,0.4);
   width: 40px;
   height: 40px;
@@ -495,6 +507,53 @@ input.small {
 
 .home-page {
   text-align: center;
+}
+
+.home-page input {
+  width: 250px;
+}
+
+.box {
+  position: absolute;
+  padding: 40px;
+  background: rgba(200,200,200,0.5);
+  border-radius: 20px;
+  border: 1px solid #eee;
+  width: 400px;
+  height: 400px;
+}
+
+.box-center {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.help {
+  margin-top: -20px;
+}
+
+.help-step {
+  padding: 7px;
+}
+
+.help-step:before {
+  content: '';
+  position: absolute;
+  border: 1px solid #eee;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: bottom;
+  line-height: 22px;
+  margin: -3px -6px;
+}
+
+.home-page .box .buttons {
+  margin-top: 30px;
 }
 
 @media (max-width: 640px) {

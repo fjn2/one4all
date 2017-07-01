@@ -437,9 +437,8 @@ class PlayList {
       `;
     }
 
-    $playlist
-      .html(el)
-      .show();
+    $playlist.html(el);
+    if (menu.active === 'playlist') $playlist.show();
   }
 }
 

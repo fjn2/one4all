@@ -6,31 +6,72 @@
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans|Syncopate|Material+Icons" rel="stylesheet">
 
-    <title>Ultimate Audio Player Sync</title>
+    <title>ListenSync</title>
   </header>
   <body>
     <div class="home-page">
-      <h1 class="block">
-        Ultimate Audio Player Sync
-      </h1>
-      <div class="">
-        <input type="text" id="roomName" placeholder="Insert the room name" />
-      </div>
-      <div class="">
-        <input type="button" class="button" value="Join in the room" onclick="gotoPrivateRoom()"/>
-      </div>
-      <div class="" style="margin-top:2rem">
-        <input style="color:white;background:blue" type="button" class="button" value="Or join into the popular room" onclick="gotoGeneralRoom()"/>
+      <h1 class="home">ListenSync</h1>
+
+      <div class="box box-center">
+        <div class="help">
+          <h2>What's this?</h2>
+          <p>
+            This is the first web application that lets you synchronize
+            audio playback between devices. Each device you add will
+            act as a new speaker for the music you love!
+          </p>
+
+          <h2>Howto</h2>
+          <p>
+            <i class="help-step">1</i>
+            First, enter a room.
+          </p>
+          <p>
+            <i class="help-step">2</i>
+            Once you're in a room paste any YouTube video URL to add
+            it to the playlist <em>(yeah, just do Cmd+v or Ctrl+v!)</em>.
+          </p>
+          <p>
+            <i class="help-step">3</i>
+            Open the chat and have fun with your friends!
+          </p>
+        </div>
+
+        <div class="block buttons">
+          <div class="block">
+            <input
+              type="text"
+              id="roomName"
+              placeholder="Type room name and press enter."
+              onkeydown="if (event.keyCode === 13) gotoPrivateRoom()"
+            />
+
+            <!-- <input type="button" class="button" value="Join in the room" onclick="gotoPrivateRoom()"/> -->
+          </div>
+
+          <div class="block">
+            <input 
+              style="color:white;background:blue" 
+              type="button" 
+              class="button" 
+              value="Or join the popular room" 
+              onclick="gotoGeneralRoom()"/>
+          </div>
+        </div>
       </div>
     </div>
+
+    <div id="background" class="background"></div>
+
     <script type="text/javascript">
-    function gotoPrivateRoom() {
-      const roomName = document.getElementById('roomName').value;
-      window.location = `room.html?id=${roomName}`;
-    }
-    function gotoGeneralRoom() {
-      window.location = `room.html`;
-    }
+      function gotoPrivateRoom() {
+        const roomName = document.getElementById('roomName').value;
+        window.location = `room.html?id=${roomName}`;
+      }
+
+      function gotoGeneralRoom() {
+        window.location = `room.html`;
+      }
     </script>
   </body>
 </html>
