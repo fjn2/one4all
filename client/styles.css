@@ -143,10 +143,13 @@ h1 {
 }
 
 #activityStream {
+  position: absolute;
   font: 12px 'Open Sans';
   overflow: scroll;
   height: calc(100% - 80px);
   text-align: left;
+  width: calc(100% - 40px);
+  padding-right: 20px;
 }
 
 #activityStream .message:nth-child(2n) {
@@ -158,12 +161,12 @@ h1 {
 }
 
 .message {
-  padding: 3px;
+  padding: 5px 0px;
   border-top: 1px solid rgba(50,50,50,0.1);
 }
 
 .message p {
-  display: inline-block;
+  display: inline;
   margin: 0;
 }
 
@@ -175,7 +178,7 @@ h1 {
 }
 
 .text {
-  color: #555;
+  color: black;
 }
 
 #chat {
