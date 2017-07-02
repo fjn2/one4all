@@ -300,7 +300,16 @@ input.small {
 }
 
 #users ul {
-  font-size: 10px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+#users li {
+  border-radius: 20px;
+}
+
+#users li:nth-child(2n) {
+  background: rgba(200,200,200,0.3);
 }
 
 #playlist {
