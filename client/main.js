@@ -868,8 +868,18 @@ function downloadSong(songUrl) {
 }
 
 function downloadFile(songUrl) {
-  console.log('TODO!')
-  alert('Comming soon!');
+  // TODO: write filename using song title.
+  const filename = 'listensync-download.mp3';
+  const data = downloader.cachedSongs[songUrl].tmpUrl;
+  const element = document.createElement('a');
+  element.setAttribute('href', data);
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+  document.body.removeChild(element);
 }
 
 function cancelDownload(songUrl) {
