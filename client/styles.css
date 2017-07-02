@@ -544,7 +544,7 @@ input.small {
 }
 
 .box-center {
-  top: 0;
+  top: 70px;
   bottom: 0;
   left: 0;
   right: 0;
@@ -574,6 +574,13 @@ input.small {
 
 .home-page .box .buttons {
   margin-top: 30px;
+}
+
+@media (max-height: 560px) {
+  .box-center {
+    margin: 75px auto;
+    top: 0;
+  }
 }
 
 @media (max-width: 640px) {
