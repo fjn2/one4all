@@ -2,24 +2,51 @@
 <html>
   <header>
     <script src="configuration.js"></script>
-    <script src="/scripts/socket.io.js"></script>
+    <script src="/dist/socket.io.js"></script>
+    <link rel="stylesheet" href="/dist/material-components-web.css">
     <link rel="stylesheet" type="text/css" href="./styles.css">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Syncopate|Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto|Material+Icons" rel="stylesheet">
 
-    <title>Ultimate Audio Player Sync</title>
+    <title>ListenSync</title>
   </header>
-  <body>
+  <body onpaste="app.onPaste(event)">
     <div class="main-container">
       <div class="container left-container">
-        <h1 class="block">
-          Ultimate Audio Player Sync
+        <h1 class="home">
+          <a href="/">ListenSync</a>
         </h1>
+
+        <div class="menu">
+          <div id="menu-playlist" class="menu-item active" onclick="menu.show('playlist')">
+            <img id="loading" src="loading.svg" style="display:none" />
+            <i class="material-icons">list</i>
+            <p>Playlist</p>
+          </div>
+
+          <div id="menu-chat" class="menu-item" onclick="menu.show('chat')">
+            <i class="material-icons">chat</i>
+            <p>Chat</p>
+          </div>
+
+          <div id="menu-rooms" class="menu-item" onclick="menu.show('rooms')">
+            <i class="material-icons">place</i>
+            <p>Rooms</p>
+          </div>
+
+          <div id="menu-users" class="menu-item" onclick="menu.show('users')">
+            <i class="material-icons">people</i>
+            <p>Users</p>
+          </div>
+
+          <div class="menu-fill"></div>
+        </div>
+
         <!-- <div class="wrapper">
           <img src="http://www.reactiongifs.com/wp-content/uploads/2013/01/gandalf_to_the_music.gif" class="gandalf"/>
         </div> -->
 
-        <div class="block status">
+        <div class="block block-md status">
           <div>
             Download status: <b id="percent"></b>
           </div>
@@ -32,17 +59,6 @@
           <div>
             <span>Users conected: <b id="userConected">WIP</b></span>
           </div>
-        </div>
-
-        <div class="block">
-          <input
-            type="text"
-            id="urlSong"
-            placeholder="Paste YouTube URL and press Enter."
-            class="large"
-            onkeydown="if (event.keyCode === 13) addSongToPlayList()"
-          >
-          <img id="loading" src="loading.svg" style="display:none" />
         </div>
 
         <div class="block controls">
@@ -62,14 +78,17 @@
             <span id="rangeAdjustmentValue"></span>
           </div>
         </div>
-
-        <div id="playlist" class="block"></div>
-        <div id="userlist" class="block"></div>
       </div>
 
       <div class="container right-container">
-        <div>
-          <h3 class="title">Chat</h3>
+        <div id="playlist" class="block"></div>
+
+        <div id="users" class="block"></div>
+
+        <div id="rooms" class="block">TODO!</div>
+
+        <div id="chat">
+          <!-- <h3 class="title">Chat</h3> -->
           <div id="activityStream" class="block"></div>
 
           <div class="chat-controls">
@@ -77,14 +96,16 @@
               type="text"
               id="userName"
               placeholder="Write username and press enter."
-              onkeydown="if (event.keyCode === 13) chat.setUsername(this.value)"
+              onkeydown="if (event.keyCode === 13) app.chat.setUsername(this.value)"
+              autofocus
             />
 
+            <i class="material-icons emoticon-selector" onclick="app.chat.showEmoticons()">insert_emoticon</i>
             <input
               id="messageText"
               type="text"
               placeholder="Message to send"
-              onkeydown="if (event.keyCode === 13) chat.sendMessage(this.value)"
+              onkeydown="if (event.keyCode === 13) app.chat.sendMessage(this.value)"
             />
 
             <img id="message-sending" src="loading.svg" style="display:none" />
@@ -133,6 +154,9 @@
 
     <div id="background" class="background-alt"></div>
 
+    <div id="generic-message"></div>
+
+    <script src="/dist/material-components-web.js"></script>
     <script type="text/javascript" charset="UTF-8" src="el.js"></script>
     <script type="text/javascript" charset="UTF-8" src="main.js"></script>
   </body>

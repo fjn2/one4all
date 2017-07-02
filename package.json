@@ -1,6 +1,6 @@
 {
   "name": "one4all",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "The idea of this repository is to create a web platform to reproduce the same music in different devices",
   "main": "index.js",
   "scripts": {
@@ -21,6 +21,7 @@
     "express": "^4.15.2",
     "foreman": "^2.0.0",
     "guid": "0.0.12",
+    "material-components-web": "^0.14.0",
     "mediaserver": "^0.1.0",
     "mp3-duration": "^1.0.10",
     "musicmetadata": "^2.0.5",
