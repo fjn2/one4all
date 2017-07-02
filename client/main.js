@@ -295,14 +295,9 @@ class PlayList {
   addSong(url) {
     console.log('Playlist: Adding song...', url);
     $loading.show();
-    // $songUrl.disable();
     this.intercommunication.get('addSong', () => {
       console.log('Song added successfully!');
       $loading.hide();
-      // $songUrl.enable();
-      // $songUrl
-      //   .val('')
-      //   .focus();
     }, {
       url,
     });
@@ -807,7 +802,6 @@ connection.start(({url}) => {
 const $loading = new El('#loading');
 const $playlist = new El('#playlist');
 const $users = new El('#users');
-// const $songUrl = new El('#urlSong');
 const $background = new El('#background');
 const $username = new El('#userName');
 const $message = new El('#messageText');
@@ -821,12 +815,8 @@ $background.setRandomBackground({
   range: [1, 18]
 });
 
-// Focus on URL input.
-// $songUrl.focus();
 
 function addSongToPlayList(songUrl) {
-  // TODO
-  // const songUrl = $songUrl.val();
   if (songUrl) {
     app.addSongToPlayList(songUrl);
   } else {
@@ -863,7 +853,7 @@ function isMobile() {
 }
 
 function downloadSong(songUrl) {
-  console.log('DOWNLOAD:', songUrl)
+  console.log('DOWNLOAD:', songUrl);
   downloader.startDownload(songUrl);
 }
 
