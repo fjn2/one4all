@@ -37,7 +37,7 @@ h1 {
   color: inherit;
 }
 
-.home:hover {
+.home a:hover {
   cursor: pointer;
   color: #6ab4d1;
 }
