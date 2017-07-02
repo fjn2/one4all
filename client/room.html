@@ -107,16 +107,16 @@
               type="text"
               id="userName"
               placeholder="Write username and press enter."
-              onkeydown="if (event.keyCode === 13) chat.setUsername(this.value)"
+              onkeydown="if (event.keyCode === 13) app.chat.setUsername(this.value)"
               autofocus
             />
 
-            <i class="material-icons emoticon-selector" onclick="chat.showEmoticons()">insert_emoticon</i>
+            <i class="material-icons emoticon-selector" onclick="app.chat.showEmoticons()">insert_emoticon</i>
             <input
               id="messageText"
               type="text"
               placeholder="Message to send"
-              onkeydown="if (event.keyCode === 13) chat.sendMessage(this.value)"
+              onkeydown="if (event.keyCode === 13) app.chat.sendMessage(this.value)"
             />
 
             <img id="message-sending" src="loading.svg" style="display:none" />

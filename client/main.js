@@ -782,7 +782,6 @@ let downloader;
 let audioPlayer;
 // the 'var' is needed for safari compatibility, otherwise, a global variable definition conflict error will be triggered
 var playlist;
-let chat;
 let user;
 let menu;
 
@@ -799,7 +798,6 @@ connection.start(({url}) => {
     downloader = app.downloader;
     audioPlayer = app.audioPlayer;
     playlist = app.playlist;
-    chat = app.chat;
     user = app.user;
     menu = new Menu();
   }
