@@ -81,6 +81,8 @@ class ServerTime {
   }
 }
 
+//---------------------------------------------------------------------------
+
 class Intercommunication {
   constructor(url) {
     this.socket = io(url, {transports: ['websocket', 'polling', 'flashsocket']});
@@ -157,6 +159,8 @@ class Intercommunication {
 
 // firstPatrol -> omg!
 let firstPatrol = true;
+
+//---------------------------------------------------------------------------
 
 class AudioPlayer {
   constructor(intercommunication, serverTime, percentEl) {
@@ -274,11 +278,14 @@ class AudioPlayer {
   }
 }
 
+//---------------------------------------------------------------------------
+
 class PlayList {
   constructor(id, intercommunication, audioPlayer) {
     this.intercommunication = intercommunication;
     this.audioPlayer = audioPlayer;
     this.songs = [];
+    this.users = [];
     this.currentSong = 0;
     this.id = id;
   }
@@ -288,14 +295,9 @@ class PlayList {
   addSong(url) {
     console.log('Playlist: Adding song...', url);
     $loading.show();
-    $songUrl.disable();
     this.intercommunication.get('addSong', () => {
       console.log('Song added successfully!');
       $loading.hide();
-      $songUrl.enable();
-      $songUrl
-        .val('')
-        .focus();
     }, {
       url,
     });
@@ -415,12 +417,13 @@ class PlayList {
       let currentSongClass = this.currentSong.url === song.url ? ' current-song' : '';
 
       const playingStatus = this.getPlayingStatus(song);
+      const playingClass = (isPlaying)? ' is-playing' : '';
       const actions = this.getSongActions(song);
       el += `
       <ul>
         <li class="song-row${currentSongClass}">
-          <span id="song-${currentSongId}" class="song-title" title="${song.metadata.title}">
-            ${playingStatus}
+          ${playingStatus}
+          <span id="song-${currentSongId}" class="song-title${playingClass}" title="${song.metadata.title}">
             ${song.metadata.title}
           </span>
           <span class="song-actions">${actions}</span>
@@ -429,11 +432,13 @@ class PlayList {
       `;
     }
 
-    $playlist
-      .html(el)
-      .show();
+    $playlist.html(el);
+    if (menu.active === 'playlist') $playlist.show();
   }
 }
+
+//---------------------------------------------------------------------------
+
 class User {
   constructor() {
     this.temporalName = ('Guest' + Math.round(Math.random() * 1000 + 1000));
@@ -494,14 +499,23 @@ class User {
     }
     el += '</ul>';
 
-    $userlist
-      .html(el)
-      .show();
+    $users.html(el);
   }
 }
+
+//---------------------------------------------------------------------------
+
 class Chat {
   constructor(intercommunication) {
     this.intercommunication = intercommunication;
+    this.guid = 'user-' + Math.floor(Math.random() * 1000000); // TODO: set on server!
+
+    // Style own messages.
+    El.injectStyles(`
+      .message.${this.guid} .username {
+        background: #9bd979;
+      }
+    `)
   }
 
   waitForActivityStream() {
@@ -511,11 +525,17 @@ class Chat {
   }
 
   setUsername(username) {
+    if (!username || !username.trim()) {
+      $username.val('');
+      return;
+    }
+
     this.username = username;
     $username.hide();
     $message
-      .show()
+      .showInline()
       .focus();
+    $emoticonSelector.show();
   }
 
   sendMessage(message) {
@@ -530,6 +550,7 @@ class Chat {
     }, {
       message,
       userName: this.username || 'Anonymous',
+      guid: this.guid
     });
     $message.val('');
   }
@@ -537,7 +558,14 @@ class Chat {
   addActivity(message) {
     window.document.getElementById('activityStream').innerHTML += message;
   }
+
+  showEmoticons() {
+    alert('Soon! ;)');
+  }
 }
+
+//---------------------------------------------------------------------------
+
 class Downloader {
   constructor(playlist) {
     this.playlist = playlist.song;
@@ -603,6 +631,8 @@ class Downloader {
   }
 }
 
+//---------------------------------------------------------------------------
+
 class App {
   constructor(url) {
     const percentEl = window.document.getElementById('percent');
@@ -648,7 +678,17 @@ class App {
   sendMessage(message, userName) {
     this.chat.sendMessage(message, userName);
   }
+
+  onPaste(event) {
+    const clipboard = event.clipboardData || window.clipboardData;
+    const pasted = clipboard.getData('Text');
+    console.log('PASTED:', pasted);
+
+    addSongToPlayList(pasted);
+  }
 }
+
+//---------------------------------------------------------------------------
 
 class Connection {
   constructor() {
@@ -692,6 +732,37 @@ class Connection {
   }
 }
 
+//---------------------------------------------------------------------------
+
+class Menu {
+  constructor() {
+    this.playlist = new El('#menu-playlist');
+    this.chat = new El('#menu-chat');
+    this.rooms = new El('#menu-rooms');
+    this.users = new El('#menu-users');
+    this.active = 'playlist'
+
+    this.content = {
+      playlist: new El('#playlist'),
+      chat: new El('#chat'),
+      users: new El('#users'),
+      rooms: new El('#rooms')
+    }
+  }
+
+  show(name) {
+    // Hide previously active.
+    this.content[this.active].hide()
+    this[this.active].removeClass('active')
+
+    // Show current.
+    this.active = name
+    this[name].addClass('active')
+    this.content[name].show()
+  }
+}
+
+//---------------------------------------------------------------------------
 
 // //////////////////////////////////////////////
 // //////////////////////////////////////////////
@@ -706,8 +777,8 @@ let downloader;
 let audioPlayer;
 // the 'var' is needed for safari compatibility, otherwise, a global variable definition conflict error will be triggered
 var playlist;
-let chat;
 let user;
+let menu;
 
 let isPlaying = false;
 
@@ -722,21 +793,21 @@ connection.start(({url}) => {
     downloader = app.downloader;
     audioPlayer = app.audioPlayer;
     playlist = app.playlist;
-    chat = app.chat;
     user = app.user;
+    menu = new Menu();
   }
 });
 
 // Set elements.
 const $loading = new El('#loading');
 const $playlist = new El('#playlist');
-const $userlist = new El('#userlist');
-const $songUrl = new El('#urlSong');
+const $users = new El('#users');
 const $background = new El('#background');
 const $username = new El('#userName');
 const $message = new El('#messageText');
 const $messageSending = new El('#message-sending');
 const $rangeAdjustment = new El('#rangeAdjustment');
+const $emoticonSelector = new El('.emoticon-selector');
 
 // Randomize background.
 $background.setRandomBackground({
@@ -744,11 +815,8 @@ $background.setRandomBackground({
   range: [1, 18]
 });
 
-// Focus on URL input.
-$songUrl.focus();
 
-function addSongToPlayList() {
-  const songUrl = $songUrl.val();
+function addSongToPlayList(songUrl) {
   if (songUrl) {
     app.addSongToPlayList(songUrl);
   } else {
@@ -785,13 +853,23 @@ function isMobile() {
 }
 
 function downloadSong(songUrl) {
-  console.log('DOWNLOAD:', songUrl)
+  console.log('DOWNLOAD:', songUrl);
   downloader.startDownload(songUrl);
 }
 
 function downloadFile(songUrl) {
-  console.log('TODO!')
-  alert('Comming soon!');
+  // TODO: write filename using song title.
+  const filename = 'listensync-download.mp3';
+  const data = downloader.cachedSongs[songUrl].tmpUrl;
+  const element = document.createElement('a');
+  element.setAttribute('href', data);
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+  document.body.removeChild(element);
 }
 
 function cancelDownload(songUrl) {
@@ -801,3 +879,5 @@ function cancelDownload(songUrl) {
 function manualAdjustment(val) {
   window.document.getElementById('rangeAdjustmentValue').innerHTML = val + ' ms';
 }
+
+mdc.autoInit();

@@ -71,10 +71,10 @@ class Server {
         this.playlist.nextSong();
         this.playMusic();
       },
-      sendMessage: ({ userName, message }) => {
+      sendMessage: ({ userName, message, guid }) => {
         const messageToSend = `
-          <div class="message">
-            <p class="username">${userName}:</p>
+          <div class="message ${guid}">
+            <p class="username">${userName}</p>
             <p class="text">${message}</p>
           </div>
         `;
