@@ -88,4 +88,12 @@ class El {
     this.$el.value = value
     return this
   }
+
+  static injectStyles (styles){
+    const style = document.createElement('style')
+    style.type = 'text/css'
+    style.innerHTML = styles
+
+    document.getElementsByTagName('head')[0].appendChild(style)
+  }
 }

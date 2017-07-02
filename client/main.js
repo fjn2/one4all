@@ -513,6 +513,14 @@ class User {
 class Chat {
   constructor(intercommunication) {
     this.intercommunication = intercommunication;
+    this.guid = 'user-' + Math.floor(Math.random() * 1000000); // TODO: set on server!
+
+    // Style own messages.
+    El.injectStyles(`
+      .message.${this.guid} .username {
+        background: #9bd979;
+      }
+    `)
   }
 
   waitForActivityStream() {
@@ -547,6 +555,7 @@ class Chat {
     }, {
       message,
       userName: this.username || 'Anonymous',
+      guid: this.guid
     });
     $message.val('');
   }
