@@ -1,7 +1,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Roboto', serif;
   cursor: default;
   color: #eee;
   overflow: hidden;
@@ -24,7 +24,7 @@ a {
 }
 
 h1 {
-  font-size: 26px;
+  font-size: 35px;
 }
 
 .home {
@@ -365,6 +365,10 @@ input.small {
   margin: 20px;
   z-index: 100;
   position: relative;
+}
+
+.block-md {
+  margin: 10px 0;
 }
 
 .status {
