@@ -533,9 +533,32 @@ class Chat {
     this.username = username;
     $username.hide();
     $message
-      .showInline()
-      .focus();
+      .show()
+      .focus()
+      .html('');
     $emoticonSelector.show();
+    setTimeout(() => {
+      $message.html('');
+    })
+  }
+
+  imageTransformation(message) {
+    return `<img src="${message}" class="message-image" />`;
+  }
+
+  applyTransformations(message) {
+    const transformations = {
+      imageTransformation: /^http(s)?:\/\/.*\.(jpg|jpeg|png|gif|webp)$/
+    }
+
+    Object.keys(transformations)
+    .some((transformationName) => {
+      if (message.match(transformations[transformationName])) {
+        message = this[transformationName](message);
+      }
+    });
+
+    return message;
   }
 
   sendMessage(message) {
@@ -544,7 +567,7 @@ class Chat {
     this.intercommunication.get('sendMessage', ({ data }) => {
       $messageSending.hide();
       $message
-        .val('')
+        .html('')
         .enable()
         .focus();
     }, {
@@ -552,7 +575,6 @@ class Chat {
       userName: this.username || 'Anonymous',
       guid: this.guid
     });
-    $message.val('');
   }
 
   addActivity(message) {
@@ -560,7 +582,14 @@ class Chat {
   }
 
   showEmoticons() {
-    alert('Soon! ;)');
+    $emoticons.open = !$emoticons.open;
+  }
+
+  addEmoticon(event) {
+    console.log('EVENT', event)
+    const icon = event.target.innerHTML;
+    console.log('ICON', icon)
+    this.sendMessage(`<i class="material-icons">${icon}</i>`);
   }
 }
 
@@ -747,7 +776,7 @@ class Menu {
       chat: new El('#chat'),
       users: new El('#users'),
       rooms: new El('#rooms')
-    }
+    };
   }
 
   show(name) {
@@ -756,6 +785,16 @@ class Menu {
     this[this.active].removeClass('active');
 
     // Show current.
+    // TODO: Do something more elegant!
+    if (name === 'chat') {
+      if ($username.isVisible()) {
+        $username.focus();
+        return;
+      }
+
+      $message.focus();
+    }
+
     this.active = name;
     this[name].addClass('active');
     this.content[name].show();
@@ -786,7 +825,7 @@ const connection = new Connection();
 connection.start(({url}) => {
   console.log('CONNECTED to SPINNER!');
   // TODO: check why this is treggered multiple times
-  if (!app) {
+  if (!app) {
     app = new App(url);
     intercommunication = app.intercommunication;
     serverTime = app.serverTime;
@@ -808,6 +847,7 @@ const $message = new El('#messageText');
 const $messageSending = new El('#message-sending');
 const $rangeAdjustment = new El('#rangeAdjustment');
 const $emoticonSelector = new El('.emoticon-selector');
+const $emoticons = new mdc.menu.MDCSimpleMenu(document.querySelector('#emoticons'));
 
 // Randomize background.
 $background.setRandomBackground({

@@ -72,9 +72,14 @@ class El {
   }
 
   html (value) {
-    if (!value) return this.$el.innerHTML;
+    if (value === undefined) return this.$el.innerHTML;
     
     this.$el.innerHTML = value
+    return this
+  }
+
+  appendHtml (value) {
+    this.$el.innerHTML += value
     return this
   }
 
@@ -87,6 +92,10 @@ class El {
     if (value === undefined) return this.$el.value
     this.$el.value = value
     return this
+  }
+
+  isVisible () {
+    return (this.$el.style.display.match(/(block|inline|inline-block)/))
   }
 
   static injectStyles (styles){
