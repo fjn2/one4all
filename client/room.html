@@ -69,14 +69,21 @@
           <div class="button" onclick="pauseMusic()">
             <i class="material-icons">stop</i>
           </div>
-
           <div class="button" onclick="nextMusic()">
             <i class="material-icons">skip_next</i>
           </div>
-          <div class="range">
-            <input id="rangeAdjustment" type="range" min="-1000" max="1000" value="0" step="10" onchange="manualAdjustment(this.value)" />
-            <span id="rangeAdjustmentValue"></span>
+          <div class="checkbox">
+            <input type="checkbox" onclick="showRange(this.checked)">
+            <span>Are you using bluetooth?</span>
           </div>
+          <div id="offsetContainer">
+            <span>Manual offset</span>
+            <div class="range">
+              <input id="rangeAdjustment" type="range" min="-1000" max="1000" value="0" step="50" onchange="manualAdjustment(this.value)" />
+              <span id="rangeAdjustmentValue">0 ms</span>
+            </div>
+          </div>
+
         </div>
       </div>
 

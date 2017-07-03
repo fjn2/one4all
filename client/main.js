@@ -15,7 +15,7 @@ class ServerTime {
         this.sampler.push({
           serverTime: new Date(new Date(data).getTime() + (latency / 2)),
           localTime: now,
-          latency,
+          latency
         });
 
         if (this.sampler.length > this.maxSampleritems) {
@@ -35,7 +35,7 @@ class ServerTime {
   getDetour() {
     const now = new Date();
     const values = this.sampler.map(
-      sample => sample.serverTime.getTime() + (now - sample.localTime),
+      sample => sample.serverTime.getTime() + (now - sample.localTime)
     );
     let acum = 0;
 
@@ -132,11 +132,11 @@ class Intercommunication {
     if (~this.eventList.indexOf(eventName)) {
       this.pendingMessages.push({
         guid,
-        callback,
+        callback
       });
       this.socket.emit(eventName, {
         guid,
-        data,
+        data
       });
     } else {
       console.warn(`The event '${eventName}' is not defined`);
@@ -145,7 +145,7 @@ class Intercommunication {
   subscribe(eventName, handler) {
     const subs = {
       eventName,
-      handler,
+      handler
     };
 
     this.subscribers.push(subs);
@@ -169,7 +169,7 @@ class AudioPlayer {
     // initialize audio control
     this.audioElement = window.document.createElement('AUDIO');
 
-    if (isMobile()) {
+    if (isMobile()) {
       this.audioElement.controls = true;
     }
     this.src = './beep.mp3';
@@ -177,10 +177,10 @@ class AudioPlayer {
 
     this.serverTime = serverTime;
 
-    window.document.body.appendChild(this.audioElement);
+    window.document.querySelector('.menu-fill').appendChild(this.audioElement);
   }
   loadAudio() {
-    return new Promise ((resolve) => {
+    return new Promise((resolve) => {
       this.intercommunication.get('currentTrack', ({ data }) => {
         if (data) {
           if (downloader.cachedSongs[data.url] && downloader.cachedSongs[data.url].tmpUrl) {
@@ -299,7 +299,7 @@ class PlayList {
       console.log('Song added successfully!');
       $loading.hide();
     }, {
-      url,
+      url
     });
   }
   removeSong(url) {
@@ -307,7 +307,7 @@ class PlayList {
     this.intercommunication.get('removeSong', () => {
       $loading.hide();
     }, {
-      url,
+      url
     });
   }
   waitForPlayList() {
@@ -457,7 +457,7 @@ class User {
       detour: serverTime.getDetour(),
       playDiff: audioPlayer.diff,
       playOffset: window.document.getElementById('rangeAdjustment').value,
-      isPlaying: isPlaying && downloader.cachedSongs[playlist.currentSong.url].percentComplete === 100,
+      isPlaying: isPlaying && downloader.cachedSongs[playlist.currentSong.url].percentComplete === 100
     });
   }
   render() {
@@ -515,7 +515,7 @@ class Chat {
       .message.${this.guid} .username {
         background: #9bd979;
       }
-    `)
+    `);
   }
 
   waitForActivityStream() {
@@ -561,9 +561,7 @@ class Chat {
     return message;
   }
 
-  sendMessage(message) {
-    message = this.applyTransformations(message);
-
+  sendMessage(message) {
     $message.disable();
     $messageSending.show();
     this.intercommunication.get('sendMessage', ({ data }) => {
@@ -771,35 +769,35 @@ class Menu {
     this.chat = new El('#menu-chat');
     this.rooms = new El('#menu-rooms');
     this.users = new El('#menu-users');
-    this.active = 'playlist'
+    this.active = 'playlist';
 
     this.content = {
       playlist: new El('#playlist'),
       chat: new El('#chat'),
       users: new El('#users'),
       rooms: new El('#rooms')
-    }
+    };
   }
 
   show(name) {
     // Hide previously active.
-    this.content[this.active].hide()
-    this[this.active].removeClass('active')
+    this.content[this.active].hide();
+    this[this.active].removeClass('active');
 
     // Show current.
-    this.active = name
-    this[name].addClass('active')
-    this.content[name].show()
-
     // TODO: Do something more elegant!
     if (name === 'chat') {
       if ($username.isVisible()) {
-        $username.focus()
-        return
+        $username.focus();
+        return;
       }
 
-      $message.focus()
+      $message.focus();
     }
+
+    this.active = name;
+    this[name].addClass('active');
+    this.content[name].show();
   }
 }
 
@@ -827,7 +825,7 @@ const connection = new Connection();
 connection.start(({url}) => {
   console.log('CONNECTED to SPINNER!');
   // TODO: check why this is treggered multiple times
-  if (!app) {
+  if (!app) {
     app = new App(url);
     intercommunication = app.intercommunication;
     serverTime = app.serverTime;
@@ -921,5 +919,13 @@ function cancelDownload(songUrl) {
 function manualAdjustment(val) {
   window.document.getElementById('rangeAdjustmentValue').innerHTML = val + ' ms';
 }
+function showRange(value) {
+  document.getElementById('offsetContainer').style.display = value ? 'block' : 'none';
+  if (!value) {
+    document.getElementById('rangeAdjustment').value = 0;
+    manualAdjustment(0);
+  }
+}
+
 
 mdc.autoInit();

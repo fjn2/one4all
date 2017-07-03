@@ -264,7 +264,7 @@ input.small {
 }
 
 .menu-item {
-  position: relative; 
+  position: relative;
   padding: 10px;
   background: black;
 }
@@ -276,7 +276,7 @@ input.small {
 }
 
 .menu-item.active i {
-  
+
 }
 
 .menu-item:hover {
@@ -292,7 +292,7 @@ input.small {
 }
 
 .menu-item p {
-  
+
 }
 
 .menu-fill {
@@ -477,8 +477,20 @@ input.small {
   width: 135px;
 }
 
-.controls .range {
+.controls #offsetContainer {
   display: none;
+}
+.controls #offsetContainer > span {
+  font-size: 0.5rem;
+}
+.controls .range input {
+  width: 80%;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+.controls .checkbox {
+  font-size: 0.5rem;
 }
 
 .controls .button {
@@ -633,5 +645,5 @@ input.small {
 }
 
 @media (max-width: 640px) {
-  
+
 }
