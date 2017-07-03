@@ -533,9 +533,13 @@ class Chat {
     this.username = username;
     $username.hide();
     $message
-      .showInline()
-      .focus();
+      .show()
+      .focus()
+      .html('');
     $emoticonSelector.show();
+    setTimeout(() => {
+      $message.html('');
+    })
   }
 
   imageTransformation(message) {
@@ -565,7 +569,7 @@ class Chat {
     this.intercommunication.get('sendMessage', ({ data }) => {
       $messageSending.hide();
       $message
-        .val('')
+        .html('')
         .enable()
         .focus();
     }, {
@@ -573,7 +577,6 @@ class Chat {
       userName: this.username || 'Anonymous',
       guid: this.guid
     });
-    $message.val('');
   }
 
   addActivity(message) {
@@ -581,7 +584,14 @@ class Chat {
   }
 
   showEmoticons() {
-    alert('Soon! ;)');
+    $emoticons.open = !$emoticons.open;
+  }
+
+  addEmoticon(event) {
+    console.log('EVENT', event)
+    const icon = event.target.innerHTML;
+    console.log('ICON', icon)
+    this.sendMessage(`<i class="material-icons">${icon}</i>`);
   }
 }
 
@@ -780,6 +790,16 @@ class Menu {
     this.active = name
     this[name].addClass('active')
     this.content[name].show()
+
+    // TODO: Do something more elegant!
+    if (name === 'chat') {
+      if ($username.isVisible()) {
+        $username.focus()
+        return
+      }
+
+      $message.focus()
+    }
   }
 }
 
@@ -829,6 +849,7 @@ const $message = new El('#messageText');
 const $messageSending = new El('#message-sending');
 const $rangeAdjustment = new El('#rangeAdjustment');
 const $emoticonSelector = new El('.emoticon-selector');
+const $emoticons = new mdc.menu.MDCSimpleMenu(document.querySelector('#emoticons'));
 
 // Randomize background.
 $background.setRandomBackground({

@@ -27,6 +27,25 @@ h1 {
   font-size: 28px;
 }
 
+input {
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-sizing: border-box;
+  font-size: 12px;
+  outline: none;
+  font-family: 'Open Sans', sans-serif;
+  opacity: 0.8;
+  border-radius: 20px;
+}
+
+input.large {
+  width: 100%;
+}
+
+input.small {
+
+}
+
 .home {
   padding: 20px;
   background: black;
@@ -187,6 +206,10 @@ h1 {
   color: black;
 }
 
+.text i {
+  margin-left: 2px;
+}
+
 #chat {
   display: none;
 }
@@ -206,11 +229,34 @@ h1 {
 
 .material-icons.emoticon-selector {
   left: 10px;
-  top: 10px;
+  top: 7px;
   font-size: 40px;
   cursor: pointer;
   z-index: 1;
   display: none;
+}
+
+#emoticons {
+  top: -40px;
+  left: 0;
+  height: 50px;
+  width: 100%;
+  z-index: 100;
+}
+
+#emoticons i {
+  position: relative;
+  cursor: pointer;
+  top: auto;
+  bottom: auto;
+}
+
+#emoticons i:hover {
+  color: #6ab4d1;
+}
+
+.emoticons-container {
+  overflow: scroll;
 }
 
 .menu {
@@ -258,8 +304,24 @@ h1 {
 
 #messageText {
   display: none;
-  width: calc(100% - 75px);
-  margin-right: -35px;
+  width: calc(100% - 90px);
+  border-radius: 40px;
+  border: 1px solid #ccc;
+  text-align: left;
+  padding: 8px 13px;
+  height: 16px;
+  overflow: scroll;
+  box-sizing: content-box;
+  background: white;
+  text-align: left;
+  margin-left: 55px;
+  outline: none;
+  line-height: 16px;
+}
+
+#messageText i {
+  position: absolute;
+  top: 14px;
 }
 
 #message-sending {
@@ -267,25 +329,6 @@ h1 {
   position: absolute;
   top: 2px;
   right: 42px;
-}
-
-input {
-  border: 1px solid #ccc;
-  padding: 10px;
-  box-sizing: border-box;
-  font-size: 12px;
-  outline: none;
-  font-family: 'Open Sans', sans-serif;
-  opacity: 0.8;
-  border-radius: 20px;
-}
-
-input.large {
-  width: 100%;
-}
-
-input.small {
-
 }
 
 .about {
