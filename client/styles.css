@@ -214,7 +214,7 @@ input.small {
   display: none;
 }
 
-.chat-controls {
+.chat-controls, .playlist-controls {
   position: absolute;
   bottom: 0;
   width: 100%;
@@ -222,7 +222,7 @@ input.small {
   padding: 10px 0;
 }
 
-.chat-controls input {
+.chat-controls input, .playlist-controls input  {
   width: calc(100% - 40px);
   display: inline-block;
 }
@@ -300,6 +300,13 @@ input.small {
   background: black;
   position: absolute;
   width: 100%;
+}
+.menu-item.new-activity .new-value{
+  display: inline;
+}
+.menu .new-value {
+  display: none;
+  color: yellow;
 }
 
 #messageText {

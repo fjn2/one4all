@@ -237,7 +237,7 @@ class AudioPlayer {
   }
   getPlayListDiff() {
     this.intercommunication.get('timeCurrentTrack', ({ data }) => {
-      const { serverTime, trackTime } = data;
+      const { serverTime, trackTime, playing } = data;
 
       const delay = 2000;
       const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get() + ($rangeAdjustment.val() * -1);
@@ -245,7 +245,7 @@ class AudioPlayer {
       setTimeout(() => {
         const diff = Math.round((trackTime + delay) - this.audioElement.currentTime * 1000);
         this.diff = diff;
-        if (isPlaying) {
+        if (playing) {
           let diffToShow = diff;
           if ($rangeAdjustment.val() !== '0') {
             diffToShow = '(' + diff + ' + ' + ($rangeAdjustment.val() * 1) + ')';
@@ -257,6 +257,8 @@ class AudioPlayer {
           }
         } else {
           window.document.getElementById('playDiff').innerHTML = '-';
+          isPlaying = false;
+          this.audioElement.pause();
         }
       }, timeDifference);
     });
@@ -323,6 +325,8 @@ class PlayList {
       this.currentSong = currentSong || {};
 
       this.render();
+
+      menu.playlistPage.addClass('new-activity');
     });
   }
 
@@ -433,7 +437,7 @@ class PlayList {
     }
 
     $playlist.html(el);
-    if (menu.active === 'playlist') $playlist.show();
+    if (menu.active === 'playlistPage') $playlist.show();
   }
 }
 
@@ -520,6 +524,7 @@ class Chat {
 
   waitForActivityStream() {
     this.intercommunication.subscribe('activityStream', ({ data }) => {
+      menu.chat.addClass('new-activity');
       this.addActivity(data.message);
     });
   }
@@ -765,14 +770,14 @@ class Connection {
 
 class Menu {
   constructor() {
-    this.playlist = new El('#menu-playlist');
+    this.playlistPage = new El('#menu-playlist');
     this.chat = new El('#menu-chat');
     this.rooms = new El('#menu-rooms');
     this.users = new El('#menu-users');
-    this.active = 'playlist';
+    this.active = 'playlistPage';
 
     this.content = {
-      playlist: new El('#playlist'),
+      playlistPage: new El('#playlistPage'),
       chat: new El('#chat'),
       users: new El('#users'),
       rooms: new El('#rooms')
@@ -787,12 +792,15 @@ class Menu {
     // Show current.
     // TODO: Do something more elegant!
     if (name === 'chat') {
+      menu.chat.removeClass('new-activity');
       if ($username.isVisible()) {
         $username.focus();
         return;
       }
 
       $message.focus();
+    } else if (name === 'playlistPage') {
+      menu.playlistPage.removeClass('new-activity');
     }
 
     this.active = name;
@@ -856,11 +864,11 @@ $background.setRandomBackground({
 });
 
 
-function addSongToPlayList(songUrl) {
+function addSongToPlayList() {
+  const songUrl = document.getElementById('songUrl').value;
+  document.getElementById('songUrl').value = '';
   if (songUrl) {
     app.addSongToPlayList(songUrl);
-  } else {
-    window.alert('Why so rude?');
   }
 }
 function removeSongToPlayList(songUrl) {

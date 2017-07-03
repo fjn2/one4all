@@ -18,25 +18,25 @@
         </h1>
 
         <div class="menu">
-          <div id="menu-playlist" class="menu-item active" onclick="menu.show('playlist')">
+          <div id="menu-playlist" class="menu-item active" onclick="menu.show('playlistPage')">
             <img id="loading" src="loading.svg" style="display:none" />
             <i class="material-icons">list</i>
-            <p>Playlist</p>
+            <p>Playlist <span id="playlistNewValue" class="new-value">*</span></p>
           </div>
 
           <div id="menu-chat" class="menu-item" onclick="menu.show('chat')">
             <i class="material-icons">chat</i>
-            <p>Chat</p>
+            <p>Chat <span id="chatNewValue" class="new-value">*</span></p>
           </div>
 
-          <div id="menu-rooms" class="menu-item" onclick="menu.show('rooms')">
+          <div id="menu-rooms" class="menu-item" onclick="menu.show('rooms')" style="display:none">
             <i class="material-icons">place</i>
             <p>Rooms</p>
           </div>
 
           <div id="menu-users" class="menu-item" onclick="menu.show('users')">
             <i class="material-icons">people</i>
-            <p>Users</p>
+            <p>Users (<b id="userConected">0</b>)</p>
           </div>
 
           <div class="menu-fill"></div>
@@ -57,7 +57,7 @@
             Play diff: <b id="playDiff"></b>
           </div>
           <div>
-            <span>Users conected: <b id="userConected">WIP</b></span>
+            <span>Users conected: <b id="_userConected">WIP</b></span>
           </div>
         </div>
 
@@ -88,7 +88,20 @@
       </div>
 
       <div class="container right-container">
-        <div id="playlist" class="block"></div>
+        <div id="playlistPage">
+          <div id="playlist" class="block"></div>
+          <div class="playlist-controls">
+            <input
+                type="text"
+                id="songUrl"
+                placeholder="Write the URL of your song."
+                onclick="addSongToPlayList()"
+                onkeydown="if (event.keyCode === 13) addSongToPlayList()"
+                autofocus
+              />
+            </div>
+        </div>
+
 
         <div id="users" class="block"></div>
 
@@ -157,13 +170,6 @@
               contenteditable="true"
               onkeydown="if (event.keyCode === 13) app.chat.sendMessage(this.innerHTML)"
             ></div>
-
-            <!-- <input
-              id="messageText"
-              type="text"
-              placeholder="Message to send"
-              onkeydown="if (event.keyCode === 13) app.chat.sendMessage(this.value)"
-            /> -->
 
             <img id="message-sending" src="loading.svg" style="display:none" />
           </div>
