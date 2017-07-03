@@ -538,7 +538,28 @@ class Chat {
     $emoticonSelector.show();
   }
 
+  imageTransformation(message) {
+    return `<img src="${message}" class="message-image" />`;
+  }
+
+  applyTransformations(message) {
+    const transformations = {
+      imageTransformation: /^http(s)?:\/\/.*\.(jpg|jpeg|png|gif|webp)$/
+    }
+
+    Object.keys(transformations)
+    .some((transformationName) => {
+      if (message.match(transformations[transformationName])) {
+        message = this[transformationName](message);
+      }
+    });
+
+    return message;
+  }
+
   sendMessage(message) {
+    message = this.applyTransformations(message);
+
     $message.disable();
     $messageSending.show();
     this.intercommunication.get('sendMessage', ({ data }) => {

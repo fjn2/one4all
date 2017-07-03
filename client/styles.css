@@ -168,6 +168,12 @@ h1 {
 .message p {
   display: inline;
   margin: 0;
+  position: relative;
+}
+
+.message-image {
+  width: 100%;
+  margin-top: 10px;
 }
 
 .username {
