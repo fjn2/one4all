@@ -116,50 +116,13 @@
             />
 
             <!-- Emoticons. -->
-            <div id="emoticons" class="mdc-simple-menu" tabindex="-1">
-              <ul class="mdc-simple-menu__items mdc-list" role="menu" aria-hidden="true">
-                <li class="mdc-list-item" role="menuitem" tabindex="0">
-                  <div class="emoticons-container" onclick="app.chat.addEmoticon(event)">
-                    <i class="material-icons">android</i>
-                    <i class="material-icons">announcement</i>
-                    <i class="material-icons">autorenew</i>
-                    <i class="material-icons">backup</i>
-                    <i class="material-icons">alarm</i>
-                    <i class="material-icons">assessment</i>
-                    <i class="material-icons">aspect_ratio</i>
-                    <i class="material-icons">bookmark</i>
-                    <i class="material-icons">bug_report</i>
-                    <i class="material-icons">build</i>
-                    <i class="material-icons">change_history</i>
-                    <i class="material-icons">check_circle</i>
-                    <i class="material-icons">code</i>
-                    <i class="material-icons">copyright</i>
-                    <i class="material-icons">credit_card</i>
-                    <i class="material-icons">date_range</i>
-                    <i class="material-icons">delete</i>
-                    <i class="material-icons">done</i>
-                    <i class="material-icons">eject</i>
-                    <i class="material-icons">euro_symbol</i>
-                    <i class="material-icons">explore</i>
-                    <i class="material-icons">extension</i>
-                    <i class="material-icons">face</i>
-                    <i class="material-icons">favorite</i>
-                    <i class="material-icons">find_in_page</i>
-                    <i class="material-icons">fingerprint</i>
-                    <i class="material-icons">g_translate</i>
-                    <i class="material-icons">grade</i>
-                    <i class="material-icons">gif</i>
-                    <i class="material-icons">get_app</i>
-                    <i class="material-icons">help</i>
-                    <i class="material-icons">home</i>
-                    <i class="material-icons">http</i>
-                    <i class="material-icons">https</i>
-                  </div>
-                </li>
-              </ul>
+            <div id="emoticons" tabindex="-1">
+              <div class="emoticons-container" onclick="app.chat.addEmoticon(event)">
+                <% include emoticons/emojione.html %>
+              </div>
             </div>
 
-            <i class="material-icons emoticon-selector" onclick="app.chat.showEmoticons()">insert_emoticon</i>
+            <i class="material-icons emoticon-selector" onclick="app.chat.toggleEmoticons()">insert_emoticon</i>
             <div
               id="messageText"
               contenteditable="true"

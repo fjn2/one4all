@@ -17,7 +17,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "compression": "^1.6.2",
     "cors": "^2.8.3",
+    "ejs": "^2.5.6",
     "express": "^4.15.2",
     "foreman": "^2.0.0",
     "guid": "0.0.12",

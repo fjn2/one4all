@@ -517,6 +517,7 @@ class Chat {
   constructor(intercommunication) {
     this.intercommunication = intercommunication;
     this.guid = 'user-' + Math.floor(Math.random() * 1000000); // TODO: set on server!
+    this.emoticonsShown = false;
 
     // Style own messages.
     El.injectStyles(`
@@ -579,6 +580,9 @@ class Chat {
         .html('')
         .enable()
         .focus();
+
+      // Ensure emoticons are closed.
+      $emoticons.hide();
     }, {
       message,
       userName: this.username || 'Anonymous',
@@ -590,15 +594,15 @@ class Chat {
     window.document.getElementById('activityStream').innerHTML += message;
   }
 
-  showEmoticons() {
-    $emoticons.open = !$emoticons.open;
+  toggleEmoticons() {
+    $emoticons.toggle()
   }
 
   addEmoticon(event) {
-    console.log('EVENT', event)
-    const icon = event.target.innerHTML;
-    console.log('ICON', icon)
-    this.sendMessage(`<i class="material-icons">${icon}</i>`);
+    const src = event.target.currentSrc;
+    $message
+      .appendHtml(`<img src="${src}" />`)
+      .caretEnd();
   }
 }
 
@@ -859,7 +863,7 @@ const $message = new El('#messageText');
 const $messageSending = new El('#message-sending');
 const $rangeAdjustment = new El('#rangeAdjustment');
 const $emoticonSelector = new El('.emoticon-selector');
-const $emoticons = new mdc.menu.MDCSimpleMenu(document.querySelector('#emoticons'));
+const $emoticons = new El('#emoticons');
 
 // Randomize background.
 $background.setRandomBackground({
