@@ -301,7 +301,7 @@ input.small {
   position: absolute;
   width: 100%;
 }
-.menu-item.new-activity .new-value{
+.menu-item.new-activity .new-value {
   display: inline;
 }
 .menu .new-value {
@@ -437,11 +437,11 @@ input.small {
 }
 
 .status {
+  margin: 0;
+  padding: 0 10px;
   font-size: 11px;
-  position: absolute;
-  top: 0;
-  right: 10px;
-  display: none;
+  text-align: left;
+  background: black;
 }
 
 .background {
@@ -548,6 +548,13 @@ input.small {
   left: 0;
   width: 200px;
   /*background: black;*/
+}
+
+.left-container .thumbnail {
+  bottom: 110px;
+}
+.left-container .thumbnail img {
+  width:100%;
 }
 
 .top-container {

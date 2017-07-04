@@ -38,7 +38,20 @@
             <i class="material-icons">people</i>
             <p>Users (<b id="userConected">0</b>)</p>
           </div>
-
+          <div class="block block-md status">
+            <div>
+              Download status: <b id="percent"></b>
+            </div>
+            <div>
+              Detour: <b id="detour"></b>
+            </div>
+            <div>
+              Play diff: <b id="playDiff"></b>
+            </div>
+            <div>
+              <span>Users conected: <b id="_userConected">WIP</b></span>
+            </div>
+          </div>
           <div class="menu-fill"></div>
         </div>
 
@@ -46,21 +59,9 @@
           <img src="http://www.reactiongifs.com/wp-content/uploads/2013/01/gandalf_to_the_music.gif" class="gandalf"/>
         </div> -->
 
-        <div class="block block-md status">
-          <div>
-            Download status: <b id="percent"></b>
-          </div>
-          <div>
-            Detour: <b id="detour"></b>
-          </div>
-          <div>
-            Play diff: <b id="playDiff"></b>
-          </div>
-          <div>
-            <span>Users conected: <b id="_userConected">WIP</b></span>
-          </div>
+        <div class="block controls thumbnail">
+          <img src="" id="currentThumbnail" />
         </div>
-
         <div class="block controls">
           <div class="button" onclick="playMusic()">
             <i class="material-icons">play_arrow</i>

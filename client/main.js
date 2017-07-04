@@ -185,6 +185,7 @@ class AudioPlayer {
         if (data) {
           if (downloader.cachedSongs[data.url] && downloader.cachedSongs[data.url].tmpUrl) {
             if (this.audioElement.src !== downloader.cachedSongs[data.url].tmpUrl) {
+              this.setThumbnail();
               this.setSong(downloader.cachedSongs[data.url].tmpUrl);
             }
           } else {
@@ -208,6 +209,9 @@ class AudioPlayer {
   }
   seek(time) {
     this.audioElement.currentTime = time / 1000;
+  }
+  setThumbnail() {
+    document.getElementById('currentThumbnail').src = playlist.currentSong.metadata.thumbnails.medium.url;
   }
   play() {
     this.intercommunication.get('timeCurrentTrack', ({ data }) => {
@@ -405,7 +409,7 @@ class PlayList {
   render() {
     let el = '';
     let currentSongId = 'No song.';
-    const songsLabel = (this.songs.length === 1)? 'song' : 'songs';
+    const songsLabel = (this.songs.length === 1) ? 'song' : 'songs';
 
     el = `
     <label>
