@@ -29,7 +29,7 @@ h1 {
 
 input {
   border: 1px solid #ccc;
-  padding: 10px;
+  padding: 8px;
   box-sizing: border-box;
   font-size: 12px;
   outline: none;
@@ -206,8 +206,15 @@ input.small {
   color: black;
 }
 
-.text i {
-  margin-left: 2px;
+.text img {
+  vertical-align: middle;
+  top: -2px;
+  position: relative;
+  padding: 0 2px;
+}
+
+.text br {
+  position: absolute;
 }
 
 #chat {
@@ -237,22 +244,23 @@ input.small {
 }
 
 #emoticons {
-  top: -40px;
+  top: -261px;
   left: 0;
-  height: 50px;
+  height: 250px;
   width: 100%;
   z-index: 100;
+  position: absolute;
+  overflow: scroll;
+  border-top: 1px solid #eee;
+  padding: 5px 0;
+  display: none;
+  outline: none;
+  background: rgba(255,255,255,0.5);
 }
 
-#emoticons i {
-  position: relative;
-  cursor: pointer;
-  top: auto;
-  bottom: auto;
-}
-
-#emoticons i:hover {
+#emoticons img:hover {
   color: #6ab4d1;
+  cursor: pointer;
 }
 
 .emoticons-container {
@@ -319,9 +327,14 @@ input.small {
   line-height: 16px;
 }
 
-#messageText i {
+#messageText img {
+  vertical-align: middle;
+  margin-top: -8px;
+  padding: 0 2px;
+}
+
+#messageText br {
   position: absolute;
-  top: 14px;
 }
 
 #message-sending {

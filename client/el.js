@@ -98,6 +98,38 @@ class El {
     return (this.$el.style.display.match(/(block|inline|inline-block)/))
   }
 
+  toggle () {
+    if (this.isVisible()) {
+      this.hide()
+      return this
+    }
+
+    this.show()
+    return this
+  }
+
+  caretEnd () {
+    this.$el.focus();
+    if (
+      typeof window.getSelection != "undefined" &&
+      typeof document.createRange != "undefined"
+    ) {
+        var range = document.createRange();
+        range.selectNodeContents(this.$el);
+        range.collapse(false);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    } else if (typeof document.body.createTextRange != "undefined") {
+        var textRange = document.body.createTextRange();
+        textRange.moveToElementText(this.$el);
+        textRange.collapse(false);
+        textRange.select();
+    }
+
+    return this
+  }
+
   static injectStyles (styles){
     const style = document.createElement('style')
     style.type = 'text/css'
