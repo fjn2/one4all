@@ -19,23 +19,8 @@ const app = http.createServer(function (req, res) {
 });
 const io = require('socket.io')(app);
 
-function connectToPm2() {
-  return new Promise((resolve) => {
-    pm2.connect(function(err) {
-      if (err) {
-        Winston.error(err);
-        process.exit(2);
-      }
-      resolve();
-    });
-  });
-}
-
-connectToPm2().then(() => {
-  app.listen(configuration.spinnerPort);
-  Winston.info('SERVER LISTENING AT PORT ', configuration.spinnerPort);
-});
-
+app.listen(configuration.spinnerPort);
+Winston.info('SERVER LISTENING AT PORT ', configuration.spinnerPort);
 
 function getPort() {
   actualPort += 2;
@@ -50,27 +35,34 @@ function createRoom(id, callback) {
   const url = `http://${configuration.host}:${port}`;
   Winston.info('createRoom -> PORT', port);
 
-  pm2.start({
-    script: 'server/index.js',
-    name: `room${port}`,
-    exec_mode: 'cluster',
-    instances: 1,
-    env: {
-      PORT: port,
-    },
-  }, function(err, apps) {
-    if (apps) {
-      if (err) throw err;
-      rooms[id] = {
-        url,
-        port,
-        proc: apps[0],
-      };
-      Winston.info('Added new room', port);
-      callback(rooms[id]);
-    } else {
-      Winston.error('The room was not created propperly', port);
-    }
+  pm2.connect(function(err) {
+      if (err) {
+        Winston.error(err);
+        process.exit(2);
+      }
+      pm2.start({
+        script: 'server/index.js',
+        name: `room${port}`,
+        exec_mode: 'cluster',
+        instances: 1,
+        env: {
+          PORT: port,
+        },
+      }, function(err, apps) {
+        if (apps) {
+          if (err) throw err;
+          rooms[id] = {
+            url,
+            port,
+            proc: apps[0],
+          };
+          Winston.info('Added new room', port);
+          callback(rooms[id]);
+        } else {
+          Winston.error('The room was not created propperly', port);
+        }
+        pm2.disconnect();
+      });
   });
 }
 
@@ -81,21 +73,24 @@ io.on('connection', function (socket) {
 
     if (room) {
       Winston.info('CONNECT to existing room:', rooms[id].url);
-      pm2.list((err, apps) => {
-        if (err) throw err;
-        let isRunning = false;
-        apps.forEach((app) => {
-          if(app.pm_id === rooms[id].proc.pm_id && app.monit.memory !== 0) {
-            isRunning = true;
+      pm2.connect(function(err) {
+        pm2.list((err, apps) => {
+          if (err) throw err;
+          let isRunning = false;
+          apps.forEach((app) => {
+            if(app.pm_id === rooms[id].proc.pm_id && app.monit.memory !== 0) {
+              isRunning = true;
+            }
+          });
+          if (!isRunning) {
+            Winston.info('The room', id, 'was down, re-starting...');
+            pm2.restart(rooms[id].proc.pm_id);
           }
-        });
-        if (!isRunning) {
-          Winston.info('The room', id, 'was down, re-starting...');
-          pm2.restart(rooms[id].proc.pm_id);
-        }
-      });
 
-      socket.emit('room', { url: room.url });
+          // pm2.disconnect();
+          socket.emit('room', { url: room.url });
+        });
+      });
       return;
     }
 
@@ -110,9 +105,5 @@ io.on('connection', function (socket) {
 
 process.on('uncaughtException', function(err) {
   Winston.error(`Caught exception: ${err}`);
-});
-
-process.on('exit', function () {
-  pm2.disconnect();
 });
 

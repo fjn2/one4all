@@ -3,5 +3,8 @@
   "globals": {
     window: true,
     io: true
+  },
+  "rules": {
+    "comma-dangle": ["error", "never"]
   }
 }
