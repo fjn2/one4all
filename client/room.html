@@ -92,6 +92,7 @@
                 placeholder="Write the URL of your song."
                 onclick="addSongToPlayList()"
                 onkeydown="if (event.keyCode === 13) addSongToPlayList()"
+                onpaste="app.onPaste(event)"
                 autofocus
               />
             </div>
@@ -112,7 +113,6 @@
               id="userName"
               placeholder="Write username and press enter."
               onkeydown="if (event.keyCode === 13) app.chat.setUsername(this.value)"
-              autofocus
             />
 
             <!-- Emoticons. -->

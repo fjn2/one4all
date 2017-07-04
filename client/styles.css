@@ -435,6 +435,10 @@ input.small {
   right: auto;
 }
 
+#currentThumbnail {
+  display: none;
+}
+
 #rooms {
   display: none;
 }

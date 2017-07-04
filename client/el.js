@@ -130,6 +130,11 @@ class El {
     return this
   }
 
+  src (value) {
+    this.$el.src = value
+    return this
+  }
+
   static injectStyles (styles){
     const style = document.createElement('style')
     style.type = 'text/css'
