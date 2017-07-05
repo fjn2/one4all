@@ -211,7 +211,12 @@ class AudioPlayer {
     this.audioElement.currentTime = time / 1000;
   }
   setThumbnail() {
-    document.getElementById('currentThumbnail').src = playlist.currentSong.metadata.thumbnails.medium.url;
+    const src = playlist.currentSong.metadata.thumbnails.medium.url;
+    $currentThumbnail
+      .src(src)
+      .show();
+
+    $background.style('backgroundImage', `url(${src})`);
   }
   play() {
     this.intercommunication.get('timeCurrentTrack', ({ data }) => {
@@ -301,9 +306,13 @@ class PlayList {
   addSong(url) {
     console.log('Playlist: Adding song...', url);
     $loading.show();
+    $songUrl.disable();
     this.intercommunication.get('addSong', () => {
       console.log('Song added successfully!');
       $loading.hide();
+      $songUrl
+        .val('')
+        .enable();
     }, {
       url
     });
@@ -726,7 +735,8 @@ class App {
     const pasted = clipboard.getData('Text');
     console.log('PASTED:', pasted);
 
-    addSongToPlayList(pasted);
+    $songUrl.val(pasted);
+    app.addSongToPlayList(pasted);
   }
 }
 
@@ -809,6 +819,7 @@ class Menu {
       $message.focus();
     } else if (name === 'playlistPage') {
       menu.playlistPage.removeClass('new-activity');
+      $songUrl.focus();
     }
 
     this.active = name;
@@ -864,6 +875,8 @@ const $messageSending = new El('#message-sending');
 const $rangeAdjustment = new El('#rangeAdjustment');
 const $emoticonSelector = new El('.emoticon-selector');
 const $emoticons = new El('#emoticons');
+const $currentThumbnail = new El('#currentThumbnail');
+const $songUrl = new El('#songUrl');
 
 // Randomize background.
 $background.setRandomBackground({
@@ -873,8 +886,7 @@ $background.setRandomBackground({
 
 
 function addSongToPlayList() {
-  const songUrl = document.getElementById('songUrl').value;
-  document.getElementById('songUrl').value = '';
+  const songUrl = $songUrl.val();
   if (songUrl) {
     app.addSongToPlayList(songUrl);
   }
