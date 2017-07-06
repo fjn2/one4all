@@ -190,6 +190,9 @@ class AudioPlayer {
     this.maxDiferenceTolerance = 100;
 
     this.serverTime = serverTime;
+    // these two variables are to set an small offset for mobiles or other devices that have problems with playing music
+    this.hardwareDeviceOffset = 0;
+    this.hardwareDeviceCuantum = 10;
 
     window.document.querySelector('.menu-fill').appendChild(this.audioElement);
   }
@@ -236,7 +239,7 @@ class AudioPlayer {
     this.intercommunication.get('timeCurrentTrack', ({ data }) => {
       const { serverTime, trackTime, playing } = data;
       const delay = 2000;
-      const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get();
+      const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get() - this.hardwareDeviceOffset;
 
       if (timeDifference >= 0 && !Number.isNaN(this.serverTime.getDetour())) {
         setTimeout(() => {
@@ -275,8 +278,11 @@ class AudioPlayer {
           }
           window.document.getElementById('playDiff').innerHTML = diffToShow + ' ms';
           if (Math.abs(diff) > this.maxDiferenceTolerance || diff < 0) {
-            console.log('Re-play');
+            console.log('Re-play', this.hardwareDeviceOffset, 'ms hardwareoffset');
+            this.hardwareDeviceOffset += this.hardwareDeviceCuantum * Math.sign(diff);
             this.play();
+          } else {
+            console.log('Playing good', this.hardwareDeviceOffset, 'ms hardwareoffset');
           }
         } else {
           window.document.getElementById('playDiff').innerHTML = '-';
