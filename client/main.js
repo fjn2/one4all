@@ -278,12 +278,13 @@ class AudioPlayer {
           }
           window.document.getElementById('playDiff').innerHTML = diffToShow + ' ms';
           if (Math.abs(diff) > this.maxDiferenceTolerance || diff < 0) {
-            console.log('Re-play', this.hardwareDeviceOffset, 'ms hardwareoffset');
+            console.log('Re-play');
             this.hardwareDeviceOffset += this.hardwareDeviceCuantum * Math.sign(diff);
             this.play();
           } else {
-            console.log('Playing good', this.hardwareDeviceOffset, 'ms hardwareoffset');
+            console.log('Playing good');
           }
+          document.getElementById('hardwareOffset').innerHTML = this.hardwareDeviceOffset + ' ms';
         } else {
           window.document.getElementById('playDiff').innerHTML = '-';
           isPlaying = false;
