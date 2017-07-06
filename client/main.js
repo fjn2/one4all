@@ -4,6 +4,12 @@ class ServerTime {
     this.detour = undefined; // desvio
     this.maxSampleritems = 30;
     this.sampler = [];
+    // at first, the server time is equals to local time (with a big detour)
+    this.realServerTime = {
+      detour: 999999,
+      localTime: new Date(),
+      time: new Date()
+    };
   }
   getSampler() {
     return new Promise((resolve) => {
@@ -21,16 +27,15 @@ class ServerTime {
         if (this.sampler.length > this.maxSampleritems) {
           const latencyArray = this.sampler.map(item => item.latency);
           const maxLatency = Math.max(...latencyArray);
-          // remove the one with more latency and also the oldest;
+          // remove the one with more latency
           this.sampler.splice(latencyArray.indexOf(maxLatency), 1);
-          this.sampler.splice(0, 1);
         }
         resolve();
       });
     });
   }
   get() {
-    return this.calculateSeverTime(this.sampler, {});
+    return this.realServerTime.time + (new Date() - this.realServerTime.localTime);
   }
   getDetour() {
     const now = new Date();
@@ -67,8 +72,17 @@ class ServerTime {
       this.getSampler().then(() => {
         this.startSynchronization(nextInterval);
       });
-
+      // wait for 5 samples to have a better result
+      if (detour < this.realServerTime.detour && this.sampler.length > 5) {
+        let time = this.calculateSeverTime(this.sampler, {});
+        if (!Number.isNaN(time)) {
+          this.realServerTime.detour = detour;
+          this.realServerTime.localTime = new Date();
+          this.realServerTime.time = this.calculateSeverTime(this.sampler, {});
+        }
+      }
       window.document.getElementById('detour').innerHTML = Math.round(detour) + ' &#177; ms';
+      window.document.getElementById('bestDetour').innerHTML = Math.round(this.realServerTime.detour) + ' &#177; ms';
 
       user.render();
     }, interval);
@@ -471,7 +485,7 @@ class User {
     intercommunication.get('sendUserStatus', () => {}, {
       id: intercommunication.socket.id,
       username: this.getName(),
-      detour: serverTime.getDetour(),
+      detour: serverTime.realServerTime.detour,
       playDiff: audioPlayer.diff,
       playOffset: window.document.getElementById('rangeAdjustment').value,
       isPlaying: isPlaying && downloader.cachedSongs[playlist.currentSong.url].percentComplete === 100
