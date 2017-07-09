@@ -279,14 +279,13 @@ class AudioPlayer {
           window.document.getElementById('playDiff').innerHTML = diffToShow + ' ms';
           if (Math.abs(diff) > this.maxDiferenceTolerance || diff < 0) {
             console.log('Re-play');
-            if (!audioPlayer.audioElement.paused) {
+            if (!audioPlayer.audioElement.paused && audioPlayer.audioElement.readyState) {
               this.hardwareDeviceOffset += this.hardwareDeviceCuantum * Math.sign(diff);
             }
 
             this.play();
-          } else {
-            console.log('Playing good');
           }
+
           document.getElementById('hardwareOffset').innerHTML = this.hardwareDeviceOffset + ' ms';
         } else {
           window.document.getElementById('playDiff').innerHTML = '-';

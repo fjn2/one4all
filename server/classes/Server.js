@@ -23,7 +23,7 @@ class Server {
       timeCurrentTrack: () => ({
         trackTime: this.songPlayer.getCurrentTime(),
         playing: this.songPlayer.playing,
-        serverTime: new Date(),
+        serverTime: new Date()
       }),
       addSong: data => (
         Promise.resolve(data.url).then((songUrl) => {
@@ -35,28 +35,35 @@ class Server {
             }).then(metadata => ({
               url: newUrl,
               metadata,
-              kind: 'youtube',
+              kind: 'youtube'
             }));
           }
           return Promise.resolve({
             url: data.url,
             metadata: data.url,
-            kind: 'unknown',
+            kind: 'unknown'
           });
         }).then((song) => {
           this.playlist.addSong(song);
           this.clientsControl.sendPlaylist({
             songs: this.playlist.songs,
-            currentSong: this.playlist.getCurrentSong(),
+            currentSong: this.playlist.getCurrentSong()
           });
+
+          // this is for the first track in the playlist
+          if (this.playlist.songs.length === 1) {
+            this.songPlayer.reset();
+          }
           return song;
+        }).catch((err) => {
+          Winston.error('Error on addSong', err);
         })
       ),
       removeSong: song => {
         this.playlist.removeSong(song.url);
         this.clientsControl.sendPlaylist({
           songs: this.playlist.songs,
-          currentSong: this.playlist.getCurrentSong(),
+          currentSong: this.playlist.getCurrentSong()
         });
       },
       playMusic: () => {

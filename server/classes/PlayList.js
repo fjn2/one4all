@@ -13,13 +13,16 @@ class Playlist {
 
     setInterval(() => {
       // check the current time, and check if the track is finish
+      if (!this.songPlayer.songDuration) {
+        // Error: when the song finished it will loop the first seconds. If the play list is empty, there is no problem
+        Winston.warn('The song duration is undefined');
+      }
       // remove the last second
       if (this.songPlayer.getCurrentTime() + 1 > this.songPlayer.songDuration) {
         this.nextSong();
         this.clientsControl.startPlay();
         this.play();
       }
-
     }, 1000);
   }
   addSong(songUrl) {
