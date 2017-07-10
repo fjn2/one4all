@@ -2,7 +2,7 @@ class ServerTime {
   constructor(intercommunication) {
     this.intercommunication = intercommunication;
     this.detour = undefined; // desvio
-    this.maxSampleritems = 30;
+    this.maxSampleritems = 50;
     this.sampler = [];
     // at first, the server time is equals to local time (with a big detour)
     this.realServerTime = {
@@ -29,6 +29,7 @@ class ServerTime {
           const maxLatency = Math.max(...latencyArray);
           // remove the one with more latency
           this.sampler.splice(latencyArray.indexOf(maxLatency), 1);
+          this.sampler.splice(0, 1);
         }
         resolve();
       });
@@ -795,7 +796,7 @@ class Connection {
 
   connectRoom() {
     this.roomId = this.getRoomId();
-    this.socket.emit('room', {id: this.roomId});
+    this.socket.emit('room', { id: this.roomId });
   }
 
   getRoomId() {
