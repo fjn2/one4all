@@ -330,8 +330,13 @@ class PlayList {
     console.log('Playlist: Adding song...', url);
     $loading.show();
     $songUrl.disable();
-    this.intercommunication.get('addSong', () => {
-      console.log('Song added successfully!');
+    this.intercommunication.get('addSong', (resp) => {
+      if (resp.data.error) {
+        alert('There was an error when we try to add the song. Try with another one');
+      } else {
+        console.log('Song added successfully!');
+      }
+
       $loading.hide();
       $songUrl
         .val('')

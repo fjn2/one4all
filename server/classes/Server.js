@@ -6,6 +6,7 @@ const SongPlayer = require('./SongPlayer');
 const yas = require('youtube-audio-server');
 const configuration = require('../../configuration.json');
 const url = require('url');
+const request = require('request');
 const args = require('minimist')(process.argv.slice(2));
 
 // TODO: update this later.
@@ -40,10 +41,24 @@ class Server {
           }
           return Promise.resolve({
             url: data.url,
-            metadata: data.url,
+            metadata: {
+              title: 'No information'
+            },
             kind: 'unknown'
           });
-        }).then((song) => {
+        }).then((song) => new Promise((resolve, reject) => {
+          request.get(song.url).on('response', (response) => {
+            Winston.debug('Verification ok', song.url);
+            if (response.headers['content-type'] !== 'audio/mpeg') {
+              reject('Error in the content-type of the URL');
+             return;
+            }
+            resolve(song);
+          }).on('error', (err) => {
+            Winston.error('Verification fail ', song.url);
+            reject(err);
+          });
+        })).then((song) => {
           this.playlist.addSong(song);
           this.clientsControl.sendPlaylist({
             songs: this.playlist.songs,
@@ -55,8 +70,12 @@ class Server {
             this.songPlayer.reset();
           }
           return song;
-        }).catch((err) => {
+        })
+        .catch((err) => {
           Winston.error('Error on addSong', err);
+          return Promise.resolve({
+            error: 'The song is not valid'
+          });
         })
       ),
       removeSong: song => {
@@ -95,7 +114,7 @@ class Server {
       playlist: () => ({
         songs: this.playlist.songs,
         currentSong: this.playlist.getCurrentSong(),
-      }),
+      })
     };
 
     this.clientsControl = new ClientsControl(this.clientActions, this.welcomeActions);
@@ -157,14 +176,14 @@ class Server {
           resp = {
             id: 0,
             title: 'Error in metadata',
-            thumbnails: {},
+            thumbnails: {}
           };
         } else {
           Winston.info(`getYouTubeMetadata finish for "${video}"!`, err, metadata);
           resp = {
             id: metadata.items[0].id,
             title: metadata.items[0].snippet.title,
-            thumbnails: metadata.items[0].snippet.thumbnails,
+            thumbnails: metadata.items[0].snippet.thumbnails
           };
         }
         resolve(resp);
