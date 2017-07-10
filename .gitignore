@@ -3,3 +3,4 @@ resources
 client/configuration.js
 configuration.json
 currentSong*
+playlist*

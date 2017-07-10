@@ -47,6 +47,7 @@ function createRoom(id, callback) {
         instances: 1,
         env: {
           PORT: port,
+          args: id // room name
         },
       }, function(err, apps) {
         if (apps) {
@@ -54,7 +55,7 @@ function createRoom(id, callback) {
           rooms[id] = {
             url,
             port,
-            proc: apps[0],
+            proc: apps[0]
           };
           Winston.info('Added new room', port);
           callback(rooms[id]);

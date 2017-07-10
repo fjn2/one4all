@@ -8,6 +8,7 @@ const configuration = require('../../configuration.json');
 const url = require('url');
 const request = require('request');
 const args = require('minimist')(process.argv.slice(2));
+const storage = require('node-persist');
 
 // TODO: update this later.
 // Override port to support multiple channels / processes.
@@ -15,8 +16,14 @@ configuration.port = args.port || configuration.port;
 Winston.info('Starting SERVER on PORT', configuration.port);
 
 class Server {
-  constructor() {
+  constructor(roomName) {
+    this.roomName = roomName;
+    // to store the playlist
+    storage.initSync({
+      dir: `./playlistStoredData_${this.roomName}`
+    });
     this.songPlayer = new SongPlayer();
+
 
     this.clientActions = {
       serverTime: () => new Date(),
@@ -111,16 +118,23 @@ class Server {
       }
     };
     this.welcomeActions = {
-      playlist: () => ({
-        songs: this.playlist.songs,
-        currentSong: this.playlist.getCurrentSong(),
-      })
+      playlist: () => {
+        storage.setItemSync('playlist', this.playlist.songs);
+        return {
+          songs: this.playlist.songs,
+          currentSong: this.playlist.getCurrentSong()
+        };
+      }
     };
 
     this.clientsControl = new ClientsControl(this.clientActions, this.welcomeActions);
 
     this.playlist = new Playlist(this.songPlayer, this.clientsControl);
     this.songPlayer.setPlaylist(this.playlist);
+    const storedPlaylistSongs = storage.getItemSync('playlist');
+    if (storedPlaylistSongs) {
+      this.playlist.songs = storedPlaylistSongs;
+    }
 
     this.hostControl = new HostControl(this.playlist, this.clientsControl);
 
