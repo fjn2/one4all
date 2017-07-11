@@ -47,6 +47,7 @@ function createRoom(id, callback) {
         instances: 1,
         env: {
           PORT: port,
+          args: id // room name
         },
       }, function(err, apps) {
         if (apps) {
@@ -54,7 +55,7 @@ function createRoom(id, callback) {
           rooms[id] = {
             url,
             port,
-            proc: apps[0],
+            proc: apps[0]
           };
           Winston.info('Added new room', port);
           callback(rooms[id]);
@@ -68,23 +69,24 @@ function createRoom(id, callback) {
 
 io.on('connection', function (socket) {
   socket.on('room', function ({ id }) {
+    const sanitizedId = id.toLowerCase();
     // Connect to existing room.
-    const room = rooms[id];
+    const room = rooms[sanitizedId];
 
     if (room) {
-      Winston.info('CONNECT to existing room:', rooms[id].url);
+      Winston.info('CONNECT to existing room:', rooms[sanitizedId].url);
       pm2.connect(function(err) {
         pm2.list((err, apps) => {
           if (err) throw err;
           let isRunning = false;
           apps.forEach((app) => {
-            if(app.pm_id === rooms[id].proc.pm_id && app.monit.memory !== 0) {
+            if(app.pm_id === rooms[sanitizedId].proc.pm_id && app.monit.memory !== 0) {
               isRunning = true;
             }
           });
           if (!isRunning) {
-            Winston.info('The room', id, 'was down, re-starting...');
-            pm2.restart(rooms[id].proc.pm_id);
+            Winston.info('The room', sanitizedId, 'was down, re-starting...');
+            pm2.restart(rooms[sanitizedId].proc.pm_id);
           }
 
           // pm2.disconnect();
@@ -95,8 +97,8 @@ io.on('connection', function (socket) {
     }
 
     // Create new room.
-    Winston.info('CREATE room:', id);
-    createRoom(id, (room) => {
+    Winston.info('CREATE room:', sanitizedId);
+    createRoom(sanitizedId, (room) => {
       socket.emit('room', { url: room.url });
     });
   });

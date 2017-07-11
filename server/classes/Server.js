@@ -6,7 +6,9 @@ const SongPlayer = require('./SongPlayer');
 const yas = require('youtube-audio-server');
 const configuration = require('../../configuration.json');
 const url = require('url');
+const request = require('request');
 const args = require('minimist')(process.argv.slice(2));
+const storage = require('node-persist');
 
 // TODO: update this later.
 // Override port to support multiple channels / processes.
@@ -14,8 +16,14 @@ configuration.port = args.port || configuration.port;
 Winston.info('Starting SERVER on PORT', configuration.port);
 
 class Server {
-  constructor() {
+  constructor(roomName) {
+    this.roomName = roomName;
+    // to store the playlist
+    storage.initSync({
+      dir: `./playlistStoredData_${this.roomName}`
+    });
     this.songPlayer = new SongPlayer();
+
 
     this.clientActions = {
       serverTime: () => new Date(),
@@ -23,7 +31,7 @@ class Server {
       timeCurrentTrack: () => ({
         trackTime: this.songPlayer.getCurrentTime(),
         playing: this.songPlayer.playing,
-        serverTime: new Date(),
+        serverTime: new Date()
       }),
       addSong: data => (
         Promise.resolve(data.url).then((songUrl) => {
@@ -35,28 +43,53 @@ class Server {
             }).then(metadata => ({
               url: newUrl,
               metadata,
-              kind: 'youtube',
+              kind: 'youtube'
             }));
           }
           return Promise.resolve({
             url: data.url,
-            metadata: data.url,
-            kind: 'unknown',
+            metadata: {
+              title: 'No information'
+            },
+            kind: 'unknown'
           });
-        }).then((song) => {
+        }).then((song) => new Promise((resolve, reject) => {
+          request.get(song.url).on('response', (response) => {
+            Winston.debug('Verification ok', song.url);
+            if (response.headers['content-type'] !== 'audio/mpeg') {
+              reject('Error in the content-type of the URL');
+             return;
+            }
+            resolve(song);
+          }).on('error', (err) => {
+            Winston.error('Verification fail ', song.url);
+            reject(err);
+          });
+        })).then((song) => {
           this.playlist.addSong(song);
           this.clientsControl.sendPlaylist({
             songs: this.playlist.songs,
-            currentSong: this.playlist.getCurrentSong(),
+            currentSong: this.playlist.getCurrentSong()
           });
+
+          // this is for the first track in the playlist
+          if (this.playlist.songs.length === 1) {
+            this.songPlayer.reset();
+          }
           return song;
+        })
+        .catch((err) => {
+          Winston.error('Error on addSong', err);
+          return Promise.resolve({
+            error: 'The song is not valid'
+          });
         })
       ),
       removeSong: song => {
         this.playlist.removeSong(song.url);
         this.clientsControl.sendPlaylist({
           songs: this.playlist.songs,
-          currentSong: this.playlist.getCurrentSong(),
+          currentSong: this.playlist.getCurrentSong()
         });
       },
       playMusic: () => {
@@ -85,16 +118,23 @@ class Server {
       }
     };
     this.welcomeActions = {
-      playlist: () => ({
-        songs: this.playlist.songs,
-        currentSong: this.playlist.getCurrentSong(),
-      }),
+      playlist: () => {
+        storage.setItemSync('playlist', this.playlist.songs);
+        return {
+          songs: this.playlist.songs,
+          currentSong: this.playlist.getCurrentSong()
+        };
+      }
     };
 
     this.clientsControl = new ClientsControl(this.clientActions, this.welcomeActions);
 
     this.playlist = new Playlist(this.songPlayer, this.clientsControl);
     this.songPlayer.setPlaylist(this.playlist);
+    const storedPlaylistSongs = storage.getItemSync('playlist');
+    if (storedPlaylistSongs) {
+      this.playlist.songs = storedPlaylistSongs;
+    }
 
     this.hostControl = new HostControl(this.playlist, this.clientsControl);
 
@@ -150,14 +190,14 @@ class Server {
           resp = {
             id: 0,
             title: 'Error in metadata',
-            thumbnails: {},
+            thumbnails: {}
           };
         } else {
           Winston.info(`getYouTubeMetadata finish for "${video}"!`, err, metadata);
           resp = {
             id: metadata.items[0].id,
             title: metadata.items[0].snippet.title,
-            thumbnails: metadata.items[0].snippet.thumbnails,
+            thumbnails: metadata.items[0].snippet.thumbnails
           };
         }
         resolve(resp);

@@ -2,8 +2,16 @@ class ServerTime {
   constructor(intercommunication) {
     this.intercommunication = intercommunication;
     this.detour = undefined; // desvio
-    this.maxSampleritems = 30;
+    this.maxSampleritems = 20;
+    this.minDetour = 20;
+    this.minValidSamples = 5;
     this.sampler = [];
+    // at first, the server time is equals to local time (with a big detour)
+    this.realServerTime = {
+      detour: 999999,
+      localTime: new Date(),
+      time: new Date()
+    };
   }
   getSampler() {
     return new Promise((resolve) => {
@@ -21,16 +29,15 @@ class ServerTime {
         if (this.sampler.length > this.maxSampleritems) {
           const latencyArray = this.sampler.map(item => item.latency);
           const maxLatency = Math.max(...latencyArray);
-          // remove the one with more latency and also the oldest;
+          // remove the one with more latency
           this.sampler.splice(latencyArray.indexOf(maxLatency), 1);
-          this.sampler.splice(0, 1);
         }
         resolve();
       });
     });
   }
   get() {
-    return this.calculateSeverTime(this.sampler, {});
+    return this.realServerTime.time + (new Date() - this.realServerTime.localTime);
   }
   getDetour() {
     const now = new Date();
@@ -64,18 +71,30 @@ class ServerTime {
       const detour = this.getDetour();
       let nextInterval = - 20 * detour + 2100;
       nextInterval = nextInterval > 100 ? nextInterval : 100;
-      this.getSampler().then(() => {
-        this.startSynchronization(nextInterval);
-      });
-
+      if (this.getDetour() > this.minDetour || this.sampler.length <= this.minValidSamples) {
+        this.getSampler().then(() => {
+            this.startSynchronization(nextInterval);
+        });
+      } else {
+        console.log('Synchronization finish');
+      }
+      // wait for 5 samples to have a better result
+      if (detour < this.realServerTime.detour && this.sampler.length > this.minValidSamples) {
+        let time = this.calculateSeverTime(this.sampler, {});
+        if (!Number.isNaN(time)) {
+          this.realServerTime.detour = detour;
+          this.realServerTime.localTime = new Date();
+          this.realServerTime.time = this.calculateSeverTime(this.sampler, {});
+        }
+      }
       window.document.getElementById('detour').innerHTML = Math.round(detour) + ' &#177; ms';
-
-      user.render();
+      window.document.getElementById('bestDetour').innerHTML = Math.round(this.realServerTime.detour) + ' &#177; ms';
     }, interval);
   }
   startPlayDiffSynchronization() {
     setInterval(() => {
       audioPlayer.getPlayListDiff();
+      user.render();
       user.sendStatus();
     }, 5000);
   }
@@ -176,6 +195,9 @@ class AudioPlayer {
     this.maxDiferenceTolerance = 100;
 
     this.serverTime = serverTime;
+    // these two variables are to set an small offset for mobiles or other devices that have problems with playing music
+    this.hardwareDeviceOffset = 0;
+    this.hardwareDeviceCuantum = 10;
 
     window.document.querySelector('.menu-fill').appendChild(this.audioElement);
   }
@@ -222,7 +244,7 @@ class AudioPlayer {
     this.intercommunication.get('timeCurrentTrack', ({ data }) => {
       const { serverTime, trackTime, playing } = data;
       const delay = 2000;
-      const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get();
+      const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get() - this.hardwareDeviceOffset;
 
       if (timeDifference >= 0 && !Number.isNaN(this.serverTime.getDetour())) {
         setTimeout(() => {
@@ -262,8 +284,14 @@ class AudioPlayer {
           window.document.getElementById('playDiff').innerHTML = diffToShow + ' ms';
           if (Math.abs(diff) > this.maxDiferenceTolerance || diff < 0) {
             console.log('Re-play');
+            if (!audioPlayer.audioElement.paused && audioPlayer.audioElement.readyState) {
+              this.hardwareDeviceOffset += this.hardwareDeviceCuantum * Math.sign(diff);
+            }
+
             this.play();
           }
+
+          document.getElementById('hardwareOffset').innerHTML = this.hardwareDeviceOffset + ' ms';
         } else {
           window.document.getElementById('playDiff').innerHTML = '-';
           isPlaying = false;
@@ -307,8 +335,13 @@ class PlayList {
     console.log('Playlist: Adding song...', url);
     $loading.show();
     $songUrl.disable();
-    this.intercommunication.get('addSong', () => {
-      console.log('Song added successfully!');
+    this.intercommunication.get('addSong', (resp) => {
+      if (resp.data.error) {
+        alert('There was an error when we try to add the song. Try with another one');
+      } else {
+        console.log('Song added successfully!');
+      }
+
       $loading.hide();
       $songUrl
         .val('')
@@ -471,7 +504,7 @@ class User {
     intercommunication.get('sendUserStatus', () => {}, {
       id: intercommunication.socket.id,
       username: this.getName(),
-      detour: serverTime.getDetour(),
+      detour: serverTime.realServerTime.detour,
       playDiff: audioPlayer.diff,
       playOffset: window.document.getElementById('rangeAdjustment').value,
       isPlaying: isPlaying && downloader.cachedSongs[playlist.currentSong.url].percentComplete === 100
@@ -767,7 +800,7 @@ class Connection {
 
   connectRoom() {
     this.roomId = this.getRoomId();
-    this.socket.emit('room', {id: this.roomId});
+    this.socket.emit('room', { id: this.roomId });
   }
 
   getRoomId() {
