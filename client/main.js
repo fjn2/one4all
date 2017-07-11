@@ -2,7 +2,9 @@ class ServerTime {
   constructor(intercommunication) {
     this.intercommunication = intercommunication;
     this.detour = undefined; // desvio
-    this.maxSampleritems = 50;
+    this.maxSampleritems = 20;
+    this.minDetour = 20;
+    this.minValidSamples = 5;
     this.sampler = [];
     // at first, the server time is equals to local time (with a big detour)
     this.realServerTime = {
@@ -29,7 +31,6 @@ class ServerTime {
           const maxLatency = Math.max(...latencyArray);
           // remove the one with more latency
           this.sampler.splice(latencyArray.indexOf(maxLatency), 1);
-          this.sampler.splice(0, 1);
         }
         resolve();
       });
@@ -71,10 +72,14 @@ class ServerTime {
       let nextInterval = - 20 * detour + 2100;
       nextInterval = nextInterval > 100 ? nextInterval : 100;
       this.getSampler().then(() => {
-        this.startSynchronization(nextInterval);
+        if (this.getDetour() > this.minDetour || this.sampler.length <= this.minValidSamples) {
+          this.startSynchronization(nextInterval);
+        } else {
+          console.log('Synchronization finish');
+        }
       });
       // wait for 5 samples to have a better result
-      if (detour < this.realServerTime.detour && this.sampler.length > 5) {
+      if (detour < this.realServerTime.detour && this.sampler.length > this.minValidSamples) {
         let time = this.calculateSeverTime(this.sampler, {});
         if (!Number.isNaN(time)) {
           this.realServerTime.detour = detour;
