@@ -392,6 +392,7 @@ input.small {
   opacity: 0.9;
   position: absolute;
   max-height: calc(100% - 115px);
+  width: calc(100% - 60px);
   overflow: scroll;
 }
 
