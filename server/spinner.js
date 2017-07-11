@@ -69,7 +69,7 @@ function createRoom(id, callback) {
 
 io.on('connection', function (socket) {
   socket.on('room', function ({ id }) {
-    const sanitizedId = id; // id ? id.toLowerCase() : '';
+    const sanitizedId = id ? id.toLowerCase() : '';
     // Connect to existing room.
     const room = rooms[sanitizedId];
 
