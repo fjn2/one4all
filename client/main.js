@@ -89,13 +89,12 @@ class ServerTime {
       }
       window.document.getElementById('detour').innerHTML = Math.round(detour) + ' &#177; ms';
       window.document.getElementById('bestDetour').innerHTML = Math.round(this.realServerTime.detour) + ' &#177; ms';
-
-      user.render();
     }, interval);
   }
   startPlayDiffSynchronization() {
     setInterval(() => {
       audioPlayer.getPlayListDiff();
+      user.render();
       user.sendStatus();
     }, 5000);
   }
