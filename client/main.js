@@ -71,13 +71,13 @@ class ServerTime {
       const detour = this.getDetour();
       let nextInterval = - 20 * detour + 2100;
       nextInterval = nextInterval > 100 ? nextInterval : 100;
-      this.getSampler().then(() => {
-        if (this.getDetour() > this.minDetour || this.sampler.length <= this.minValidSamples) {
-          this.startSynchronization(nextInterval);
-        } else {
-          console.log('Synchronization finish');
-        }
-      });
+      if (this.getDetour() > this.minDetour || this.sampler.length <= this.minValidSamples) {
+        this.getSampler().then(() => {
+            this.startSynchronization(nextInterval);
+        });
+      } else {
+        console.log('Synchronization finish');
+      }
       // wait for 5 samples to have a better result
       if (detour < this.realServerTime.detour && this.sampler.length > this.minValidSamples) {
         let time = this.calculateSeverTime(this.sampler, {});
