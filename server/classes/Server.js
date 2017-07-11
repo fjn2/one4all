@@ -19,9 +19,11 @@ class Server {
   constructor(roomName) {
     this.roomName = roomName;
     // to store the playlist
+    Winston.debug('Reading from', `./playlistStoredData_${this.roomName}`);
     storage.initSync({
       dir: `./playlistStoredData_${this.roomName}`
     });
+    Winston.debug('Reading finish');
     this.songPlayer = new SongPlayer();
 
 
