@@ -7,10 +7,8 @@ const cors = require('cors');
 const args = require('minimist')(process.argv.slice(2));
 const app = express();
 const pm2 = require('pm2');
-const resourcesPath = path.join(__dirname, '../../resources');
 
 app.use(cors());
-app.use('/resources', express.static(resourcesPath));
 
 configuration.port = process.env.PORT || configuration.port;
 

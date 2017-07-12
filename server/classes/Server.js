@@ -183,7 +183,7 @@ class Server {
       Winston.verbose(`Server -> createMp3FromYoutube -> Downloading ${id} into ${file}...`);
       yas.downloader.onSuccess(() => {
         Winston.info(`Yay! Audio (${id}) downloaded successfully into "${file}"!`);
-        resolve(`http://${configuration.host}:${configuration.port}/resources/${id}.mp3`);
+        resolve(`http://${configuration.host}:${configuration.resourceManagerPort}/resources/${id}.mp3`);
       }).onError(({ v, error }) => {
         Winston.error(`Sorry, an error ocurred when trying to download ${v}`, error);
         reject(error);
