@@ -37,7 +37,7 @@ class Server {
       }),
       addSong: data => (
         Promise.resolve(data.url).then((songUrl) => {
-          if (~songUrl.indexOf('youtube')) {
+          if (this.isYouTubeUrl(songUrl)) {
             let newUrl;
             return this.createMp3FromYoutube(songUrl).then((newSongUrl) => {
               newUrl = newSongUrl;
@@ -164,10 +164,20 @@ class Server {
     Winston.debug('Server -> getSongTime', this.songPlayer.getCurrentTime());
     return this.songPlayer.getCurrentTime();
   }
+  isYouTubeUrl(songUrl) {
+    return (~songUrl.indexOf('youtube') || ~songUrl.indexOf('youtu.be'));
+  }
+  getYouTubeId(songUrl) {
+    let id = url.parse(songUrl, true).query.v;
+    if (!id) {
+      [id] = songUrl.split('/').splice(-1, 1);
+    }
+    return id;
+  }
   createMp3FromYoutube(songUrl) {
     Winston.info('Server -> createMp3FromYoutube');
     // Download video.
-    const id = url.parse(songUrl, true).query.v;
+    const id = this.getYouTubeId(songUrl);
     const file = `${process.cwd()}/resources/${id}.mp3`;
     return new Promise((resolve, reject) => {
       Winston.verbose(`Server -> createMp3FromYoutube -> Downloading ${id} into ${file}...`);
@@ -181,7 +191,7 @@ class Server {
     });
   }
   getYouTubeMetadata(songUrl) {
-    const video = url.parse(songUrl, true).query.v;
+    const video = this.getYouTubeId(songUrl);
 
     return new Promise((resolve) => {
       Winston.verbose(`Server -> getYouTubeMetadata`);
