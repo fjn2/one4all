@@ -420,7 +420,7 @@ class PlayList {
     `;
     const downloadingStatus = `
       <a onclick="cancelDownload('${song.url}')">
-        <span class="downloaded">${percent}</span>
+        <span class="downloaded">${percent}%</span>
       </a>
     `;
 
