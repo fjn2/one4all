@@ -161,6 +161,12 @@ input.small {
   font-size: 21px;
 }
 
+.downloaded {
+  position: absolute;
+  top: 0;
+  right: 5px;
+}
+
 #activityStream {
   position: absolute;
   font: 12px 'Open Sans';
