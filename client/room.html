@@ -10,7 +10,7 @@
 
     <title>ListenSync</title>
   </header>
-  <body onpaste="app.onPaste(event)">
+  <body onpaste="app.onPaste(event)" ondragover="event.preventDefault()" ondrop="app.onDrop(event)">
     <div class="main-container">
       <div class="container left-container">
         <h1 class="home">

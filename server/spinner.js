@@ -20,7 +20,7 @@ const app = http.createServer(function (req, res) {
 const io = require('socket.io')(app);
 
 app.listen(configuration.spinnerPort);
-Winston.info('SERVER LISTENING AT PORT ', configuration.spinnerPort);
+Winston.info('SPINNER LISTENING AT PORT ', configuration.spinnerPort);
 
 function getPort() {
   actualPort += 2;
@@ -70,36 +70,36 @@ function createRoom(id, callback) {
 io.on('connection', function (socket) {
   socket.on('room', function ({ id }) {
     const sanitizedId = id ? id.toLowerCase() : '';
-    // Connect to existing room.
     const room = rooms[sanitizedId];
 
-    if (room) {
-      Winston.info('CONNECT to existing room:', rooms[sanitizedId].url);
-      pm2.connect(function(err) {
-        pm2.list((err, apps) => {
-          if (err) throw err;
-          let isRunning = false;
-          apps.forEach((app) => {
-            if(app.pm_id === rooms[sanitizedId].proc.pm_id && app.monit.memory !== 0) {
-              isRunning = true;
-            }
-          });
-          if (!isRunning) {
-            Winston.info('The room', sanitizedId, 'was down, re-starting...');
-            pm2.restart(rooms[sanitizedId].proc.pm_id);
-          }
-
-          // pm2.disconnect();
-          socket.emit('room', { url: room.url });
-        });
+    // Create new room.
+    if (!room) {
+      Winston.info('CREATE room:', sanitizedId);
+      createRoom(sanitizedId, (room) => {
+        socket.emit('room', { url: room.url });
       });
       return;
     }
 
-    // Create new room.
-    Winston.info('CREATE room:', sanitizedId);
-    createRoom(sanitizedId, (room) => {
-      socket.emit('room', { url: room.url });
+    // Existing room.
+    Winston.info('CONNECT to existing room:', rooms[sanitizedId].url);
+    pm2.connect(function(err) {
+      pm2.list((err, apps) => {
+        if (err) throw err;
+        let isRunning = false;
+        apps.forEach((app) => {
+          if(app.pm_id === rooms[sanitizedId].proc.pm_id && app.monit.memory !== 0) {
+            isRunning = true;
+          }
+        });
+        if (!isRunning) {
+          Winston.info(`The room '${sanitizedId}' was down, re-starting...`);
+          pm2.restart(rooms[sanitizedId].proc.pm_id);
+        }
+
+        // pm2.disconnect();
+        socket.emit('room', { url: room.url });
+      });
     });
   });
 });
