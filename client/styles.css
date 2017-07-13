@@ -244,9 +244,9 @@ input.small {
 }
 
 #emoticons {
-  top: -261px;
+  top: -155px;
   left: 0;
-  height: 250px;
+  height: 144px;
   width: 100%;
   z-index: 100;
   position: absolute;
