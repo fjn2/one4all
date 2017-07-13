@@ -1,2 +1,3 @@
-server: node server/index.js
+server: node server/spinner.js
+resourcer: node server/resourcer.js
 client: node client/serve.js

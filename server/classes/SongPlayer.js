@@ -51,7 +51,7 @@ class SongPlayer {
           });
         });
       } else {
-        reject('there isn\'t a current song');
+        reject(`there isn't a current song`);
       }
     });
   }

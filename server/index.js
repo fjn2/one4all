@@ -8,9 +8,7 @@ Winston.info('Room name:', roomName);
 Winston.info('Starting server...');
 
 const server = new Server(roomName);
-
 Winston.info('Server is running');
-
 
 process.on('uncaughtException', function(err) {
   Winston.error(`Caught exception: ${err}`);

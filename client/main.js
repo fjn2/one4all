@@ -771,6 +771,17 @@ class App {
     $songUrl.val(pasted);
     app.addSongToPlayList(pasted);
   }
+
+  onDrop(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const text = event.dataTransfer.getData('text');
+    console.log('DROPPED text', text);
+
+    $songUrl.val(text);
+    app.addSongToPlayList(text);
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -986,6 +997,10 @@ function showRange(value) {
     document.getElementById('rangeAdjustment').value = 0;
     manualAdjustment(0);
   }
+}
+
+function toArray (list) {
+  return Array.prototype.slice.call(list || [], 0)
 }
 
 
