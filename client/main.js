@@ -258,11 +258,11 @@ class AudioPlayer {
       const delay = 2000;
       const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get() - this.hardwareDeviceOffset;
 
-      if (timeDifference >= 0 && !Number.isNaN(this.serverTime.getDetour())) {
+      if (timeDifference >= 100 && !Number.isNaN(this.serverTime.getDetour())) {
         setTimeout(() => {
           this.seek(trackTime + delay + ($rangeAdjustment.val() * 1));
-          const initialTime = new Date();
           // 100ms looping to have a better performance
+          const initialTime = new Date();
           while (new Date() - initialTime < 100) {}
           if (playing) {
             isPlaying = true;
@@ -284,32 +284,36 @@ class AudioPlayer {
 
       const delay = 2000;
       const timeDifference = Math.round(new Date(serverTime).getTime() + delay) - this.serverTime.get() + ($rangeAdjustment.val() * -1);
+      if (timeDifference >= 100) {
+        setTimeout(() => {
+          // 100ms looping to have a better performance
+          const initialTime = new Date();
+          while (new Date() - initialTime < 100) {}
+          const diff = Math.round((trackTime + delay) - this.audioElement.currentTime * 1000);
+          this.diff = diff;
+          if (playing) {
+            let diffToShow = diff;
+            if ($rangeAdjustment.val() !== '0') {
+              diffToShow = '(' + diff + ' + ' + ($rangeAdjustment.val() * 1) + ')';
+            }
+            window.document.getElementById('playDiff').innerHTML = diffToShow + ' ms';
+            if (Math.abs(diff) > this.maxDiferenceTolerance) {
+              console.log('Re-play');
+              if (!audioPlayer.audioElement.paused && audioPlayer.audioElement.readyState) {
+                this.hardwareDeviceOffset += this.hardwareDeviceCuantum * Math.sign(diff);
+              }
 
-      setTimeout(() => {
-        const diff = Math.round((trackTime + delay) - this.audioElement.currentTime * 1000);
-        this.diff = diff;
-        if (playing) {
-          let diffToShow = diff;
-          if ($rangeAdjustment.val() !== '0') {
-            diffToShow = '(' + diff + ' + ' + ($rangeAdjustment.val() * 1) + ')';
-          }
-          window.document.getElementById('playDiff').innerHTML = diffToShow + ' ms';
-          if (Math.abs(diff) > this.maxDiferenceTolerance) {
-            console.log('Re-play');
-            if (!audioPlayer.audioElement.paused && audioPlayer.audioElement.readyState) {
-              this.hardwareDeviceOffset += this.hardwareDeviceCuantum * Math.sign(diff);
+              this.play();
             }
 
-            this.play();
+            document.getElementById('hardwareOffset').innerHTML = this.hardwareDeviceOffset + ' ms';
+          } else {
+            window.document.getElementById('playDiff').innerHTML = '-';
+            isPlaying = false;
+            this.audioElement.pause();
           }
-
-          document.getElementById('hardwareOffset').innerHTML = this.hardwareDeviceOffset + ' ms';
-        } else {
-          window.document.getElementById('playDiff').innerHTML = '-';
-          isPlaying = false;
-          this.audioElement.pause();
-        }
-      }, timeDifference);
+        }, timeDifference - 100);
+      }
     });
   }
   calculateHardwareDeviceOffset(callback, samples = []) {
