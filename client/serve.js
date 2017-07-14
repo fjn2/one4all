@@ -18,7 +18,7 @@ app.use('/room/:roomId', express.static(__dirname));
 
 // Set routes.
 app.get('/room.html', (req, res) => {
-  res.render('room')
+  res.render('room');
 });
 
 app.use(express.static(__dirname));

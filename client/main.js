@@ -66,17 +66,22 @@ class ServerTime {
     }
     return samplerAcum / samplerCount;
   }
-  startSynchronization(interval = 1000) {
+  startSynchronization(callback, interval = 1000) {
     setTimeout(() => {
       const detour = this.getDetour();
-      let nextInterval = - 20 * detour + 2100;
-      nextInterval = nextInterval > 100 ? nextInterval : 100;
+      // this is the progresive version of the nextInterval
+      // let nextInterval = - 20 * detour + 2100;
+      // nextInterval = nextInterval > 100 ? nextInterval : 100;
+      const nextInterval = 500;
       if (this.getDetour() > this.minDetour || this.sampler.length <= this.minValidSamples) {
         this.getSampler().then(() => {
-            this.startSynchronization(nextInterval);
+            this.startSynchronization(callback, nextInterval);
         });
       } else {
         console.log('Synchronization finish');
+        if (callback) {
+          callback();
+        }
       }
       // wait for 5 samples to have a better result
       if (detour < this.realServerTime.detour && this.sampler.length > this.minValidSamples) {
@@ -89,6 +94,11 @@ class ServerTime {
       }
       window.document.getElementById('detour').innerHTML = Math.round(detour) + ' &#177; ms';
       window.document.getElementById('bestDetour').innerHTML = Math.round(this.realServerTime.detour) + ' &#177; ms';
+      if (this.minDetour > Math.round(detour)) {
+        window.document.querySelector('.server-sync-data').innerHTML = `Your actual best detur is ${Math.round(detour)}. You need one smaller than ${this.minDetour}`;
+      } else {
+        window.document.querySelector('.server-sync-data').innerHTML = ':)';
+      }
     }, interval);
   }
   startPlayDiffSynchronization() {
@@ -188,18 +198,20 @@ class AudioPlayer {
     // initialize audio control
     this.audioElement = window.document.createElement('AUDIO');
 
-    if (isMobile()) {
+    if (isMobile() || true) {
       this.audioElement.controls = true;
     }
-    this.src = './beep.mp3';
-    this.maxDiferenceTolerance = 100;
+    this.beepSong = './beep.mp3';
+    this.src = this.beepSong;
+    this.maxDiferenceTolerance = 50;
 
     this.serverTime = serverTime;
     // these two variables are to set an small offset for mobiles or other devices that have problems with playing music
     this.hardwareDeviceOffset = 0;
     this.hardwareDeviceCuantum = 10;
+    this.hardwareDeviceInitialSamples = 4;
 
-    window.document.querySelector('.menu-fill').appendChild(this.audioElement);
+    window.document.querySelector('.fake-button').appendChild(this.audioElement);
   }
   loadAudio() {
     return new Promise((resolve) => {
@@ -282,7 +294,7 @@ class AudioPlayer {
             diffToShow = '(' + diff + ' + ' + ($rangeAdjustment.val() * 1) + ')';
           }
           window.document.getElementById('playDiff').innerHTML = diffToShow + ' ms';
-          if (Math.abs(diff) > this.maxDiferenceTolerance || diff < 0) {
+          if (Math.abs(diff) > this.maxDiferenceTolerance) {
             console.log('Re-play');
             if (!audioPlayer.audioElement.paused && audioPlayer.audioElement.readyState) {
               this.hardwareDeviceOffset += this.hardwareDeviceCuantum * Math.sign(diff);
@@ -299,6 +311,39 @@ class AudioPlayer {
         }
       }, timeDifference);
     });
+  }
+  calculateHardwareDeviceOffset(callback, samples = []) {
+    console.log('calculateHardwareDeviceOffset -> Prepare');
+    audioPlayer.audioElement.currentTime = 0;
+    setTimeout(() => {
+      console.log('calculateHardwareDeviceOffset -> Starting');
+      const initialTime = new Date();
+      const onEnded = () => {
+        const diff = new Date() - initialTime - (this.audioElement.duration * 1000);
+        console.log('calculateHardwareDeviceOffset -> diff', diff);
+        clearInterval(backUpTimer);
+        audioPlayer.audioElement.removeEventListener('ended', onEnded, false);
+        if (samples.length < this.hardwareDeviceInitialSamples) {
+          window.document.querySelector('.fake-button').innerHTML = this.hardwareDeviceInitialSamples - samples.length;
+          audioPlayer.calculateHardwareDeviceOffset(callback, [...samples, diff]);
+        } else {
+          if (callback) {
+            const sumOffset = samples.reduce((acum, sample) => acum + sample, 0);
+            const avgOffset = sumOffset / samples.length;
+            console.log('hardwareDeviceOffset calculation finish');
+            callback(Math.round(avgOffset));
+          }
+        }
+      };
+      this.audioElement.addEventListener('ended', onEnded, false);
+      // sometimes the onend event is not fired
+      const backUpTimer = setTimeout(() => {
+        console.log('ended not triggered, re-starting');
+        audioPlayer.audioElement.removeEventListener('ended', onEnded, false);
+        audioPlayer.calculateHardwareDeviceOffset(callback, samples);
+      }, 2000);
+      this.audioElement.play();
+    }, 1000);
   }
   waitForPlay() {
     this.intercommunication.subscribe('startPlay', () => {
@@ -362,7 +407,8 @@ class PlayList {
     this.intercommunication.subscribe('playlist', ({ data }) => {
       const { songs, currentSong } = data;
       this.songs = songs;
-      if (!currentSong || !this.currentSong || this.currentSong.url !== currentSong.url) {
+      // check app.initialSyncFinish to verify the hardware offset properly
+      if ((!currentSong || !this.currentSong || this.currentSong.url !== currentSong.url) && app.initialSyncFinish) {
         this.audioPlayer.stop();
         this.audioPlayer.loadAudio().then(() => {
           this.audioPlayer.play();
@@ -721,7 +767,7 @@ class App {
   constructor(url) {
     const percentEl = window.document.getElementById('percent');
 
-    this.intercommunication = new Intercommunication(url); //configuration.server
+    this.intercommunication = new Intercommunication(url);
     this.serverTime = new ServerTime(this.intercommunication);
     this.downloader = new Downloader(this.intercommunication);
     this.audioPlayer = new AudioPlayer(this.intercommunication, this.serverTime, percentEl);
@@ -729,20 +775,53 @@ class App {
     this.user = new User();
     this.chat = new Chat(this.intercommunication);
 
-    this.serverTime.startSynchronization();
-    this.serverTime.startPlayDiffSynchronization();
+    // Syncronization procces
 
+    this.initialSyncFinish = false;
+
+    let serverSyncronization = false;
+    let hardwareOffsetSyncronization = false;
+
+    const onPlay = () => {
+      audioPlayer.audioElement.removeEventListener('play', onPlay, false);
+      // hide the player to avoid multiple clicks
+      audioPlayer.audioElement.style.visibility = 'hidden';
+      audioPlayer.audioElement.volume = 0;
+      this.audioPlayer.calculateHardwareDeviceOffset((offsetAvg) => {
+        this.audioPlayer.hardwareDeviceOffset = offsetAvg;
+        hardwareOffsetSyncronization = true;
+        audioPlayer.audioElement.volume = 1;
+        this.audioPlayer.setSong(undefined);
+      });
+
+    };
+    // prepare the dummy song
+    this.audioPlayer.setSong(this.audioPlayer.beepSong);
+
+    this.audioPlayer.audioElement.addEventListener('play', onPlay, false);
+
+    this.serverTime.startSynchronization(() => {
+      serverSyncronization = true;
+    });
+
+    // this is very importart here to read the 'welcome actions' from the server
     this.playlist.waitForPlayList();
-    this.playlist.waitForNumberOfConections();
-    this.chat.waitForActivityStream();
 
-    const timer = setInterval(() => {
-      if (this.serverTime.getDetour() < configuration.maxDetour) {
-        // here I know the server time
+    const verificationSyncInterval = setInterval(() => {
+      if (serverSyncronization && hardwareOffsetSyncronization) {
+        console.log('We are ready to go');
+        this.initialSyncFinish = true;
+        this.audioPlayer.loadAudio();
+        clearInterval(verificationSyncInterval);
+
+        this.serverTime.startPlayDiffSynchronization();
         this.audioPlayer.waitForPlay();
-        clearInterval(timer);
+        this.playlist.waitForNumberOfConections();
+        this.chat.waitForActivityStream();
+
+        window.document.querySelector('.syncronization-modal').style.display = 'none';
       }
-    }, 1000);
+    }, 2000);
   }
   addSongToPlayList(songUrl) {
     this.playlist.addSong(songUrl);
@@ -1000,7 +1079,7 @@ function showRange(value) {
 }
 
 function toArray (list) {
-  return Array.prototype.slice.call(list || [], 0)
+  return Array.prototype.slice.call(list || [], 0);
 }
 
 

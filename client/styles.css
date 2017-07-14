@@ -678,6 +678,59 @@ input.small {
   margin-top: 30px;
 }
 
+/*** Modal ***/
+.syncronization-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+}
+.syncronization-modal .syncronization-background {
+  height: 100%;
+  width: 100%;
+  background: lightblue;
+  opacity: 0.5;
+}
+.syncronization-modal .syncronization-content {
+  width: 330px;
+  height: 130px;
+  background: white;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate3d(-50%,-50%,0);
+  top: 50%;
+  text-align: center;
+  color:black;
+  border-radius: 5px;
+}
+.syncronization-modal .syncronization-content span {
+  line-height: 2rem;
+}
+.syncronization-modal .syncronization-content .fake-button {
+  border-radius: 100%;
+  background: firebrick;
+  color: white;
+  line-height: 40px;
+  width: 40px;
+  height: 40px;
+  margin: auto;
+  margin-top:20px;
+  box-shadow: 2px 2px 5px 1px #777;
+}
+.syncronization-modal .syncronization-content .server-sync-data {
+  font-size: 0.7rem;
+  margin-top: 10px;
+}
+.syncronization-modal .syncronization-content audio {
+  padding-top: 4px;
+  display: block;
+  opacity: 0;
+}
+/*** End Modal ***/
+
 @media (max-height: 560px) {
   .box-center {
     margin: 75px auto;
