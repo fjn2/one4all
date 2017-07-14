@@ -94,10 +94,14 @@ class ServerTime {
       }
       window.document.getElementById('detour').innerHTML = Math.round(detour) + ' &#177; ms';
       window.document.getElementById('bestDetour').innerHTML = Math.round(this.realServerTime.detour) + ' &#177; ms';
-      if (this.minDetour > Math.round(detour)) {
-        window.document.querySelector('.server-sync-data').innerHTML = `Your actual best detur is ${Math.round(detour)}. You need one smaller than ${this.minDetour}`;
+      if (this.sampler.length < this.minValidSamples) {
+        window.document.querySelector('.server-sync-data').innerHTML = 'Recollecting server information...';
       } else {
-        window.document.querySelector('.server-sync-data').innerHTML = ':)';
+        if (this.minDetour > Math.round(detour)) {
+          window.document.querySelector('.server-sync-data').innerHTML = `Your actual best detur is ${Math.round(detour)}. You need one smaller than ${this.minDetour}`;
+        } else {
+          window.document.querySelector('.server-sync-data').innerHTML = ':)';
+        }
       }
     }, interval);
   }
