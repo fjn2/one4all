@@ -104,7 +104,11 @@ class Server {
       },
       nextMusic: () => {
         this.playlist.nextSong();
-        this.playMusic();
+        if (this.playMusic) {
+          this.playMusic();
+        } else {
+          Winston.warn('this.playMusic() is not a function in Server.js I don\'t know why');
+        }
       },
       sendMessage: ({ userName, message, guid }) => {
         const messageToSend = `

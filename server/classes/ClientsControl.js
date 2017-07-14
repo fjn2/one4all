@@ -39,17 +39,17 @@ class ClientControls {
             .then((pData) => {
               socket.emit(`${key}-S`, {
                 guid: data.guid,
-                data: pData,
+                data: pData
               });
             })
             .catch((err) => {
-              console.error('ERROR:', err)
+              Winston.error('ERROR IN ACTION', key, err);
             });
           } else {
             // it is some other value
             socket.emit(`${key}-S`, {
               guid: data.guid,
-              data: serverData,
+              data: serverData
             });
           }
         });
