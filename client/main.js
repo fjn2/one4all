@@ -97,7 +97,7 @@ class ServerTime {
       if (this.sampler.length < this.minValidSamples) {
         window.document.querySelector('.server-sync-data').innerHTML = 'Recollecting server information...';
       } else {
-        if (this.minDetour > Math.round(detour)) {
+        if (Math.round(detour) > this.minDetour) {
           window.document.querySelector('.server-sync-data').innerHTML = `Your actual best detur is ${Math.round(detour)}. You need one smaller than ${this.minDetour}`;
         } else {
           window.document.querySelector('.server-sync-data').innerHTML = ':)';
