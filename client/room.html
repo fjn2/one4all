@@ -62,15 +62,15 @@
         <div class="block controls thumbnail">
           <img src="" id="currentThumbnail" />
         </div>
-        <div class="block controls" id="playlistcontrols">
+        <div class="block controls">
           <div class="button" onclick="playMusic()">
             <i class="material-icons">play_arrow</i>
           </div>
 
-          <div class="button" onclick="pauseMusic()">
+          <div class="button" onclick="pauseMusic()" id="stopMusicButton">
             <i class="material-icons">stop</i>
           </div>
-          <div class="button" onclick="nextMusic()">
+          <div class="button" onclick="nextMusic()" id="nextMusicButton">
             <i class="material-icons">skip_next</i>
           </div>
           <div class="checkbox">

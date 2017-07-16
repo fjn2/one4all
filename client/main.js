@@ -1165,7 +1165,9 @@ function showRange(value) {
 }
 
 function displayPlaylistControls() {
-  document.getElementById('playlistcontrols').style.display = adminPermission ? 'block' : 'none';
+  const state = adminPermission ? 'block' : 'none';
+  document.getElementById('stopMusicButton').style.display = state;
+  document.getElementById('nextMusicButton').style.display = state;
 }
 
 function becomeAdmin(id) {

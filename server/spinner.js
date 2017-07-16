@@ -97,7 +97,7 @@ io.on('connection', function (socket) {
           }
         });
         if (!isRunning) {
-          Winston.info(`The room '${sanitizedId}' was down, re-starting...`);
+          Winston.info(`The room '${sanitizedId}' was down, re-starting...`, 'process id:', room.proc.pm_id);
           pm2.restart(room.proc.pm_id, (err, apps) => {
             if (err) throw err;
             socket.emit('room', { url: room.url });
