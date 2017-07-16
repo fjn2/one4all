@@ -188,12 +188,14 @@ input.small {
 .message {
   padding: 5px 0px;
   border-top: 1px solid rgba(50,50,50,0.1);
+  position: relative;
 }
 
 .message p {
   display: inline;
   margin: 0;
   position: relative;
+  line-height: 20px;
 }
 
 .message-image {
@@ -212,11 +214,17 @@ input.small {
   color: black;
 }
 
-.text img {
+.text .emoticon {
   vertical-align: middle;
   top: -2px;
   position: relative;
   padding: 0 2px;
+  width: 26px;
+}
+
+#activityStream .code {
+  font-family: 'Source Code Pro', monospace;
+  color: #444;
 }
 
 .text br {
@@ -338,12 +346,14 @@ input.small {
   margin-left: 55px;
   outline: none;
   line-height: 16px;
+  cursor: text;
 }
 
 #messageText img {
   vertical-align: middle;
-  margin-top: -8px;
   padding: 0 2px;
+  margin-top: -6px;
+  width: 26px;
 }
 
 #messageText br {
