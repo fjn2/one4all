@@ -603,6 +603,12 @@ class Chat {
       imageTransformation: /^http(s)?:\/\/.*\.(jpg|jpeg|png|gif|webp)$/
     }
 
+    // Strip HTML to clean up message when not an emoticon.
+    if (!message.match(/<img src=".*emoticons.*class="emoticon">/)) {
+      message = message.replace(/<(?:.|\n)*?>/gm, '');
+    }
+
+    // Apply other transformations.
     Object.keys(transformations)
     .some((transformationName) => {
       if (message.match(transformations[transformationName])) {
@@ -1013,7 +1019,13 @@ function showRange(value) {
 }
 
 function toArray (list) {
-  return Array.prototype.slice.call(list || [], 0)
+  return Array.prototype.slice.call(list || [], 0);
+}
+
+function stripHtml (html) {
+   var tmp = document.createElement('DIV');
+   tmp.innerHTML = html;
+   return tmp.textContent || tmp.innerText || '';
 }
 
 
