@@ -630,7 +630,7 @@ class Chat {
       // Ensure emoticons are closed.
       $emoticons.hide();
 
-      $activityStream.scrollBottom();
+      setTimeout(() => $activityStream.scrollBottom())
     }, {
       message,
       userName: this.username || 'Anonymous',
