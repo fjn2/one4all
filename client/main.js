@@ -685,11 +685,33 @@ class Chat {
     return `<img src="${message}" class="message-image" />`;
   }
 
+  codeTransformation(message) {
+    return `
+      <span class="code">
+        ${
+          message
+            .replace(/^`/, '')
+            .replace(/`$/, '')
+            // .replace(/&nbsp; &nbsp;/g, '&nbsp;')
+            // .replace(/&nbsp; &nbsp;/g, '&nbsp;')
+            // .replace(/\&nbsp;/g, '<br>')
+        }
+      </span>
+    `;
+  }
+
   applyTransformations(message) {
     const transformations = {
-      imageTransformation: /^http(s)?:\/\/.*\.(jpg|jpeg|png|gif|webp)$/
+      imageTransformation: /^http(s)?:\/\/.*\.(jpg|jpeg|png|gif|webp)$/,
+      codeTransformation: /^`.*`$/g
     }
 
+    // Strip HTML to clean up message when not an emoticon.
+    if (!message.match(/<img src=".*emoticons.*class="emoticon">/)) {
+      message = message.replace(/<(?:.|\n)*?>/gm, '');
+    }
+
+    // Apply other transformations.
     Object.keys(transformations)
     .some((transformationName) => {
       if (message.match(transformations[transformationName])) {
@@ -700,9 +722,13 @@ class Chat {
     return message;
   }
 
-  sendMessage(message) {
+  sendMessage(message, event) {
+    event.stopPropagation();
+    event.preventDefault();
+
     $message.disable();
     $messageSending.show();
+    message = this.applyTransformations(message);
     this.intercommunication.get('sendMessage', ({ data }) => {
       $messageSending.hide();
       $message
@@ -712,6 +738,8 @@ class Chat {
 
       // Ensure emoticons are closed.
       $emoticons.hide();
+
+      setTimeout(() => $activityStream.scrollBottom())
     }, {
       message,
       userName: this.username || 'Anonymous',
@@ -720,7 +748,9 @@ class Chat {
   }
 
   addActivity(message) {
-    window.document.getElementById('activityStream').innerHTML += message;
+    $activityStream
+      .appendHtml(message)
+      .scrollBottom();
   }
 
   toggleEmoticons() {
@@ -730,7 +760,7 @@ class Chat {
   addEmoticon(event) {
     const src = event.target.currentSrc;
     $message
-      .appendHtml(`<img src="${src}" />`)
+      .appendHtml(`<img src="${src}" class="emoticon" />`)
       .caretEnd();
   }
 }
@@ -888,6 +918,9 @@ class App {
     this.chat.sendMessage(message, userName);
   }
   onPaste(event) {
+    // Do nothing when pasting text in the chat.
+    if (event.target.id === 'messageText') return;
+
     const clipboard = event.clipboardData || window.clipboardData;
     const pasted = clipboard.getData('Text');
     console.log('PASTED:', pasted);
@@ -984,11 +1017,12 @@ class Menu {
     if (name === 'chat') {
       menu.chat.removeClass('new-activity');
       if ($username.isVisible()) {
-        $username.focus();
-        return;
+        setTimeout(() => $username.focus());
+      } else {
+        $message.focus();
       }
 
-      $message.focus();
+      setTimeout(() => $activityStream.scrollBottom());
     } else if (name === 'playlistPage') {
       menu.playlistPage.removeClass('new-activity');
       $songUrl.focus();
@@ -1055,6 +1089,7 @@ const $emoticonSelector = new El('.emoticon-selector');
 const $emoticons = new El('#emoticons');
 const $currentThumbnail = new El('#currentThumbnail');
 const $songUrl = new El('#songUrl');
+const $activityStream = new El('#activityStream')
 
 // Randomize background.
 $background.setRandomBackground({
@@ -1082,8 +1117,8 @@ function nextMusic() {
   app.next();
 }
 function sendMessage() {
-  const message = window.document.getElementById('messageText').value;
-  const userName = window.document.getElementById('userName').value;
+  const message = $message.val();
+  const userName = $username.val();
   if (userName.length) {
     app.sendMessage(message, userName);
     window.document.getElementById('messageText').value = '';
@@ -1140,6 +1175,7 @@ function becomeAdmin(id) {
 function toArray (list) {
   return Array.prototype.slice.call(list || [], 0);
 }
+
 function getCookie(cname) {
   var name = cname + "=";
   var decodedCookie = decodeURIComponent(document.cookie);
@@ -1156,6 +1192,12 @@ function getCookie(cname) {
   // redirect to home page to make the authentication
   window.location = '/';
   return '';
+}
+
+function stripHtml (html) {
+  var tmp = document.createElement('DIV');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
 }
 
 mdc.autoInit();
