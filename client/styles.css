@@ -231,7 +231,7 @@ input.small {
   position: absolute;
 }
 
-#playlistcontrols {
+#stopMusicButton, #nextMusicButton {
   display:none;
 }
 #chat {
