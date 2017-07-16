@@ -889,12 +889,12 @@ class Menu {
     if (name === 'chat') {
       menu.chat.removeClass('new-activity');
       if ($username.isVisible()) {
-        setTimeout(() => {
-          $username.focus();
-        });
+        setTimeout(() => $username.focus());
       } else {
         $message.focus();
       }
+
+      setTimeout(() => $activityStream.scrollBottom());
     } else if (name === 'playlistPage') {
       menu.playlistPage.removeClass('new-activity');
       $songUrl.focus();
