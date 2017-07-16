@@ -188,12 +188,14 @@ input.small {
 .message {
   padding: 5px 0px;
   border-top: 1px solid rgba(50,50,50,0.1);
+  position: relative;
 }
 
 .message p {
   display: inline;
   margin: 0;
   position: relative;
+  line-height: 20px;
 }
 
 .message-image {
@@ -218,6 +220,11 @@ input.small {
   position: relative;
   padding: 0 2px;
   width: 26px;
+}
+
+#activityStream .code {
+  font-family: 'Source Code Pro', monospace;
+  color: #444;
 }
 
 .text br {

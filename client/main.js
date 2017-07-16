@@ -598,9 +598,25 @@ class Chat {
     return `<img src="${message}" class="message-image" />`;
   }
 
+  codeTransformation(message) {
+    return `
+      <span class="code">
+        ${
+          message
+            .replace(/^`/, '')
+            .replace(/`$/, '')
+            // .replace(/&nbsp; &nbsp;/g, '&nbsp;')
+            // .replace(/&nbsp; &nbsp;/g, '&nbsp;')
+            // .replace(/\&nbsp;/g, '<br>')
+        }
+      </span>
+    `;
+  }
+
   applyTransformations(message) {
     const transformations = {
-      imageTransformation: /^http(s)?:\/\/.*\.(jpg|jpeg|png|gif|webp)$/
+      imageTransformation: /^http(s)?:\/\/.*\.(jpg|jpeg|png|gif|webp)$/,
+      codeTransformation: /^`.*`$/g
     }
 
     // Strip HTML to clean up message when not an emoticon.
@@ -967,8 +983,8 @@ function nextMusic() {
   app.next();
 }
 function sendMessage() {
-  const message = window.document.getElementById('messageText').value;
-  const userName = window.document.getElementById('userName').value;
+  const message = $message.val();
+  const userName = $username.val();
   if (userName.length) {
     app.sendMessage(message, userName);
     window.document.getElementById('messageText').value = '';
@@ -1027,6 +1043,5 @@ function stripHtml (html) {
    tmp.innerHTML = html;
    return tmp.textContent || tmp.innerText || '';
 }
-
 
 mdc.autoInit();
