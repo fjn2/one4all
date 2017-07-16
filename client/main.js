@@ -639,7 +639,9 @@ class Chat {
   }
 
   addActivity(message) {
-    $activityStream.appendHtml(message);
+    $activityStream
+      .appendHtml(message)
+      .scrollBottom();
   }
 
   toggleEmoticons() {
