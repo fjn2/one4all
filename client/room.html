@@ -131,7 +131,7 @@
             <div
               id="messageText"
               contenteditable="true"
-              onkeydown="if (event.keyCode === 13) app.chat.sendMessage(this.innerHTML)"
+              onkeydown="if (event.keyCode === 13) app.chat.sendMessage(this.innerHTML, event)"
             ></div>
 
             <img id="message-sending" src="loading.svg" style="display:none" />

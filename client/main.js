@@ -613,7 +613,9 @@ class Chat {
     return message;
   }
 
-  sendMessage(message) {
+  sendMessage(message, event) {
+    event.stopPropagation();
+    event.preventDefault();
     $message.disable();
     $messageSending.show();
     this.intercommunication.get('sendMessage', ({ data }) => {

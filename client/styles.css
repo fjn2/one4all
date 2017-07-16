@@ -217,6 +217,7 @@ input.small {
   top: -2px;
   position: relative;
   padding: 0 2px;
+  width: 26px;
 }
 
 .text br {
@@ -338,12 +339,14 @@ input.small {
   margin-left: 55px;
   outline: none;
   line-height: 16px;
+  cursor: text;
 }
 
 #messageText img {
   vertical-align: middle;
-  margin-top: -8px;
   padding: 0 2px;
+  margin-top: -6px;
+  width: 26px;
 }
 
 #messageText br {
