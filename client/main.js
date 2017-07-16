@@ -1165,7 +1165,7 @@ function showRange(value) {
 }
 
 function displayPlaylistControls() {
-  const state = adminPermission ? 'block' : 'none';
+  const state = adminPermission ? 'inline-block' : 'none';
   document.getElementById('stopMusicButton').style.display = state;
   document.getElementById('nextMusicButton').style.display = state;
 }
