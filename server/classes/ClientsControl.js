@@ -89,7 +89,7 @@ class ClientControls {
         this.isTheRoomEmpty = false;
       }
     }, 60000);
-    setInterval( () => {
+    setInterval(() => {
       this.sendNumberOfConections();
     }, 3000);
   }
@@ -139,7 +139,7 @@ class ClientControls {
     io.emit('stopPlay');
   }
   sendNumberOfConections() {
-    Winston.info('ClientControls -> sendNumberOfConections', this.clients.length, this.clients[0].username);
+    Winston.info('ClientControls -> sendNumberOfConections', this.clients.length);
     const clientsData = this.clients.map(client => {
       return {
         id: client.id,

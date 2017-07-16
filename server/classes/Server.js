@@ -136,7 +136,11 @@ class Server {
       }
     };
 
-    const storedAdministrators = storage.getItemSync('administrators');
+    let storedAdministrators = storage.getItemSync('administrators');
+    if (storedAdministrators) {
+      // remove all falsy values
+      storedAdministrators = storedAdministrators.filter(el => el);
+    }
 
     this.clientsControl = new ClientsControl(this.clientActions, this.welcomeActions, storedAdministrators);
 
