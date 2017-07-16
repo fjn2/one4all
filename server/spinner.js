@@ -38,7 +38,7 @@ function createRoom(id, callback) {
   pm2.connect(function(err) {
       if (err) {
         Winston.error(err);
-        process.exit(2);
+        return;
       }
       pm2.start({
         script: 'server/index.js',
@@ -50,8 +50,8 @@ function createRoom(id, callback) {
           args: id // room name
         },
       }, function(err, apps) {
+        if (err) throw err;
         if (apps) {
-          if (err) throw err;
           if (!rooms[id]) {
             rooms[id] = {
               url,
@@ -86,23 +86,27 @@ io.on('connection', function (socket) {
     }
 
     // Existing room.
-    Winston.info('CONNECT to existing room:', rooms[sanitizedId].url);
+    Winston.info('CONNECT to existing room:', room.url);
     pm2.connect(function(err) {
       pm2.list((err, apps) => {
         if (err) throw err;
         let isRunning = false;
         apps.forEach((app) => {
-          if(app.pm_id === rooms[sanitizedId].proc.pm_id && app.monit.memory !== 0) {
+          if(app.pm_id === room.proc.pm_id && app.monit.memory !== 0) {
             isRunning = true;
           }
         });
         if (!isRunning) {
           Winston.info(`The room '${sanitizedId}' was down, re-starting...`);
-          pm2.restart(rooms[sanitizedId].proc.pm_id);
+          pm2.restart(room.proc.pm_id, (err, apps) => {
+            if (err) throw err;
+            socket.emit('room', { url: room.url });
+            pm2.disconnect();
+          });
+        } else {
+          socket.emit('room', { url: room.url });
+          pm2.disconnect();
         }
-
-        // pm2.disconnect();
-        socket.emit('room', { url: room.url });
       });
     });
   });
@@ -110,6 +114,6 @@ io.on('connection', function (socket) {
 
 
 process.on('uncaughtException', function(err) {
-  Winston.error(`Caught exception: ${err}`);
+  Winston.error('Caught exception:', err);
 });
 

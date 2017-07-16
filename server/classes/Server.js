@@ -121,6 +121,9 @@ class Server {
       },
       sendUserStatus: (data) => {
         this.clientsControl.setUserSatus(data);
+      },
+      becomeAdmin: ({ id }) => {
+        this.clientsControl.addAdmin(id);
       }
     };
     this.welcomeActions = {
@@ -133,7 +136,9 @@ class Server {
       }
     };
 
-    this.clientsControl = new ClientsControl(this.clientActions, this.welcomeActions);
+    const storedAdministrators = storage.getItemSync('administrators');
+
+    this.clientsControl = new ClientsControl(this.clientActions, this.welcomeActions, storedAdministrators);
 
     this.playlist = new Playlist(this.songPlayer, this.clientsControl);
     this.songPlayer.setPlaylist(this.playlist);

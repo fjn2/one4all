@@ -1,10 +1,26 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const compression = require('compression');
 const ejs = require('ejs');
+const Guid = require('guid');
 
 const app = express();
 const port = 2001;
+
+app.use(cookieParser());
+
+app.get('/', function(req, res, next) {
+  if(!req.cookies.user) {
+    console.log('Creating new guid for the user');
+    res.cookie('user', Guid.raw(), {
+      expires: new Date('01-01-2100')
+    });
+  } else {
+    console.log('Using an existing guid for the user');
+  }
+  next();
+});
 
 app.set('view engine', 'html');
 app.engine('html', ejs.renderFile);

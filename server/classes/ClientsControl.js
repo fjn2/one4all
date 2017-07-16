@@ -7,6 +7,7 @@ const cors = require('cors');
 const args = require('minimist')(process.argv.slice(2));
 const app = express();
 const pm2 = require('pm2');
+const storage = require('node-persist');
 
 app.use(cors());
 
@@ -19,13 +20,20 @@ Winston.info('Running socket at port:', configuration.port);
 server.listen(configuration.port);
 
 class ClientControls {
-  constructor(clientActions, welcomeActions) {
+  constructor(clientActions, welcomeActions, administrators = []) {
     Winston.verbose('ClientControls -> constructor');
     this.clients = [];
+    this.administrators = administrators;
 
     io.on('connection', (socket) => {
       Winston.info('ClientControls -> new connection');
       this.addClient(socket);
+
+      // if there is no administrators, the new user becomes an administrator
+      if (this.administrators.length === 0) {
+        Winston.warn(`ClientControls -> the user ${this.clients[this.clients.length - 1].id} is the first admin of the room.`);
+        this.addAdmin(this.clients[this.clients.length - 1].id);
+      }
 
       // load all the events dynamicly
       Object.keys(clientActions).forEach((key) => {
@@ -85,16 +93,34 @@ class ClientControls {
       this.sendNumberOfConections();
     }, 3000);
   }
+  readUserIdFromCookie(socket) {
+    if (socket.request.headers.cookie) {
+      const cookieObj = socket.request.headers.cookie.replace(/ /g, '').split(';').reduce((acum, item) => {
+        const [key, value] = item.split('=');
+        acum[key] = value;
+        return acum;
+      }, {});
+      if (cookieObj.user) {
+        return cookieObj.user;
+      } else {
+        Winston.warn('The user id was not defined');
+      }
+    } else {
+      Winston.warn('The cookie is missing');
+    }
+
+  }
   addClient(socket) {
     Winston.verbose('ClientControls -> addClient');
+    const userId = this.readUserIdFromCookie(socket);
     this.clients.push({
-      id: socket.id,
-      socket,
+      id: userId,
+      socket
     });
   }
   removeClient(socket) {
     Winston.verbose('ClientControls -> removeClient');
-    for (var i = 0; i < this.clients.length; i++) {
+    for (let i = 0; i < this.clients.length; i++) {
       if (this.clients[i].socket === socket) {
         this.clients.splice(i, 1);
         break;
@@ -113,30 +139,40 @@ class ClientControls {
     io.emit('stopPlay');
   }
   sendNumberOfConections() {
-    Winston.info('ClientControls -> sendNumberOfConections');
+    Winston.info('ClientControls -> sendNumberOfConections', this.clients.length, this.clients[0].username);
     const clientsData = this.clients.map(client => {
       return {
-        id: client.socket.id,
+        id: client.id,
         ip: client.socket.handshake.address,
         username: client.username,
         detour: client.detour,
         playOffset: client.playOffset,
         playDiff: client.playDiff,
         isPlaying: client.isPlaying,
+        hardwareOffset: client.hardwareOffset,
+        admin: this.isAdmin(client.id)
       };
     });
 
     io.emit('numberOfConections', {
-      data: clientsData,
+      data: clientsData
     });
+  }
+  isAdmin(id) {
+    return this.administrators.includes(id);
+  }
+  addAdmin(id) {
+    Winston.info('ClientControls -> addAdmin', id);
+    this.administrators.push(id);
+    storage.setItemSync('administrators', this.administrators);
   }
   sendPlaylist({ songs, currentSong }) {
     Winston.info('ClientControls -> sendPlaylist');
     io.emit('playlist', {
       data: {
         songs,
-        currentSong,
-      },
+        currentSong
+      }
     });
   }
   sendActivityStream(message) {
@@ -144,11 +180,11 @@ class ClientControls {
     io.emit('activityStream', {
       data: {
         type: 'normal',
-        message,
-      },
+        message
+      }
     });
   }
-  setUserSatus({ id, username, detour, playOffset, playDiff, isPlaying }) {
+  setUserSatus({ id, username, detour, playOffset, playDiff, isPlaying, hardwareOffset }) {
     Winston.info('ClientControls -> setUserSatus', id);
     for (let i = 0; i < this.clients.length; i += 1) {
       if (this.clients[i].id === id) {
@@ -157,6 +193,7 @@ class ClientControls {
         this.clients[i].playOffset = playOffset;
         this.clients[i].playDiff = playDiff;
         this.clients[i].isPlaying = isPlaying;
+        this.clients[i].hardwareOffset = hardwareOffset;
         break;
       }
     }

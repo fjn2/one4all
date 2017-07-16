@@ -223,6 +223,9 @@ input.small {
   position: absolute;
 }
 
+#playlistcontrols {
+  display:none;
+}
 #chat {
   display: none;
 }

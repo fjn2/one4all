@@ -110,6 +110,7 @@ class ServerTime {
       audioPlayer.getPlayListDiff();
       user.render();
       user.sendStatus();
+      displayPlaylistControls();
     }, 5000);
   }
 }
@@ -127,7 +128,7 @@ class Intercommunication {
     }
     this.socket = io(url, { transports: ['websocket', 'polling', 'flashsocket'] });
     // these events require the petition of the client
-    this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'removeSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage', 'sendUserStatus'];
+    this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'removeSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage', 'sendUserStatus', 'becomeAdmin'];
     // these events are fired by the server
     this.eventSubscribe = ['startPlay', 'stopPlay', 'playlist', 'numberOfConections', 'activityStream'];
 
@@ -440,6 +441,7 @@ class PlayList {
   waitForNumberOfConections() {
     this.intercommunication.subscribe('numberOfConections', ({ data }) => {
       this.users = data;
+      this.checkForAdminPermision();
       window.document.getElementById('userConected').innerHTML = this.users.length;
     });
   }
@@ -494,8 +496,10 @@ class PlayList {
     // Not started.
     if (percent === 0) actions = downloadSong;
 
-    // Delete action
-    actions += deleteAction;
+    if (adminPermission) {
+      // Delete action
+      actions += deleteAction;
+    }
 
     // Playing.
     // if (isPlayingCurrentSong && percent === 100) {
@@ -508,7 +512,14 @@ class PlayList {
   getSongId(song) {
     return this.currentSong.metadata.id; // YouTube
   }
-
+  checkForAdminPermision() {
+    const myReferenceInUsers = this.users.find(user => (user.id === userId));
+    if (myReferenceInUsers) {
+      adminPermission = myReferenceInUsers.admin;
+    } else {
+      console.warn('The current user was not found in the user array');
+    }
+  }
   render() {
     let el = '';
     let currentSongId = 'No song.';
@@ -563,11 +574,12 @@ class User {
   }
   sendStatus() {
     intercommunication.get('sendUserStatus', () => {}, {
-      id: intercommunication.socket.id,
+      id: userId,
       username: this.getName(),
       detour: serverTime.realServerTime.detour,
       playDiff: audioPlayer.diff,
       playOffset: window.document.getElementById('rangeAdjustment').value,
+      hardwareOffset: audioPlayer.hardwareDeviceOffset,
       isPlaying: isPlaying && downloader.cachedSongs[playlist.currentSong.url].percentComplete === 100
     });
   }
@@ -578,7 +590,6 @@ class User {
     </label>
     <ul>
     `;
-
     for (let i = 0; i < playlist.users.length; i += 1) {
       let diffToShow = Math.round(playlist.users[i].playDiff) + ' ms';
       if (playlist.users[i].playOffset !== '0') {
@@ -591,8 +602,12 @@ class User {
       } else {
         diffToShow = '-';
       }
+      const isAdmin = playlist.users[i].admin ? 'ADMIN -': '';
       el += `
       <li>
+        <span>
+          <b>${isAdmin}</b>
+        </span>
         <b>
           ${playlist.users[i].username} -
         </b>
@@ -603,10 +618,21 @@ class User {
           <b>Play diff:</b> ${diffToShow}
         </span>
         <span>
+          <b>Hw offset:</b> ${playlist.users[i].hardwareOffset}
+        </span>
+        <span>
           ${playing}
         </span>
-
-      </li>`;
+      `;
+      if (!isAdmin && adminPermission) {
+        const becomeAdminAction = `
+          <a onclick="becomeAdmin('${playlist.users[i].id}')">
+            <i class="material-icons">accessibility</i>
+          </a>
+        `;
+        el += becomeAdminAction;
+      }
+      el += '</li>';
     }
     el += '</ul>';
 
@@ -861,7 +887,6 @@ class App {
   sendMessage(message, userName) {
     this.chat.sendMessage(message, userName);
   }
-
   onPaste(event) {
     const clipboard = event.clipboardData || window.clipboardData;
     const pasted = clipboard.getData('Text');
@@ -870,7 +895,6 @@ class App {
     $songUrl.val(pasted);
     app.addSongToPlayList(pasted);
   }
-
   onDrop(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -880,6 +904,11 @@ class App {
 
     $songUrl.val(text);
     app.addSongToPlayList(text);
+  }
+  becomeAdmin(id) {
+    this.intercommunication.get('becomeAdmin', undefined, {
+      id
+    });
   }
 }
 
@@ -988,7 +1017,8 @@ let audioPlayer;
 var playlist;
 let user;
 let menu;
-
+let userId = getCookie('user');
+let adminPermission = false;
 let isPlaying = false;
 
 const connection = new Connection();
@@ -1090,6 +1120,7 @@ function cancelDownload(songUrl) {
 function manualAdjustment(val) {
   window.document.getElementById('rangeAdjustmentValue').innerHTML = val + ' ms';
 }
+
 function showRange(value) {
   document.getElementById('offsetContainer').style.display = value ? 'block' : 'none';
   if (!value) {
@@ -1098,9 +1129,33 @@ function showRange(value) {
   }
 }
 
+function displayPlaylistControls() {
+  document.getElementById('playlistcontrols').style.display = adminPermission ? 'block' : 'none';
+}
+
+function becomeAdmin(id) {
+  app.becomeAdmin(id);
+}
+
 function toArray (list) {
   return Array.prototype.slice.call(list || [], 0);
 }
-
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(';');
+  for(var i = 0; i <ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  // redirect to home page to make the authentication
+  window.location = '/';
+  return '';
+}
 
 mdc.autoInit();
