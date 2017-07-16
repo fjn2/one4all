@@ -118,7 +118,10 @@ class ServerTime {
 
 class Intercommunication {
   constructor(url) {
-    this.socket = io(url, {transports: ['websocket', 'polling', 'flashsocket']});
+    this.initialize(url);
+  }
+  initialize(url) {
+    this.socket = io(url, { transports: ['websocket', 'polling', 'flashsocket'] });
     // these events require the petition of the client
     this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'removeSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage', 'sendUserStatus'];
     // these events are fired by the server
@@ -130,7 +133,7 @@ class Intercommunication {
     this.processCallbacks = (eventName, data) => {
       this.pendingMessages.forEach((message, index) => {
         if (message.guid === data.guid) {
-          if (typeof message.callback ===  'function') {
+          if (typeof message.callback === 'function') {
             message.callback(data);
           }
           this.pendingMessages.splice(index, 1);
@@ -157,7 +160,6 @@ class Intercommunication {
       });
     });
   }
-
   get(eventName, callback, data) {
     // TODO: Generate GUIDs on the server.
     const guid = Math.floor(Math.random() * 1000000);
@@ -985,9 +987,9 @@ let menu;
 let isPlaying = false;
 
 const connection = new Connection();
-connection.start(({url}) => {
+
+connection.start(({ url }) => {
   console.log('CONNECTED to SPINNER!');
-  // TODO: check why this is treggered multiple times
   if (!app) {
     app = new App(url);
     intercommunication = app.intercommunication;
@@ -997,6 +999,11 @@ connection.start(({url}) => {
     playlist = app.playlist;
     user = app.user;
     menu = new Menu();
+  } else {
+    // here, the spinner has restarted
+
+    // update the room url
+    intercommunication.initialize(url);
   }
 });
 
