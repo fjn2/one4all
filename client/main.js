@@ -339,7 +339,7 @@ class AudioPlayer {
           if (callback) {
             // normally the first element in 'sample' is not a clear value
             const sumOffset = samples.splice(1, samples.length).reduce((acum, sample) => acum + sample, 0);
-            const avgOffset = sumOffset / samples.length;
+            const avgOffset = sumOffset / (samples.length - 1);
             console.log('hardwareDeviceOffset calculation finish');
             callback(Math.round(avgOffset));
           }
