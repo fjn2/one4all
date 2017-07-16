@@ -52,12 +52,16 @@ function createRoom(id, callback) {
       }, function(err, apps) {
         if (apps) {
           if (err) throw err;
-          rooms[id] = {
-            url,
-            port,
-            proc: apps[0]
-          };
-          Winston.info('Added new room', port);
+          if (!rooms[id]) {
+            rooms[id] = {
+              url,
+              port,
+              proc: apps[0]
+            };
+            Winston.info('Added new room', id, 'in the port', port);
+          } else {
+            Winston.warn('Condition race detected and saved. The spinner tries to create two times the same room', id, 'returning the port', rooms[id].port);
+          }
           callback(rooms[id]);
         } else {
           Winston.error('The room was not created propperly', port);

@@ -59,7 +59,7 @@ class ClientControls {
         Object.keys(welcomeActions).forEach((key) => {
           Winston.info(`ClientActions -> sending ${key}`);
           socket.emit(`${key}`, {
-            data: welcomeActions[key](),
+            data: welcomeActions[key]()
           });
         });
       }, 1000); // wait for one second to stablish the conection

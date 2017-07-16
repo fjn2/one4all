@@ -121,6 +121,10 @@ class Intercommunication {
     this.initialize(url);
   }
   initialize(url) {
+    // if there was a connection before, disconect it.
+    if (this.socket) {
+      this.socket.disconnect();
+    }
     this.socket = io(url, { transports: ['websocket', 'polling', 'flashsocket'] });
     // these events require the petition of the client
     this.eventList = ['serverTime', 'currentTrack', 'timeCurrentTrack', 'addSong', 'removeSong', 'playMusic', 'pauseMusic', 'nextMusic', 'sendMessage', 'sendUserStatus'];
