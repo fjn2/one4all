@@ -711,7 +711,7 @@ input.small {
 }
 .syncronization-modal .syncronization-content .fake-button {
   border-radius: 100%;
-  background: firebrick;
+  background: grey;
   color: white;
   line-height: 40px;
   width: 40px;
