@@ -98,7 +98,7 @@ class ServerTime {
         window.document.querySelector('.server-sync-data').innerHTML = 'Recollecting server information...';
       } else {
         if (Math.round(detour) > this.minDetour) {
-          window.document.querySelector('.server-sync-data').innerHTML = `Your actual best detur is ${Math.round(detour)}. You need one smaller than ${this.minDetour}`;
+          window.document.querySelector('.server-sync-data').innerHTML = `Your actual best detur is <b>${Math.round(this.realServerTime.detour)}</b>. You need one smaller than <b>${this.minDetour}</b>`;
         } else {
           window.document.querySelector('.server-sync-data').innerHTML = ':)';
         }
