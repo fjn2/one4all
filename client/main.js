@@ -616,8 +616,10 @@ class Chat {
   sendMessage(message, event) {
     event.stopPropagation();
     event.preventDefault();
+
     $message.disable();
     $messageSending.show();
+    message = this.applyTransformations(message);
     this.intercommunication.get('sendMessage', ({ data }) => {
       $messageSending.hide();
       $message
@@ -627,6 +629,8 @@ class Chat {
 
       // Ensure emoticons are closed.
       $emoticons.hide();
+
+      $activityStream.scrollBottom();
     }, {
       message,
       userName: this.username || 'Anonymous',
@@ -635,7 +639,7 @@ class Chat {
   }
 
   addActivity(message) {
-    window.document.getElementById('activityStream').innerHTML += message;
+    $activityStream.appendHtml(message);
   }
 
   toggleEmoticons() {
@@ -645,7 +649,7 @@ class Chat {
   addEmoticon(event) {
     const src = event.target.currentSrc;
     $message
-      .appendHtml(`<img src="${src}" />`)
+      .appendHtml(`<img src="${src}" class="emoticon" />`)
       .caretEnd();
   }
 }
@@ -766,6 +770,9 @@ class App {
   }
 
   onPaste(event) {
+    // Do nothing when pasting text in the chat.
+    if (event.target.id === 'messageText') return;
+
     const clipboard = event.clipboardData || window.clipboardData;
     const pasted = clipboard.getData('Text');
     console.log('PASTED:', pasted);
@@ -858,11 +865,12 @@ class Menu {
     if (name === 'chat') {
       menu.chat.removeClass('new-activity');
       if ($username.isVisible()) {
-        $username.focus();
-        return;
+        setTimeout(() => {
+          $username.focus();
+        });
+      } else {
+        $message.focus();
       }
-
-      $message.focus();
     } else if (name === 'playlistPage') {
       menu.playlistPage.removeClass('new-activity');
       $songUrl.focus();
@@ -923,6 +931,7 @@ const $emoticonSelector = new El('.emoticon-selector');
 const $emoticons = new El('#emoticons');
 const $currentThumbnail = new El('#currentThumbnail');
 const $songUrl = new El('#songUrl');
+const $activityStream = new El('#activityStream')
 
 // Randomize background.
 $background.setRandomBackground({

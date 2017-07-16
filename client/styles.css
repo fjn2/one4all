@@ -212,7 +212,7 @@ input.small {
   color: black;
 }
 
-.text img {
+.text .emoticon {
   vertical-align: middle;
   top: -2px;
   position: relative;

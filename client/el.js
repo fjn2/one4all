@@ -95,6 +95,7 @@ class El {
   }
 
   isVisible () {
+    if (this.$el.style.display === '') return true
     return (this.$el.style.display.match(/(block|inline|inline-block)/))
   }
 
@@ -132,6 +133,11 @@ class El {
 
   src (value) {
     this.$el.src = value
+    return this
+  }
+
+  scrollBottom () {
+    this.$el.scrollTop = this.$el.scrollHeight
     return this
   }
 
