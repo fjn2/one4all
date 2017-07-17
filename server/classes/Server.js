@@ -128,7 +128,6 @@ class Server {
     };
     this.welcomeActions = {
       playlist: () => {
-        storage.setItemSync('playlist', this.playlist.songs);
         return {
           songs: this.playlist.songs,
           currentSong: this.playlist.getCurrentSong()

@@ -1,4 +1,5 @@
 const Winston = require('winston');
+const storage = require('node-persist');
 
 class Playlist {
   constructor(songPlayer, clientsControl) {
@@ -28,6 +29,7 @@ class Playlist {
   addSong(songUrl) {
     Winston.info('Playlist -> addSong ', songUrl);
     this.songs.push(songUrl);
+    storage.setItemSync('playlist', this.songs);
   }
   removeSong(songUrl) {
     Winston.info('Playlist -> removeSong ', songUrl, this.songs);
@@ -39,6 +41,7 @@ class Playlist {
         this.currentSong -= 1;
       }
       this.songs.splice(index, 1);
+      storage.setItemSync('playlist', this.songs);
     } else {
       Winston.warn('Playlist -> removeSong -> The song doesn\'t exit in the list');
     }
