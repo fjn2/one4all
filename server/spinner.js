@@ -58,7 +58,7 @@ function createRoom(id, callback) {
               port,
               proc: apps[0]
             };
-            Winston.info('Added new room', id, 'in the port', port);
+            Winston.info('Added new room', id, 'in the port', port, 'process id =', apps[0].pm_id);
           } else {
             Winston.warn('Condition race detected and saved. The spinner tries to create two times the same room', id, 'returning the port', rooms[id].port);
           }
