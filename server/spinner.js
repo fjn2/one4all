@@ -53,12 +53,19 @@ function createRoom(id, callback) {
         if (err) throw err;
         if (apps) {
           if (!rooms[id]) {
-            rooms[id] = {
-              url,
-              port,
-              proc: apps[0]
-            };
-            Winston.info('Added new room', id, 'in the port', port, 'process id =', apps[0].pm_id);
+            if (apps[0].pm_id) {
+              rooms[id] = {
+                url,
+                port,
+                proc: apps[0]
+              };
+              Winston.info('Added new room', id, 'in the port', port, 'process id =', apps[0].pm_id);
+            } else {
+              Wiston.warn('PM2 has returned and empty id. Re-trying the operation');
+              pm2.disconnect();
+              createRoom(id, callback);
+              return;
+            }
           } else {
             Winston.warn('Condition race detected and saved. The spinner tries to create two times the same room', id, 'returning the port', rooms[id].port);
           }
