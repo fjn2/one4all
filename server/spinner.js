@@ -61,7 +61,7 @@ function createRoom(id, callback) {
               };
               Winston.info('Added new room', id, 'in the port', port, 'process id =', apps[0].pm_id);
             } else {
-              Wiston.warn('PM2 has returned and empty id. Re-trying the operation');
+              Winston.warn('PM2 has returned and empty id. Re-trying the operation');
               pm2.disconnect();
               createRoom(id, callback);
               return;
