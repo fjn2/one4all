@@ -63,7 +63,7 @@ function createRoom(id, callback) {
             } else {
               Winston.warn('PM2 has returned and empty id. Re-trying the operation');
               pm2.disconnect();
-              createRoom(id, callback);
+              //createRoom(id, callback);
               return;
             }
           } else {
