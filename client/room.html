@@ -94,16 +94,7 @@
         <div id="playlistPage">
           <div id="playlist" class="block"></div>
           <div class="playlist-controls">
-            <!-- <input
-                type="text"
-                id="songUrl"
-                placeholder="Write the URL of your song."
-                onclick="addSongToPlayList()"
-                onkeydown="if (event.keyCode === 13) addSongToPlayList()"
-                autofocus
-              /> -->
-
-              <div id="results" style="display:none"></div>
+              <div id="results" style="display:none" onclick="sources.add(event)"></div>
               <img id="searching" src="loading.svg" style="display:none" />
               <input
                 type="text"

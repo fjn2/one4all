@@ -146,6 +146,11 @@ class El {
     return this
   }
 
+  on (event, callback) {
+    this.$el.addEventListener(event, callback)
+    return this
+  }
+
   static injectStyles (styles){
     const style = document.createElement('style')
     style.type = 'text/css'

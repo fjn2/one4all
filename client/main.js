@@ -393,9 +393,14 @@ class PlayList {
 
   }
   addSong(url) {
+    if (loadingSong) {
+      console.log('Wait until current song is loaded.')
+      return
+    }
+    
     console.log('Playlist: Adding song...', url);
+    loadingSong = true;
     $loading.show();
-    $songUrl.disable();
     this.intercommunication.get('addSong', (resp) => {
       if (resp.data.error) {
         alert('There was an error when we try to add the song. Try with another one');
@@ -404,13 +409,16 @@ class PlayList {
       }
 
       $loading.hide();
-      $songUrl
-        .val('')
-        .enable();
+      loadingSong = false;
     }, {
       url
     });
   }
+
+  addSongById(id) {
+    this.addSong(`https://www.youtube.com/watch?v=${id}`)
+  }
+
   removeSong(url) {
     $loading.show();
     this.intercommunication.get('removeSong', () => {
@@ -902,6 +910,9 @@ class App {
   addSongToPlayList(songUrl) {
     this.playlist.addSong(songUrl);
   }
+  addSongToPlayListById(id) {
+   this.playlist.addSongById(id); 
+  }
   removeSongToPlaylist(songUrl) {
     this.playlist.removeSong(songUrl);
   }
@@ -925,7 +936,6 @@ class App {
     const pasted = clipboard.getData('Text');
     console.log('PASTED:', pasted);
 
-    $songUrl.val(pasted);
     app.addSongToPlayList(pasted);
   }
   onDrop(event) {
@@ -935,7 +945,6 @@ class App {
     const text = event.dataTransfer.getData('text');
     console.log('DROPPED text', text);
 
-    $songUrl.val(text);
     app.addSongToPlayList(text);
   }
   becomeAdmin(id) {
@@ -952,33 +961,19 @@ class Sources {
     this.youtubeReady = false
   }
 
-  renderResults (data) {
-    let html = ''
-    data.result.items.map((item) => {
-      const id = item.id.videoId
-      const thumb = item.snippet.thumbnails.default // [high | medium]
-      const title = item.snippet.title
-
-      html += `
-        <div class="result-item">
-          <div class="result-title ellipsis">${title}</div>
-        </div>
-      `
-    })
-
-    $results.appendHtml(html)
-    $results.show()
-  }
-
   search (query) {
     console.log('SEARCH:', query)
     $query.disable()
     $searching.show()
-    $results.html('') // Reset previous reults.
+    results.clear()
     gapi.client.youtube.search.list({
       q: query,
       part: 'snippet',
-      maxResults: '25'
+      maxResults: '25',
+      order: 'rating',
+      topicId: '/m/04rlf', // music
+      type: 'video',
+      videoDuration: 'medium' // 4 to 20 min
     }).then(
       (data) => {
         console.log('SEARCH RESULTS:', data)
@@ -988,7 +983,7 @@ class Sources {
           .enable()
           .focus()
 
-        this.renderResults(data)
+        results.render(data)
       },
       (err) => {
         $searching.hide()
@@ -999,6 +994,15 @@ class Sources {
         throw err
       }
     )
+  }
+
+  add (event) {
+    // Keep search results open.
+    // Maybe we want to add more videos from shown results.
+    event.stopPropagation()
+
+    const id = event.target.dataset.id
+    app.addSongToPlayListById(id)
   }
 
   initYouTube (callback) {
@@ -1027,6 +1031,47 @@ class Sources {
     gapi.load('client', () => {
       this.initYouTube(() => this.onYouTubeReady())
     });
+  }
+}
+
+//---------------------------------------------------------------------------
+
+class Results {
+  constructor () {
+    $body.on('click', (event) => {
+      if (event.target.id === 'query') return
+      this.hide()
+    })
+  }
+
+  hide () {
+    $results.hide()
+  }
+
+  show () {
+    $results.show()
+  }
+
+  clear () {
+    $results.html('')
+  }
+
+  render (data) {
+    let html = ''
+    data.result.items.map((item) => {
+      const id = item.id.videoId
+      const thumb = item.snippet.thumbnails.default // [high | medium]
+      const title = item.snippet.title
+
+      html += `
+        <div class="result-item">
+          <div class="result-title ellipsis" data-id="${id}">${title}</div>
+        </div>
+      `
+    })
+
+    $results.appendHtml(html)
+    $results.show()
   }
 }
 
@@ -1110,7 +1155,7 @@ class Menu {
       setTimeout(() => $activityStream.scrollBottom());
     } else if (name === 'playlistPage') {
       menu.playlistPage.removeClass('new-activity');
-      $songUrl.focus();
+      $query.focus();
     }
 
     this.active = name;
@@ -1124,6 +1169,24 @@ class Menu {
 // //////////////////////////////////////////////
 // //////////////////////////////////////////////
 // application starts
+
+// Set elements.
+const $body = new El('body');
+const $loading = new El('#loading');
+const $searching = new El('#searching');
+const $playlist = new El('#playlist');
+const $results = new El('#results');
+const $users = new El('#users');
+const $background = new El('#background');
+const $username = new El('#userName');
+const $message = new El('#messageText');
+const $messageSending = new El('#message-sending');
+const $rangeAdjustment = new El('#rangeAdjustment');
+const $emoticonSelector = new El('.emoticon-selector');
+const $emoticons = new El('#emoticons');
+const $currentThumbnail = new El('#currentThumbnail');
+const $query = new El('#query');
+const $activityStream = new El('#activityStream')
 
 // expose the object to the entry world
 
@@ -1139,7 +1202,9 @@ let menu;
 let userId = getCookie('user');
 let adminPermission = false;
 let isPlaying = false;
+let loadingSong = false;
 
+const results = new Results()
 const sources = new Sources()
 sources.init()
 
@@ -1164,37 +1229,12 @@ connection.start(({ url }) => {
   }
 });
 
-// Set elements.
-const $loading = new El('#loading');
-const $searching = new El('#searching');
-const $playlist = new El('#playlist');
-const $results = new El('#results');
-const $users = new El('#users');
-const $background = new El('#background');
-const $username = new El('#userName');
-const $message = new El('#messageText');
-const $messageSending = new El('#message-sending');
-const $rangeAdjustment = new El('#rangeAdjustment');
-const $emoticonSelector = new El('.emoticon-selector');
-const $emoticons = new El('#emoticons');
-const $currentThumbnail = new El('#currentThumbnail');
-const $songUrl = new El('#songUrl');
-const $query = new El('#query');
-const $activityStream = new El('#activityStream')
-
 // Randomize background.
 $background.setRandomBackground({
   path: 'backgrounds',
   range: [1, 18]
 });
 
-
-function addSongToPlayList() {
-  const songUrl = $songUrl.val();
-  if (songUrl) {
-    app.addSongToPlayList(songUrl);
-  }
-}
 function removeSongToPlayList(songUrl) {
   app.removeSongToPlaylist(songUrl);
 }
