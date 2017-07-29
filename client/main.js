@@ -947,6 +947,91 @@ class App {
 
 //---------------------------------------------------------------------------
 
+class Sources {
+  constructor () {
+    this.youtubeReady = false
+  }
+
+  renderResults (data) {
+    let html = ''
+    data.result.items.map((item) => {
+      const id = item.id.videoId
+      const thumb = item.snippet.thumbnails.default // [high | medium]
+      const title = item.snippet.title
+
+      html += `
+        <div class="result-item">
+          <div class="result-title ellipsis">${title}</div>
+        </div>
+      `
+    })
+
+    $results.appendHtml(html)
+    $results.show()
+  }
+
+  search (query) {
+    console.log('SEARCH:', query)
+    $query.disable()
+    $searching.show()
+    $results.html('') // Reset previous reults.
+    gapi.client.youtube.search.list({
+      q: query,
+      part: 'snippet',
+      maxResults: '25'
+    }).then(
+      (data) => {
+        console.log('SEARCH RESULTS:', data)
+        $searching.hide()
+        $query
+          .clear()
+          .enable()
+          .focus()
+
+        this.renderResults(data)
+      },
+      (err) => {
+        $searching.hide()
+        $query
+          .clear()
+          .enable()
+          .focus()
+        throw err
+      }
+    )
+  }
+
+  initYouTube (callback) {
+    // Initializes the client with the API key and the Translate API.
+    gapi.client.init({
+      'apiKey': 'AIzaSyDt2mEYU5lp2l-6oaWXSg1VwMyxWMRghc8',
+      'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
+    }).then(
+      () => {
+        callback()
+      },
+      (err) => {
+        console.log('ERROR:', err.result.error.message)
+        throw err
+      }
+    )
+  }
+
+  onYouTubeReady () {
+    console.log('--- YT READY! gapi.client.youtube:', gapi.client.youtube)
+    this.youtubeReady = true
+  }
+
+  init () {
+    // Loads the JavaScript client library and then executes callback.
+    gapi.load('client', () => {
+      this.initYouTube(() => this.onYouTubeReady())
+    });
+  }
+}
+
+//---------------------------------------------------------------------------
+
 class Connection {
   constructor() {
     this.url = `http://${configuration.spinner}`;
@@ -1055,6 +1140,9 @@ let userId = getCookie('user');
 let adminPermission = false;
 let isPlaying = false;
 
+const sources = new Sources()
+sources.init()
+
 const connection = new Connection();
 
 connection.start(({ url }) => {
@@ -1078,7 +1166,9 @@ connection.start(({ url }) => {
 
 // Set elements.
 const $loading = new El('#loading');
+const $searching = new El('#searching');
 const $playlist = new El('#playlist');
+const $results = new El('#results');
 const $users = new El('#users');
 const $background = new El('#background');
 const $username = new El('#userName');
@@ -1089,6 +1179,7 @@ const $emoticonSelector = new El('.emoticon-selector');
 const $emoticons = new El('#emoticons');
 const $currentThumbnail = new El('#currentThumbnail');
 const $songUrl = new El('#songUrl');
+const $query = new El('#query');
 const $activityStream = new El('#activityStream')
 
 // Randomize background.

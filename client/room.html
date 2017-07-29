@@ -3,6 +3,8 @@
   <header>
     <script src="configuration.js"></script>
     <script src="/dist/socket.io.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+
     <link rel="stylesheet" href="/dist/material-components-web.css">
     <link rel="stylesheet" type="text/css" href="./styles.css">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
@@ -92,12 +94,22 @@
         <div id="playlistPage">
           <div id="playlist" class="block"></div>
           <div class="playlist-controls">
-            <input
+            <!-- <input
                 type="text"
                 id="songUrl"
                 placeholder="Write the URL of your song."
                 onclick="addSongToPlayList()"
                 onkeydown="if (event.keyCode === 13) addSongToPlayList()"
+                autofocus
+              /> -->
+
+              <div id="results" style="display:none"></div>
+              <img id="searching" src="loading.svg" style="display:none" />
+              <input
+                type="text"
+                id="query"
+                placeholder="What do you want to listen to?"
+                onkeydown="if (event.keyCode === 13) sources.search(this.value)"
                 autofocus
               />
             </div>

@@ -94,6 +94,11 @@ class El {
     return this
   }
 
+  clear () {
+    this.$el.value = ''
+    return this
+  }
+
   isVisible () {
     if (this.$el.style.display === '') return true
     return (this.$el.style.display.match(/(block|inline|inline-block)/))
