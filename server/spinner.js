@@ -51,9 +51,10 @@ function createRoom(id, callback) {
         },
       }, function(err, apps) {
         if (err) throw err;
+
         if (apps) {
           if (!rooms[id]) {
-            if (apps[0].pm_id) {
+            if (apps[0] && apps[0].pm_id) {
               rooms[id] = {
                 url,
                 port,
