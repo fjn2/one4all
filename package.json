@@ -8,7 +8,10 @@
     "lint": "eslint ./client/**/*.js; eslint ./server/**/*.js; echo",
     "start-client": "node client/serve.js",
     "start-server": "node server/index.js",
-    "start": "nf start"
+    "start": "nf start",
+    "pm2-list": "pm2 ls",
+    "pm2-delete": "pm2 delete all",
+    "pm2": "pm2"
   },
   "repository": {
     "type": "git",

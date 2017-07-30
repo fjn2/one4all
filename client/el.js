@@ -94,6 +94,11 @@ class El {
     return this
   }
 
+  clear () {
+    this.$el.value = ''
+    return this
+  }
+
   isVisible () {
     if (this.$el.style.display === '') return true
     return (this.$el.style.display.match(/(block|inline|inline-block)/))
@@ -138,6 +143,11 @@ class El {
 
   scrollBottom () {
     this.$el.scrollTop = this.$el.scrollHeight
+    return this
+  }
+
+  on (event, callback) {
+    this.$el.addEventListener(event, callback)
     return this
   }
 

@@ -363,11 +363,32 @@ input.small {
   position: absolute;
 }
 
-#message-sending {
-  width: 35px;
+#message-sending,
+#searching {
+  width: 31px;
   position: absolute;
-  top: 2px;
-  right: 42px;
+  top: 12px;
+  right: 22px;
+  z-index: 1;
+}
+
+#results {
+  height: 250px;
+  overflow: scroll;
+}
+
+.result-item {
+  font-size: 12px;
+  padding: 2px;
+  margin: 0 2px;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.result-item:hover {
+  background: rgba(200,200,200,0.3);
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .about {
