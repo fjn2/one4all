@@ -242,7 +242,7 @@ input.small {
   position: absolute;
   bottom: 0;
   width: 100%;
-  background: rgba(255,255,255,0.8);
+  background: #ccc;
   padding: 10px 0;
   z-index: 100;
 }
@@ -273,7 +273,7 @@ input.small {
   padding: 5px 0;
   display: none;
   outline: none;
-  background: rgba(255,255,255,0.8);
+  background: #ccc;
 }
 
 #emoticons img:hover {
@@ -377,7 +377,7 @@ input.small {
   height: 250px;
   overflow: scroll;
   margin-top: -10px;
-  border-top: 1px solid white;
+  border-top: 1px solid #eee;
 }
 
 .result-item {
