@@ -242,8 +242,9 @@ input.small {
   position: absolute;
   bottom: 0;
   width: 100%;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.8);
   padding: 10px 0;
+  z-index: 100;
 }
 
 .chat-controls input, .playlist-controls input  {
@@ -272,7 +273,7 @@ input.small {
   padding: 5px 0;
   display: none;
   outline: none;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.8);
 }
 
 #emoticons img:hover {
@@ -375,6 +376,8 @@ input.small {
 #results {
   height: 250px;
   overflow: scroll;
+  margin-top: -10px;
+  border-top: 1px solid white;
 }
 
 .result-item {
